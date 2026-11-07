@@ -1,0 +1,74 @@
+/* Track panel (web/js/mixer.js) -- the context area's Audio tab (#cp-audio > #mixer).
+   Resolve-style lanes as cards: A0 Master on top, then A1..AN. Each lane = a control card (.lctl: A-number, M / S,
+   dB, the fader across the bottom, the post-fader meter on its right) and a waveform card (.wf > canvas.wave).
+   mixer.js measures the waveform column for the in / out shading (#mx-io) and the playhead (#mx-ph), so the
+   column widths and gaps here can change freely. */
+.mixer { --ctl: 232px; --lh: 48px; --gap: 6px; display: flex; flex-direction: column; padding-top: 4px; }
+.mxhead { display: flex; align-items: center; gap: 12px; padding: 0 0 12px; font-size: var(--fs-s); color: var(--muted); min-width: 0; }
+.mxhead > b { display: none; }                      /* "Audio tracks": the Audio tab already says it */
+.mxhead #mx-span { font-family: var(--sans); color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.mxstate { color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; }
+.mxstate:empty { display: none; }
+.mxbody { position: relative; display: flex; flex-direction: column; gap: var(--gap); }
+#mx-master, #mx-lanes { display: flex; flex-direction: column; gap: var(--gap); }
+#mx-lanes > .empty { border: 1px dashed var(--line2); border-radius: var(--r); }
+
+.lane { display: grid; grid-template-columns: var(--ctl) minmax(0, 1fr); gap: 8px; height: var(--lh); }
+.lane.master { height: 56px; margin-bottom: 6px; }
+.lane .lctl { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr 1fr; column-gap: 8px; padding: 4px 8px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-s); min-width: 0; }
+.lane.master .lctl { background: var(--raised); border-color: var(--line2); }
+.lane .lrow { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.lane .lrow.fad { grid-column: 1; grid-row: 2; }
+.lane .lnum { font-family: var(--mono); font-size: var(--fs-xs); font-weight: 600; min-width: 24px; cursor: default; }
+.lane .lname { font-size: var(--fs-xs); font-weight: 600; color: var(--text2); }
+.lane button.ms { height: 18px; padding: 0 6px; font: 600 var(--fs-xs)/16px var(--sans); min-width: 22px; border-radius: 4px; border: 1px solid var(--line2); background: transparent; color: var(--muted); cursor: pointer; }
+.lane button.ms:hover { color: var(--text); border-color: var(--faint); }
+.lane button.ms.m.on { background: #c0503f; border-color: #c0503f; color: #fff; }
+.lane button.ms.s.on { background: #c9a23b; border-color: #c9a23b; color: #111; }
+.lane button.ms.d { min-width: 32px; }
+.lane button.ms.d.on { background: #5a6bb5; border-color: #5a6bb5; color: #fff; }
+.lane .db { font-family: var(--mono); font-size: var(--fs-xs); margin-left: auto; text-align: right; color: var(--text2); white-space: nowrap; }
+
+/* faders: a thin track filled up to the level (--p is set by mixer.js), a round thumb */
+.lane input.fader { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; margin: 0; background: transparent; cursor: ew-resize; }
+.lane input.fader::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--accent) var(--p, 77%), var(--line2) var(--p, 77%)); }
+.lane input.fader::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #e7e9ee; margin-top: -4.5px; box-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.lane input.fader:focus-visible { outline: none; }
+.lane input.fader:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px var(--accent-line); }
+.lane input.fader::-moz-range-track { height: 3px; border-radius: 2px; background: var(--line2); }
+.lane input.fader::-moz-range-progress { height: 3px; background: var(--accent); }
+.lane input.fader::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: #e7e9ee; }
+.lane.off input.fader::-webkit-slider-runnable-track { background: linear-gradient(90deg, var(--faint) var(--p, 77%), var(--line2) var(--p, 77%)); }
+
+/* post-fader meters (master: L / R with peak hold) */
+.lane .meters { grid-column: 2; grid-row: 1 / span 2; display: flex; justify-content: flex-end; gap: 2px; align-self: stretch; padding: 2px 0; }
+.lane.master .meters { cursor: pointer; }
+.lane .meter { width: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 2px; position: relative; overflow: hidden; }
+.lane .meter i { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(to top, var(--ok) 0%, var(--ok) 65%, var(--warn) 82%, var(--bad) 100%); }
+.lane .meter b { position: absolute; left: 0; right: 0; height: 2px; bottom: 0; background: #fff; opacity: 0; }
+
+/* waveform cards */
+.lane .wf { position: relative; border-radius: var(--r-s); background: var(--surface); border: 1px solid var(--line); overflow: hidden; min-width: 0; }
+.lane.master .wf { background: var(--raised); border-color: var(--line2); }
+.lane canvas.wave { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: pointer; }
+.lane.off .wf { opacity: .35; }
+.lane.implicit .lnum { opacity: .55; }
+.lane.silent .lctl { opacity: .55; }
+.lane.master.dimmed .db { color: var(--accent-2); }
+
+/* playhead + in / out over the waveform column (left / width in px from mixer.js) */
+.mxph { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; box-shadow: 0 0 4px #000; pointer-events: none; z-index: 1; }
+.mxio { position: absolute; top: 0; bottom: 0; background: rgba(107,140,255,.10); border-left: 1px solid var(--accent-line); border-right: 1px solid var(--accent-line); pointer-events: none; }
+.mxph[hidden], .mxio[hidden] { display: none; }
+
+/* track details disclosure */
+.mxdet { margin-top: 12px; }
+.mxdet[hidden] { display: none; }
+.mxdet .mxdet-b { padding: 0 12px 12px; overflow: auto; }
+.mxdet .mxdet-b p { margin: 8px 0 0; }
+
+/* narrow context area (docked beside the player on an ultrawide, or a small window): a slimmer control card */
+@container ctx (max-width: 760px) {
+  .mixer { --ctl: 176px; }
+  .lane .lname { display: none; }
+}

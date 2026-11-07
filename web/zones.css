@@ -1,0 +1,171 @@
+/* Zones editor (web/js/zones.js): a full view in #main like Calibration. While it is open,
+   #main carries .zn-open and every other main-area element is hidden by this rule (not by its `hidden` flag, which
+   the player and the mixer keep toggling), so closing the view leaves them exactly as their own code last set them.
+   The shell folds the side panel while the view is open (app.js onMainView); the view brings its own streamer
+   column, styled like the side panel. Colours = the tokens in style.css; the four zone colours are the boxes' own. */
+#main.zn-open > :not(#zones-view) { display: none !important; }
+#main.zn-open { padding: 0; overflow: hidden; }
+
+#zones-view.zn { height: 100%; min-height: 520px; display: grid; grid-template-columns: 300px minmax(0, 1fr); background: var(--bg); }
+#zones-view.zn.busy { cursor: progress; }
+#zones-view.zn.busy .zn-acts button, #zones-view.zn.busy .zn-side .phd button { pointer-events: none; opacity: .55; }
+
+/* ---------- left column: streamers + their versions (looks like the side panel) ---------- */
+.zn-side { display: flex; flex-direction: column; min-height: 0; background: var(--bg2); border-right: 1px solid var(--line); overflow: hidden; }
+.zn-side .phd { padding: 12px 8px 4px 16px; }
+.zn-shead { display: flex; align-items: center; gap: 8px; padding: 16px 16px 8px; font-size: var(--fs-xs); font-weight: 600; letter-spacing: .7px;
+            text-transform: uppercase; color: var(--faint); flex: none; }
+.zn-shead .cnt { font-weight: 400; letter-spacing: 0; color: var(--faint); }
+.zn-shead .btn { text-transform: none; letter-spacing: 0; font-weight: 400; margin: -4px 0; }
+.zn-list { overflow: auto; min-height: 60px; padding: 0 8px; }
+#zn-streamers { flex: 0 1 auto; max-height: 46%; }
+.zn-list.zn-tpls { flex: 1 1 auto; }
+.zn-sfoot { flex: none; border-top: 1px solid var(--line); padding: 8px 16px; color: var(--faint); font-size: var(--fs-xs); line-height: 1.4; }
+
+.zn-item { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pv nm" "pv ct"; align-items: center; column-gap: 12px;
+           padding: 8px 12px; border-radius: var(--r); border: 1px solid transparent; cursor: pointer; font-size: var(--fs-s); min-height: 40px; }
+.zn-item:hover { background: var(--surface); }
+.zn-item.on { background: var(--accent-bg); border-color: rgba(107,140,255,.25); }
+.zn-item > .prov, .zn-item > .badge { grid-area: pv; justify-self: start; }
+.zn-item .zn-nm { grid-area: nm; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--text); }
+.zn-item .zn-ct { grid-area: ct; color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* version rows: no provider badge -> the name on top, the date under it, a "this rec" badge on the right */
+.zn-tpls .zn-item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "nm pv" "ct pv"; }
+.zn-tpls .zn-item > .badge { justify-self: end; }
+.zn-tpls .zn-item .zn-nm { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.35; }
+.zn-tpls .zn-item:not(:has(.zn-ct)) { grid-template-areas: "nm pv"; }
+.zn-list .empty { padding: 24px 12px; }
+.prov.p-obs { background: var(--accent-bg); color: var(--accent-2); }
+
+/* ---------- right column: the editor ---------- */
+.zn-ed { display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; padding: 12px 16px 8px; }
+.zn-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: none; min-width: 0; }
+.zn-ttl { min-width: 0; flex: 0 1 auto; }
+.zn-l1 { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.zn-l1 h2 { margin: 0; font-size: var(--fs-l); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.zn-src { color: var(--muted); font-size: var(--fs-xs); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zn-src:empty { display: none; }
+.zn-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.zn-acts .btn svg.i { width: 14px; height: 14px; }
+
+/* labelled fields: a quiet label in front of the control */
+.zn-f { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: var(--fs-s); white-space: nowrap; min-width: 0; }
+.zn-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: none; padding: 8px 12px; background: var(--surface);
+           border: 1px solid var(--line); border-radius: var(--r); }
+.zn-meta #zn-name { width: 220px; }
+.zn-f.zn-grow { flex: 1; min-width: 200px; }
+.zn-f.zn-grow input { flex: 1; }
+#zones-view input[type=datetime-local], .zn-dlg input[type=datetime-local] { height: 26px; background: var(--surface); color: var(--text); border: 1px solid var(--line2);
+  border-radius: var(--r-s); padding: 0 8px; font: inherit; font-size: var(--fs-s); color-scheme: dark; outline: none; }
+#zones-view input[type=datetime-local]:focus, .zn-dlg input[type=datetime-local]:focus { border-color: var(--accent-line); }
+
+/* frame source bar (above the frame, like the player header) */
+.zn-fbar { display: flex; align-items: center; gap: 8px; flex: none; min-width: 0; }
+.zn-lab { color: var(--faint); font-size: var(--fs-xs); font-weight: 600; letter-spacing: .7px; text-transform: uppercase; margin-right: 4px; }
+.zn-fbar #zn-rec { flex: 0 1 560px; min-width: 160px; }
+.zn-fbar #zn-t { width: 90px; text-align: center; }
+.zn-fbar #zn-tr { flex: 1 1 200px; min-width: 80px; max-width: 520px; accent-color: var(--accent); }
+
+/* the frame + boxes: the frame element is sized by JS to the fitted image, boxes are % of it */
+.zn-canvas { flex: 1 1 auto; min-height: 240px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;
+             background: #07090c; border: 1px solid var(--line); border-radius: var(--r-l); }
+.zn-frame { position: relative; flex: none; background: #000; user-select: none; -webkit-user-select: none; touch-action: none;
+            background-image: linear-gradient(45deg, #0b0f14 25%, transparent 25%, transparent 75%, #0b0f14 75%), linear-gradient(45deg, #0b0f14 25%, transparent 25%, transparent 75%, #0b0f14 75%);
+            background-size: 24px 24px; background-position: 0 0, 12px 12px; }
+.zn-frame img { display: block; width: 100%; height: 100%; -webkit-user-drag: none; }
+.zn-frame.loading img { opacity: .45; }
+.zn-fmsg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; color: var(--muted);
+           font-size: var(--fs-s); pointer-events: none; text-shadow: 0 1px 2px #000; }
+.zn-frame.loading .zn-fmsg { color: var(--text); }
+
+.zn-box { --zc: var(--accent); position: absolute; border: 2px solid var(--zc); box-shadow: 0 0 0 1px rgba(0,0,0,.85), inset 0 0 0 1px rgba(0,0,0,.45);
+          background-color: color-mix(in srgb, var(--zc) 7%, transparent); cursor: move; touch-action: none; outline: none; }
+.zn-box[data-z="center"] { z-index: 1; }
+.zn-box[data-z="feed"] { z-index: 2; }
+.zn-box[data-z="ticker"] { z-index: 3; }
+.zn-box.sel { z-index: 5; background-color: color-mix(in srgb, var(--zc) 16%, transparent); }
+/* money lies INSIDE the ticker: it stays above the ticker even while the ticker is selected (else the
+   selected ticker covers it and the band can no longer be clicked / dragged). This rule comes after .sel. */
+.zn-box[data-z="money"] { z-index: 7; }
+/* while the ticker is selected, money's own handles stop catching the pointer so the ticker's top-edge
+   handles (which sit under them) stay reachable; a click on the band itself still selects money */
+.zn-box[data-z="ticker"].sel ~ .zn-box[data-z="money"] .zn-h { pointer-events: none; opacity: 0; }
+.zn-box.drag { cursor: grabbing; }
+/* the kill feed shows one line per row height (--rowh = row / box height) */
+.zn-box[data-z="feed"] { background-image: linear-gradient(to bottom, transparent calc(100% - 1px), rgba(76,167,239,.6) calc(100% - 1px));
+                         background-size: 100% var(--rowh, 8.6667%); background-repeat: repeat-y; }
+.zn-box[data-z="feed"].rowdef { background-image: linear-gradient(to bottom, transparent calc(100% - 1px), rgba(76,167,239,.28) calc(100% - 1px)); }
+.zn-lbl { position: absolute; left: -2px; top: -21px; background: var(--zc); color: #000; font: 600 var(--fs-xs)/19px var(--sans); font-variant-numeric: tabular-nums; padding: 0 6px; white-space: nowrap;
+          border-radius: 4px 4px 0 0; pointer-events: none; }
+.zn-box.lblin .zn-lbl { top: auto; bottom: -21px; border-radius: 0 0 4px 4px; }
+.zn-box.lblr .zn-lbl { left: auto; right: -2px; }
+.zn-box[data-z="money"] .zn-lbl { opacity: .9; }
+/* 8 resize handles: visible on hover and on the selected box */
+.zn-h { position: absolute; width: 10px; height: 10px; background: var(--zc); border: 1px solid #000; border-radius: 2px; opacity: 0; transition: opacity .1s; }
+.zn-box:hover .zn-h, .zn-box.sel .zn-h { opacity: 1; }
+.zn-h.zn-nw { left: -6px; top: -6px; cursor: nwse-resize; }
+.zn-h.zn-n { left: calc(50% - 5px); top: -6px; cursor: ns-resize; }
+.zn-h.zn-ne { right: -6px; top: -6px; cursor: nesw-resize; }
+.zn-h.zn-e { right: -6px; top: calc(50% - 5px); cursor: ew-resize; }
+.zn-h.zn-se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+.zn-h.zn-s { left: calc(50% - 5px); bottom: -6px; cursor: ns-resize; }
+.zn-h.zn-sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
+.zn-h.zn-w { left: -6px; top: calc(50% - 5px); cursor: ew-resize; }
+/* a zone left at its built-in default: a dashed outline, not editable until its "default" switch is turned off */
+.zn-ghost { position: absolute; border: 1px dashed; pointer-events: none; z-index: 0; }
+.zn-ghost[data-g="money"] { border-color: rgba(255,213,74,.7); z-index: 6; }
+.zn-ghost[data-g="center"] { border-color: rgba(73,196,99,.7); }
+
+/* ---------- zone toolbar under the frame (like the player's transport) ---------- */
+.zn-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: none; min-width: 0; }
+.zn-grp { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.zn-pair { display: inline-flex; align-items: center; gap: 8px; }
+.zn-chip { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 12px; border-radius: 14px; border: 1px solid var(--line2);
+           background: transparent; color: var(--text2); cursor: pointer; font-size: var(--fs-s); white-space: nowrap; transition: background .12s, border-color .12s; }
+.zn-chip i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.zn-chip:hover { border-color: #3a4252; color: var(--text); background: var(--surface); }
+.zn-chip.on { border-color: var(--accent-line); background: var(--accent-bg); color: var(--text); }
+.zn-chip.def { color: var(--faint); border-style: dashed; }
+.zn-def { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: var(--fs-xs); cursor: pointer; white-space: nowrap; }
+.zn-def input.toggle { width: 30px; height: 18px; }
+.zn-def input.toggle::after { width: 12px; height: 12px; }
+.zn-def input.toggle:checked::after { transform: translateX(12px); }
+.zn-def input:disabled { opacity: .45; cursor: default; }
+#zn-rowh { width: 64px; text-align: right; }
+.zn-sep { width: 1px; height: 20px; background: var(--line2); flex: none; }
+.zn-num { display: inline-flex; align-items: center; gap: 8px; color: var(--faint); font-size: var(--fs-xs); white-space: nowrap; }
+.zn-num b { color: var(--text); font-weight: 600; font-size: var(--fs-s); min-width: 64px; }
+.zn-num input { width: 70px; text-align: right; }
+.zn-num input:disabled { opacity: .45; }
+/* nothing selected: one quiet hint instead of a dash and four empty fields */
+.zn-num.none > span, .zn-num.none > input { display: none; }
+.zn-num.none b { font-weight: 400; color: var(--faint); font-size: var(--fs-xs); }
+
+/* ---------- footer: what the frame is + the keys ---------- */
+.zn-foot { display: flex; align-items: center; gap: 12px; flex: none; min-width: 0; padding-top: 8px; border-top: 1px solid var(--line); }
+.zn-hint { color: var(--muted); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.zn-keys { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.zn-keys .kbd { height: 18px; min-width: 18px; }
+
+/* ---------- the modal (new version date, confirms) ---------- */
+.zn-dlg .zn-form { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 8px; }
+.zn-dlg .zn-form label { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 12px; color: var(--muted); font-size: var(--fs-s); }
+.zn-dlg .zn-form input[type=text] { min-width: 0; }
+.zn-dlg .zn-form input[type=datetime-local] { height: 30px; }
+.zn-dlg .zn-dlgbody .hint { color: var(--muted); font-size: var(--fs-s); margin: 12px 0 0; line-height: 1.5; }
+.zn-dlg .zn-dlgbody .hint b { color: var(--text); }
+.zn-dlg .dlgacts { margin-top: 16px; }
+button.zn-danger, .zn-dlg button.zn-danger { background: var(--bad-bg); border-color: rgba(224,103,90,.5); color: var(--bad-text); }
+button.zn-danger:hover, .zn-dlg button.zn-danger:hover { background: rgba(224,103,90,.24); border-color: var(--bad); }
+
+/* narrower main column: a slimmer streamer column, the keys line goes */
+@container main (max-width: 1250px) {
+  #zones-view.zn { grid-template-columns: 236px minmax(0, 1fr); }
+  .zn-meta #zn-name { width: 160px; }
+  .zn-keys { display: none; }
+}
+@container main (max-width: 820px) {
+  #zones-view.zn { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .zn-side { max-height: 260px; border-right: 0; border-bottom: 1px solid var(--line); }
+  #zn-streamers { max-height: 120px; }
+}

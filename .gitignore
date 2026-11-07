@@ -1,0 +1,35 @@
+# --- Python environment
+venv/
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+
+# --- build output
+dist/
+
+# --- logs, editor / OS files
+*.log
+*.tmp
+*.bak
+.claude/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# --- never commit a data dir or footage by accident
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.mp4
+*.mkv
+*.mov
+*.wav
+*.part
+*.ytdl
+instance.json
+instance.lock

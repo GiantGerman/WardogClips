@@ -1,0 +1,168 @@
+/* First-run setup wizard (dialog#dlg-setup), Settings > Add-ons rows and the status bar download item.
+   Tokens only (style.css :root); type >= 12 px; the one accent. The wizard is a large centred card: on a first run
+   the backdrop is the page colour (the empty app behind it says nothing yet), on a re-run the usual blur. */
+
+dialog.dlg.setup { width: min(1040px, calc(100vw - 32px)); height: min(760px, calc(100vh - 32px)); max-height: none; padding: 0; overflow: hidden; }
+dialog.dlg.setup[open] { display: flex; }
+dialog.dlg.setup.first::backdrop { background: radial-gradient(1200px 600px at 50% 0%, rgba(107,140,255,.10), transparent 70%), var(--bg); backdrop-filter: none; }
+.su-wrap { display: grid; grid-template-columns: 232px minmax(0, 1fr); width: 100%; min-height: 0; }
+
+/* left: brand + the step list */
+.su-side { background: var(--bg2); border-right: 1px solid var(--line); padding: 24px 16px; display: flex; flex-direction: column; gap: 24px; min-height: 0; overflow: auto; }
+.su-brand { display: flex; align-items: center; gap: 12px; padding: 0 8px; }
+.su-brand .brand-mark { width: 32px; height: 32px; border-radius: 8px; flex: none; }
+.su-brand .brand-mark svg.i { width: 18px; height: 18px; }
+.su-brand b { display: block; font-size: var(--fs-m); font-weight: 600; }
+.su-brand small { display: block; color: var(--faint); font-size: var(--fs-xs); }
+.su-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; counter-reset: none; }
+.su-steps button { display: flex; align-items: center; gap: 12px; width: 100%; height: 38px; padding: 0 8px; border: 0; border-radius: var(--r-s); background: transparent; color: var(--muted); font-size: var(--fs-s); text-align: left; cursor: pointer; }
+.su-steps button:hover:not(:disabled) { background: var(--raised); color: var(--text); }
+.su-steps button:disabled { opacity: 1; pointer-events: none; cursor: default; color: var(--faint); }
+.su-steps .n { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid var(--line2); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; flex: none; color: var(--text2); background: var(--surface); }
+.su-steps .n svg.i { width: 13px; height: 13px; stroke-width: 2.4; }
+.su-steps li.on button { background: var(--accent-bg); color: var(--text); }
+.su-steps li.on .n { background: var(--accent-fill); border-color: var(--accent-fill); color: #fff; }
+.su-steps li.done .n { background: var(--ok-bg); border-color: transparent; color: var(--ok-text); }
+.su-steps li.done button { color: var(--text2); }
+
+/* right: the step + the footer */
+.su-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.su-body { flex: 1; overflow: auto; padding: 32px 40px 24px; outline: none; }
+.su-body > * { max-width: 720px; }
+.su-body h2 { margin: 0 0 8px; font-size: var(--fs-xl); font-weight: 600; outline: none; }
+.su-body .lead { margin: 0 0 16px; color: var(--text2); font-size: var(--fs-m); line-height: 1.55; }
+.su-body p.muted { margin: 0 0 16px; font-size: var(--fs-s); }
+.su-body .hint { margin: 16px 0 0; font-size: var(--fs-xs); color: var(--muted); }
+.su-sub { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .7px; text-transform: uppercase; color: var(--faint); margin: 24px 0 8px; }
+.su-loading { height: 100%; display: grid; place-content: center; text-align: center; color: var(--muted); font-size: var(--fs-s); max-width: none; }
+.su-foot { flex: none; }
+.su-foot .su-msg { color: var(--muted); font-size: var(--fs-s); max-width: 520px; text-align: right; }
+.su-foot .su-msg.bad { color: var(--warn-text); }
+.su-foot #su-skip { font-size: var(--fs-s); color: var(--muted); }
+.su-foot #su-skip:hover { color: var(--text); }
+.su-foot .btn svg.i { width: 14px; height: 14px; }
+.ok-t { color: var(--ok-text); } .warn-t { color: var(--warn-text); } .bad-t { color: var(--bad-text); }
+
+/* step 1: hardware chips */
+.su-hw { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; }
+.su-chip { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: var(--r); border: 1px solid var(--line2); background: var(--bg2); min-width: 0; }
+.su-chip svg.i { margin-top: 2px; color: var(--faint); }
+.su-chip b { display: block; font-size: var(--fs-s); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.su-chip small { display: block; color: var(--muted); font-size: var(--fs-xs); }
+.su-chip > div { min-width: 0; }
+.su-chip.ok svg.i { color: var(--ok); } .su-chip.warn svg.i { color: var(--warn); } .su-chip.bad svg.i { color: var(--bad); }
+.su-chip.bad { border-color: rgba(224,103,90,.4); }
+
+/* step 2: folder rows + the add row */
+.su-roots { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.su-root { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto 26px; gap: 12px; align-items: center; padding: 8px 8px 8px 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--bg2); }
+.su-root.on { border-color: var(--accent-line); background: var(--accent-bg); }
+.su-root .path { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-s); cursor: pointer; }
+.su-root .meta { display: inline-flex; align-items: center; gap: 8px; }
+.su-root .info { font-size: var(--fs-xs); white-space: nowrap; }
+.su-none { padding: 16px; border: 1px dashed var(--line2); border-radius: var(--r); color: var(--muted); font-size: var(--fs-s); text-align: center; }
+.su-add { display: flex; gap: 8px; align-items: center; }
+.su-add .inp { flex: 1; min-width: 0; }
+.su-line { font-size: var(--fs-xs); margin-top: 8px; min-height: 18px; }
+.su-check { display: flex; gap: 8px; align-items: flex-start; margin-top: 16px; font-size: var(--fs-s); color: var(--text2); cursor: pointer; }
+.su-check input { margin-top: 3px; }
+
+/* step 3: chip inputs */
+.su-field { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.su-lab b { display: block; font-size: var(--fs-s); font-weight: 600; }
+.su-lab small { display: block; color: var(--muted); font-size: var(--fs-xs); margin-top: 2px; }
+.su-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 38px; padding: 4px 6px; border: 1px solid var(--line2); border-radius: var(--r-s); background: var(--surface); cursor: text; }
+.su-chips:focus-within { border-color: var(--accent-line); }
+.su-chips input { flex: 1; min-width: 160px; border: 0 !important; background: transparent; height: 28px; padding: 0 4px; outline: none; }
+.su-tag { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 4px 0 10px; border-radius: 13px; background: var(--accent-bg); border: 1px solid var(--accent-line); color: var(--text); font-size: var(--fs-s); }
+.su-tag button { width: 20px; height: 20px; border-radius: 50%; border: 0; background: transparent; color: var(--muted); display: inline-grid; place-items: center; padding: 0; cursor: pointer; }
+.su-tag button:hover, .su-tag button:focus-visible { background: var(--raised2); color: var(--text); }
+.su-tag button svg.i { width: 12px; height: 12px; }
+
+/* step 4 / 5: options reuse dialog.dlg .opt; the switch row */
+.su-switch { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--line2); border-radius: var(--r); cursor: pointer; }
+.su-switch b { display: block; font-size: var(--fs-s); font-weight: 600; }
+.su-switch small { display: block; color: var(--muted); font-size: var(--fs-xs); }
+.su-models.off { opacity: .5; }
+dialog.setup .opt { margin-bottom: 6px; }
+dialog.setup .opt b { font-size: var(--fs-s); }
+dialog.setup .opt .badge { margin-left: 4px; height: 18px; line-height: 18px; }
+dialog.setup .opt .badge svg.i { width: 11px; height: 11px; }
+
+/* step 6: summary + progress */
+.su-summary { border: 1px solid var(--line); border-radius: var(--r); background: var(--bg2); }
+.su-sum { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: var(--fs-s); }
+.su-sum:last-child { border-bottom: 0; }
+.su-sum > span { color: var(--muted); }
+.su-sum .mono { font-size: var(--fs-xs); overflow-wrap: anywhere; }
+.su-prog { display: flex; flex-direction: column; gap: 8px; }
+
+/* pack rows: the wizard's progress list and Settings > Add-ons */
+.pk-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 12px; border: 1px solid var(--line2); border-radius: var(--r); background: var(--bg2); }
+.pk-row.act { border-color: var(--accent-line); }
+.pk-row.na { opacity: .6; }
+.pk-t { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-s); }
+.pk-t b { font-weight: 600; }
+.pk-d { color: var(--muted); font-size: var(--fs-xs); margin-top: 2px; }
+.pk-prog { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.pk-prog .pg { flex: 1; height: 6px; border-radius: 3px; }
+.pk-prog span { font-size: var(--fs-xs); color: var(--text2); white-space: nowrap; }
+.pk-note { font-size: var(--fs-xs); color: var(--muted); margin-top: 4px; }
+.pk-note.ok { color: var(--ok-text); }
+.pk-err { font-size: var(--fs-xs); color: var(--bad-text); margin-top: 4px; overflow-wrap: anywhere; }
+.pk-acts { display: flex; gap: 8px; }
+.drawer .ao-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 12px; max-width: 760px; }
+.drawer .ao-acts { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.drawer .ao-sub { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .7px; text-transform: uppercase; color: var(--faint); margin: 16px 0 4px; }
+.drawer #up-res { min-height: 20px; }
+.drawer #up-res:empty { display: none; }
+
+/* status bar: download progress + a newer release */
+#sb-dl .pg { width: 56px; height: 4px; }
+#sb-update { color: var(--accent-2); text-decoration: none; }
+#sb-update:hover { text-decoration: underline; }
+
+/* narrow windows: the step list turns into a row of numbers above the step */
+@media (max-width: 760px) {
+  .su-wrap { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .su-side { flex-direction: row; align-items: center; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); gap: 16px; overflow-x: auto; }
+  .su-brand small { display: none; }
+  .su-steps { flex-direction: row; }
+  .su-steps button { width: auto; height: 32px; }
+  .su-steps li:not(.on) button > span:last-child { display: none; }
+  .su-body { padding: 24px 16px; }
+  .su-field { grid-template-columns: 1fr; gap: 8px; }
+  .su-sum { grid-template-columns: 1fr; gap: 4px; }
+  .su-root { grid-template-columns: 18px minmax(0, 1fr) 26px; }
+  .su-root .meta { grid-column: 2; grid-row: 2; }
+}
+/* short windows (1280x720 minus the browser's chrome): less air */
+@media (max-height: 700px) {
+  .su-body { padding: 24px 32px 16px; }
+  .su-side { padding: 16px 12px; gap: 16px; }
+  .su-sub { margin: 16px 0 8px; }
+}
+dialog.setup .opt small.why { color: var(--faint); margin-top: 4px; }
+/* a toast shown inside the wizard sits above its footer, not on the Next / Open button */
+dialog.setup .toast { bottom: 88px; right: 40px; }
+/* big screens (3440x1440): a little more room, same type sizes */
+@media (min-width: 2000px) and (min-height: 1200px) {
+  dialog.dlg.setup { width: 1200px; height: 860px; }
+  .su-body > * { max-width: 820px; }
+}
+
+/* plain-language wizard: hardware as plain lines, speech / VOD choices as cards, "Saved to" row */
+.su-hw { display: flex; flex-direction: column; gap: 6px; grid-template-columns: none; }
+.su-hw .su-hwl { margin: 0; }
+.su-hw .su-hwl b { font-weight: 600; color: var(--text); }
+.su-cards { display: grid; gap: 8px; }
+dialog.setup .su-card { margin-bottom: 0; padding: 16px; align-items: center; }
+dialog.setup .su-card b { font-size: var(--fs-m); }
+dialog.setup .su-card small { font-size: var(--fs-s); }
+dialog.setup .su-card input { margin-top: 0; }
+dialog.setup .su-card .num { font-size: var(--fs-s); }
+.su-vodsbox { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.su-vodsbox .sline { margin: 0; }
+.su-saveto { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-s); }
+.su-saveto .path { flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.su-sum .mono.faint { margin-top: 2px; }

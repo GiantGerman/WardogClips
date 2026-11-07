@@ -1,0 +1,86 @@
+/* Player + whole-recording timeline (web/js/player.js fills these ids; the markup is static in index.html).
+   The player is the hero -- header (Clip | Full recording, title, Send to Resolve), the video, the scrub
+   bar, a compact transport, then the timeline strip with a time scale. Tokens come from style.css. */
+
+.plh { display: flex; align-items: center; gap: 12px; height: 36px; margin-bottom: 8px; flex: none; min-width: 0; }
+.pltitle { color: var(--muted); font-size: var(--fs-s); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#btn-send svg.i:last-child { width: 14px; height: 14px; margin-left: -2px; }
+#pl-modes button.noproxy { color: var(--faint); }
+#pl-modes button.noproxy:hover, #pl-modes button.noproxy.on { color: var(--text); }
+
+/* the video */
+.plvideo { position: relative; flex: 0 1 auto; width: 100%; aspect-ratio: var(--pl-ar, 1.7778); min-height: 120px; grid-template: minmax(0, 1fr) / minmax(0, 1fr); border-radius: var(--r-l); background: #050608; overflow: hidden; display: grid; place-items: center; border: 1px solid #1a1e25; }
+.plvideo video { width: 100%; height: 100%; object-fit: contain; background: #050608; display: block; }
+.plpip { display: flex; gap: 8px; z-index: 1; }
+.plpip .badge { background: rgba(13,15,19,.75); backdrop-filter: blur(4px); }
+.ploverlay { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; background: rgba(5,6,8,.72); backdrop-filter: blur(2px); color: var(--text2); padding: 16px; z-index: 2; }
+.ploverlay[hidden] { display: none; }
+.ploverlay > div { max-width: 460px; }
+.ploverlay .empty { background: rgba(22,26,32,.92); border: 1px solid var(--line2); border-radius: var(--r-l); padding: 24px; box-shadow: var(--shadow); }
+.ploverlay .empty > b { font-size: var(--fs-l); margin-bottom: 8px; }
+.ploverlay .plcard .acts { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+.ploverlay .plerr { font-family: var(--mono); word-break: break-word; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-s); padding: 8px; margin-top: 12px; color: var(--text2); }
+.ploverlay .plprog { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 16px; }
+.ploverlay .plprog[hidden] { display: none; }
+.ploverlay .plprog .pg { width: 100%; }
+.ploverlay .plbusy { color: var(--text2); font-size: var(--fs-s); }
+.ploverlay .spin { margin-bottom: 12px; }
+.ploverlay small { display: block; margin-top: 6px; color: var(--faint); font-size: var(--fs-xs); }
+
+/* scrub bar: in / out shading, the played part, the event mark, other events, the playhead, hover time */
+.plbar { position: relative; height: 28px; margin-top: 8px; cursor: pointer; user-select: none; flex: none; }
+.plbar .trk { position: absolute; left: 0; right: 0; top: 12px; height: 4px; border-radius: 2px; background: var(--line2); }
+.plbar .played { position: absolute; left: 0; top: 12px; height: 4px; border-radius: 2px; background: var(--text2); opacity: .55; pointer-events: none; }
+.plbar .played[hidden] { display: none; }
+.plbar .inout { position: absolute; top: 10px; height: 8px; border-radius: 3px; background: rgba(107,140,255,.30); border: 1px solid var(--accent-line); }
+.plbar .mark { position: absolute; top: 4px; width: 3px; height: 20px; border-radius: 1px; margin-left: -1px; background: var(--k-kill); }
+.plbar .evt { position: absolute; top: 6px; width: 2px; height: 16px; border-radius: 1px; margin-left: -1px; opacity: .6; }
+.plbar .head { position: absolute; top: 2px; width: 12px; height: 24px; margin-left: -6px; pointer-events: none; }
+.plbar .head::before { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; width: 2px; background: #fff; border-radius: 1px; }
+.plbar .head::after { content: ""; position: absolute; left: 1px; top: 0; width: 10px; height: 6px; border-radius: 2px; background: #fff; }
+.plbar .hov { top: -22px; transform: translateX(-50%); pointer-events: none; z-index: 3; }
+.plbar .hov[hidden] { display: none; }
+.plbar .hov span { display: block; background: var(--raised2); border: 1px solid var(--line2); border-radius: 4px; padding: 1px 6px; font: var(--fs-xs) var(--mono); color: var(--text); white-space: nowrap; }
+
+/* transport */
+.plctl { display: flex; align-items: center; gap: 4px; height: 44px; flex: none; min-width: 0; }
+.plctl .grp { display: flex; gap: 2px; align-items: center; flex: none; }
+.plctl .vsep { width: 1px; height: 18px; background: var(--line2); margin: 0 8px; flex: none; }
+.plctl .play { width: 36px; height: 36px; border-radius: 50%; background: var(--text); color: #0d0f13; border: 0; display: grid; place-items: center; cursor: pointer; margin: 0 4px; font-size: 13px; padding: 0; }
+.plctl .play:hover { background: #fff; }
+.plctl .play svg.i { width: 18px; height: 18px; }
+.lbl-btn { height: 30px; padding: 0 8px; border: 0; background: transparent; border-radius: var(--r-s); color: var(--text2); cursor: pointer; display: inline-flex; gap: 8px; align-items: center; font-size: var(--fs-s); }
+.lbl-btn:hover:not(:disabled) { background: var(--raised); color: var(--text); }
+.lbl-btn:disabled { cursor: default; color: var(--faint); }
+.lbl-btn.on { color: var(--accent-2); background: var(--accent-bg); }
+.lbl-btn .tc { color: var(--text); font-family: var(--mono); font-size: var(--fs-s); }
+.lbl-btn.on .tc { color: var(--accent-2); }
+.lbl-btn .tc:empty { display: none; }
+.pltime { margin-left: auto; font: var(--fs-s) var(--mono); color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pltime b { color: var(--text); font-weight: 500; }
+#pl-tools { position: absolute; right: 16px; bottom: 52px; z-index: 30; width: 280px; }
+#pl-loop.on > svg.i { color: var(--accent-2); }
+#pl-loop.on { color: var(--accent-2); }
+
+/* whole-recording timeline (player.js renders .gl / .win / .tk / .ph / .hover into #tl-track and the line into #tl-info;
+   app.js writes the time scale into #tl-scale) */
+.tl { padding: 4px 16px 12px; min-width: 0; }
+.tlinfo { display: flex; gap: 12px; align-items: center; font-size: var(--fs-xs); color: var(--muted); height: 22px; white-space: nowrap; overflow: hidden; }
+.tlinfo b { color: var(--text2); font-weight: 500; }
+.tlinfo .tlk { display: inline-flex; gap: 4px; align-items: center; }
+.tlinfo .tlk i { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+.tlinfo .tlk.off { opacity: .4; }
+.tlinfo .spacer { flex: 1; }
+.tlinfo #tl-at { font-family: var(--mono); color: var(--text2); }
+.tltrack { position: relative; height: 30px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); cursor: crosshair; overflow: hidden; }
+.tltrack .gl { position: absolute; bottom: 0; height: 8px; border-left: 1px solid var(--line2); pointer-events: none; }
+.tltrack .win { position: absolute; top: 0; bottom: 0; background: rgba(107,140,255,.12); border-left: 1px solid var(--accent-line); border-right: 1px solid var(--accent-line); pointer-events: none; }
+.tltrack .tk { position: absolute; top: 6px; bottom: 6px; width: 3px; margin-left: -1.5px; border-radius: 2px; cursor: pointer; transition: transform .1s; }
+.tltrack .tk:hover { transform: scaleY(1.25); }
+.tltrack .tk.false { opacity: .3; }
+.tltrack .tk.cur { top: 4px; bottom: 4px; box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--kc, #fff); }
+.tltrack .ph { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; pointer-events: none; }
+.tltrack .hover { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.35); pointer-events: none; }
+.tltrack .ph[hidden], .tltrack .hover[hidden] { display: none; }
+.tlscale { position: relative; height: 16px; margin-top: 4px; }
+.tlscale span { position: absolute; top: 0; font: var(--fs-xs)/16px var(--mono); color: var(--muted); transform: translateX(-50%); pointer-events: none; }

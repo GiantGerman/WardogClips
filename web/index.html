@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WardogClips</title>
+<link rel="icon" href="/static/img/favicon.ico" sizes="16x16 32x32 48x48"><link rel="apple-touch-icon" href="/static/img/icon-192.png">
+<!-- Layout: icon rail + one side panel, the player as the main view, a context area beside / below it.
+     Other modules rely on the ids and mount points in this file; keep them stable. -->
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/player.css">
+<link rel="stylesheet" href="/static/mixer.css">
+<link rel="stylesheet" href="/static/zones.css">
+<link rel="stylesheet" href="/static/vodbrowse.css">
+<link rel="stylesheet" href="/static/setup.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===================== top bar: brand, breadcrumb, the one search / command field ===================== -->
+  <header id="top">
+    <div class="brand"><div class="brand-mark"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M4 7l4 12 4-9 4 9 4-12"/></svg></div></div>
+    <span class="brand-name">WardogClips</span>
+    <nav class="crumb" id="crumb" aria-label="current recording"></nav>
+    <div id="gsearch">
+      <i data-ic="search"></i>
+      <input id="search" type="text" placeholder="Filter recordings &middot; Enter searches what was said" autocomplete="off" spellcheck="false"
+             title="Typing filters the Recordings list by name / VOD title; Enter searches every transcript (2+ characters)">
+      <span class="hint"><button type="button" class="ib sm clr" id="search-clr" data-tip="Clear search"><i data-ic="x"></i></button><span class="kbd" data-tip="Focus search">/</span><button type="button" class="kbd" id="btn-palette" data-tip="Command palette: every action">Ctrl K</button></span>
+      <div class="gs-menu" id="gsmenu"></div>
+    </div>
+  </header>
+
+  <!-- ===================== rail: one side panel at a time; click the active one to fold it ===================== -->
+  <nav id="rail" aria-label="panels">
+    <button class="rb" data-p="rec" data-tip="Recordings" data-k="J / K" data-side="r"><i data-ic="rec"></i><span class="rl">Library</span></button>
+    <button class="rb" data-p="events" data-tip="Events of this recording" data-k="N / P" data-side="r"><i data-ic="events"></i><span class="rl">Events</span></button>
+    <button class="rb" data-p="clips" data-tip="Find clips across the library" data-side="r"><i data-ic="clips"></i><span class="rl">Find</span></button>
+    <button class="rb" data-p="said" data-tip="What was said: transcript search results" data-side="r"><i data-ic="tx"></i><span class="rl">Said</span></button>
+    <button class="rb" data-p="jobs" data-tip="Job queue" data-side="r"><i data-ic="jobs"></i><span class="rl">Jobs</span><span class="dot" id="rail-jobs-dot" hidden></span></button>
+    <button class="rb" data-p="vods" data-tip="Stream VODs: browse, favorites, import" data-side="r"><i data-ic="vods"></i><span class="rl">VODs</span></button>
+    <button class="rb" data-p="zones" data-tip="Detection zones per streamer" data-side="r"><i data-ic="zones"></i><span class="rl">Zones</span></button>
+    <div class="rail-sp"></div>
+    <button class="rb" id="btn-settings" data-tip="Settings" data-side="r"><i data-ic="settings"></i><span class="rl">Settings</span></button>
+    <button class="rb" id="btn-help" data-tip="Keyboard shortcuts and help" data-k="?" data-side="r"><i data-ic="help"></i><span class="rl">Help</span></button>
+  </nav>
+
+  <!-- ===================== side panel: one .pv section per rail entry, only the active one shows ===================== -->
+  <aside id="panel" class="closed">
+    <!-- Library / Recordings -->
+    <section class="pv" id="pv-rec" data-p="rec" hidden>
+      <div class="phd"><h2>Recordings</h2><span class="sp"></span>
+        <select class="inp sm" id="sel-drive" title="library drive: filters this list and scopes Find clips / transcript search"><option value="">All drives</option></select>
+        <button type="button" class="ib sm" data-menu="library" data-tip="Library actions"><i data-ic="more"></i></button></div>
+      <div class="psub" id="rec-sub" hidden></div>
+      <div class="pbody" id="tab-rec"></div>
+      <div class="pfoot" id="rec-foot"></div>
+    </section>
+    <!-- Events of the selected recording (rendered by renderEvents) -->
+    <section class="pv" id="pv-events" data-p="events" hidden><div class="pv-fill" id="tab-events"></div></section>
+    <!-- Find clips: the clip search form + results -->
+    <section class="pv" id="pv-clips" data-p="clips" hidden>
+      <div class="phd"><h2>Find clips</h2><span class="sp"></span>
+        <span class="kslot" data-kinds-slot></span>
+        <select class="inp sm" id="f-order" title="sort"><option value="score">Best score</option><option value="newest">Newest</option><option value="oldest">Oldest</option></select></div>
+      <div class="finder" id="finder">
+        <div class="disc" id="f-disc" role="button" tabindex="0" aria-controls="fgrid" title="show / hide the clip search filters"><i data-ic="chev" class="chev"></i><b>Filters</b><span id="f-nset" class="faint">defaults</span><span class="sp"></span><button type="button" class="btn ghost sm" id="f-reset" title="back to the default filters">Reset</button></div>
+        <div class="fgrid" id="fgrid">
+          <label><span>Status</span><select class="inp" id="f-status"><option value="notfalse">Not false</option><option value="new">New</option><option value="kept">Kept</option><option value="false">False positive</option><option value="any">Any</option></select></label>
+          <label title="the event's score (kind x confidence + multikill + voice ...)"><span>Min score</span><input class="inp" type="number" id="f-score" step="0.05" min="0" placeholder="0"></label>
+          <label title="a name in the kill feed: the player you killed or who killed you"><span>Player</span><input class="inp" type="text" id="f-player" placeholder="victim or killer"></label>
+          <label title="kill-feed distance tag ([60 m])"><span>Min distance (m)</span><input class="inp" type="number" id="f-dist" step="10" min="0" placeholder="any"></label>
+          <label title="kills with at least N kills (this one included) within the multikill window"><span>Streak</span><select class="inp" id="f-streak"><option value="">Any</option><option value="2">2+ kills</option><option value="3">3+ kills</option><option value="4">4+ kills</option><option value="5">5+ kills</option></select></label>
+          <label><span>Footage</span><select class="inp" id="f-reckind"><option value="any">Any</option><option value="replay">Replays</option><option value="recording">Recordings</option><option value="vod">Stream VODs</option></select></label>
+          <label class="full" title="words in the transcript (you or the squad) near the event, all of them"><span>Said nearby</span><span class="frow"><input class="inp" type="text" id="f-said" placeholder="words said nearby"><span class="faint">&plusmn;</span><input class="inp" type="number" id="f-saidw" min="1" max="120" step="1" placeholder="10" title="window in seconds"><span class="faint">s</span></span></label>
+          <label title="when it happened (local date)"><span>From</span><input class="inp" type="date" id="f-from"></label>
+          <label><span>To</span><input class="inp" type="date" id="f-to"></label>
+        </div>
+        <div class="findbar"><button type="button" class="btn pri sm" id="f-find" title="search every recording (Enter in any field)"><i data-ic="search"></i>Find clips</button><span class="muted" id="f-count"></span><span class="sp"></span><span class="faint" id="f-drive"></span></div>
+      </div>
+      <div class="pbody" id="tab-clips"></div>
+    </section>
+    <!-- What was said: transcript search hits -->
+    <section class="pv" id="pv-said" data-p="said" hidden><div class="pv-fill" id="tab-said"></div></section>
+    <!-- Jobs -->
+    <section class="pv" id="pv-jobs" data-p="jobs" hidden><div class="pv-fill" id="tab-jobs"></div></section>
+    <!-- VODs: vodbrowse.js may mount here (VB.mountPanel); until then the rail opens its dialog -->
+    <section class="pv" id="pv-vods" data-p="vods" hidden><div class="pv-fill" id="vb-panel"></div></section>
+  </aside>
+
+  <!-- ===================== main: review (player + timeline + context area), calibration, zones (zones.js appends) ===================== -->
+  <main id="main">
+    <div id="review">
+      <section id="player">
+        <div class="plh">
+          <div class="seg" id="pl-modes"><button type="button" class="on" data-mode="clip" title="the selected event's clip (in / out + handles)">Clip</button><button type="button" data-mode="full" title="the whole recording (needs a proxy)">Full recording</button></div>
+          <span class="pltitle" id="pl-title">no clip</span>
+          <span class="sp"></span>
+          <button type="button" class="btn pri" id="btn-send" title="markers, a selects timeline or CSV + EDL"><i data-ic="send"></i>Send to Resolve<i data-ic="chevd"></i></button>
+        </div>
+        <div class="plvideo" id="pl-box">
+          <video id="pl-video" playsinline preload="auto"></video>
+          <div class="ploverlay" id="pl-over"><div class="empty"><b>Pick a recording</b>Open the Library on the left (or press J), then an event: its clip plays here from the pre-roll.</div></div>
+        </div>
+        <div class="plbar" id="pl-bar" title="click / drag to seek"><div class="trk"></div><div class="inout" id="pl-io" hidden></div><div class="mark" id="pl-mark" hidden></div><div class="head" id="pl-head" hidden></div></div>
+        <div class="plctl" id="pl-ctl">
+          <div class="grp">
+            <button type="button" class="ib" id="pl-back" data-tip="Previous frame" data-k=","><i data-ic="back"></i></button>
+            <button type="button" class="play" id="pl-play" data-tip="Play / pause" data-k="Space"><i data-ic="play"></i></button>
+            <button type="button" class="ib" id="pl-fwd" data-tip="Next frame" data-k="."><i data-ic="fwd"></i></button>
+          </div>
+          <span class="vsep"></span>
+          <div class="grp">
+            <button type="button" class="lbl-btn" id="pl-in" data-tip="Set the clip in point here" data-k="I">In <span class="tc" id="pl-in-t"></span></button>
+            <button type="button" class="lbl-btn" id="pl-out" data-tip="Set the clip out point here" data-k="O">Out <span class="tc" id="pl-out-t"></span></button>
+          </div>
+          <span class="pltime" id="pl-time">-</span>
+          <button type="button" class="ib" id="pl-more" data-tip="Clip tools: replay, loop, reset, wider, mark, quality"><i data-ic="more"></i></button>
+        </div>
+        <!-- clip tools: a static popover (player.js wires these ids) opened by #pl-more -->
+        <div class="pop menu" id="pl-tools" hidden>
+          <button type="button" class="mi" id="pl-replay" title="replay from the in point (R)"><i data-ic="replay"></i><span>Replay from in</span><span class="k">R</span></button>
+          <button type="button" class="mi" id="pl-loop" title="loop in -> out (L)"><i data-ic="loop"></i><span>Loop in &rarr; out</span><span class="k">L</span></button>
+          <button type="button" class="mi" id="pl-reset" title="back to the pre / post roll"><i data-ic="reset"></i><span>Reset in / out<small>to the pre / post roll</small></span></button>
+          <button type="button" class="mi" id="pl-wider" title="render 15 s more either side"><i data-ic="wider"></i><span>Wider<small>15 s more either side</small></span></button>
+          <button type="button" class="mi" id="pl-markhere" title="add a manual event at the playhead (M)"><i data-ic="mark"></i><span>Mark here</span><span class="k">M</span></button>
+          <div class="msep"></div>
+          <label class="mi quality" title="height of the rendered clip"><i data-ic="bolt"></i><span>Clip quality</span><select class="inp sm" id="pl-h"><option>540</option><option selected>720</option><option>1080</option><option>1440</option></select></label>
+        </div>
+      </section>
+
+      <section class="tl" id="tl" hidden>
+        <div class="tlinfo" id="tl-info"></div>
+        <div class="tltrack" id="tl-track"></div>
+        <div class="tlscale" id="tl-scale"></div>
+      </section>
+
+      <section id="ctxa">
+        <!-- the audio tracks are always shown (mixing is the common job, a tab hid it): pinned on top of the context area,
+             the Event / Recording / Transcript tabs below it -->
+        <div class="audsec" id="cp-audio">
+          <div class="audh"><i data-ic="wave"></i><b>Audio tracks</b></div>
+          <section class="mixer" id="mixer" hidden>
+            <div class="mxhead"><span class="muted" id="mx-span"></span><span class="spacer"></span><span class="mxstate mono" id="mx-state"></span><button type="button" class="btn sm" id="mx-reset" title="back to the default mix: game + mic + squad, desktop / music muted">Reset mix</button></div>
+            <div class="mxbody" id="mx-body"><div id="mx-master"></div><div id="mx-lanes"></div><div class="mxio" id="mx-io" hidden></div><div class="mxph" id="mx-ph" hidden></div></div>
+          </section>
+          <div class="empty aud-empty"><b>No audio tracks loaded</b>Play an event's clip (or the full recording with a proxy): its tracks show here as Resolve-style lanes with mute, solo and faders.</div>
+        </div>
+        <div class="ctxtabs">
+          <div class="ctxh">
+            <div class="seg" id="ctabs" role="tablist">
+              <button type="button" data-ct="event" data-tip="Event" data-k="1">Event</button>
+              <button type="button" data-ct="rec" data-tip="Recording" data-k="2">Recording</button>
+              <button type="button" data-ct="tx" data-tip="Transcript" data-k="3">Transcript<span class="cnt" id="ctab-txn"></span></button>
+            </div>
+            <span class="sp"></span><span class="acts" id="ctx-extra"></span>
+          </div>
+          <div class="ctxb">
+            <div class="cpane" id="cp-event" data-ct="event"></div>
+            <div class="cpane" id="cp-rec" data-ct="rec" hidden></div>
+            <div class="cpane" id="cp-tx" data-ct="tx" hidden><div id="tab-transcript"></div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <section id="calview" class="view" hidden></section>
+  </main>
+
+  <!-- ===================== status bar ===================== -->
+  <footer id="statusbar">
+    <button type="button" class="sb" id="pill-jobs" data-tip="Open the job queue"><span class="sd"></span><span id="pill-jobs-t">jobs -</span></button>
+    <button type="button" class="sb" id="btn-pause" data-tip="Pause / resume the job lanes (handy while gaming)"><i data-ic="pausej"></i></button>
+    <span class="sb-sep"></span>
+    <span class="sb static" id="sb-watch"></span>
+    <span class="sb static" id="status"></span>
+    <!-- add-on downloads (setup.js): shown while a pack / model downloads; click = Settings > Add-ons -->
+    <button type="button" class="sb" id="sb-dl" hidden><i data-ic="download"></i><span id="sb-dl-t"></span><span class="pg"><i></i></span></button>
+    <span class="sp"></span>
+    <a class="sb" id="sb-update" href="#" target="_blank" rel="noopener" hidden></a>
+    <span class="sb static" id="legend"></span>
+    <span class="sb-sep"></span>
+    <span class="sb static" id="sb-enc" data-tip="Encoder for clips and proxies right now (OBS keeps the NVENC engine)">-</span>
+    <span class="sb-sep"></span>
+    <button type="button" class="sb" id="pill-resolve"><i data-ic="resolve"></i><span class="sd"></span><span id="pill-resolve-t">Resolve -</span><span class="start" id="pill-resolve-start" hidden>Start</span></button>
+  </footer>
+</div>
+
+<!-- ===================== overlays ===================== -->
+<div class="pop" id="pop" hidden></div>
+<div class="tip" id="tip"></div>
+<div class="ctx" id="ctx" hidden></div>
+<div class="toast" id="toast" hidden></div>
+<div id="lightbox" hidden><img alt=""></div>
+
+<!-- settings: a modal panel (not a <dialog>: player.js / zones.js test $("drawer").hidden) -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden aria-label="Settings">
+  <div class="dhead"><h3>Settings</h3><span class="faint">Every value saves as you change it</span><span class="sp"></span><span class="msg" id="dmsg"></span><button type="button" class="ib" id="btn-dclose" data-tip="Close" data-k="Esc"><i data-ic="x"></i></button></div>
+  <div class="setwrap"><nav class="setnav" id="setnav"></nav><div class="dbody" id="dbody"></div></div>
+</aside>
+
+<dialog class="dlg m" id="dlg-tall">
+  <form method="dialog">
+    <div class="mh"><h3>Transcribe all</h3><button value="cancel" class="ib" title="close"><i data-ic="x"></i></button></div>
+    <div class="mb" id="tall-body"><div class="hint">counting...</div></div>
+    <div class="dlgacts"><span class="hint" id="tall-note"></span><span class="spacer"></span><button value="cancel" class="btn ghost">Cancel</button><button value="go" class="btn pri" id="tall-go" disabled>Queue</button></div>
+  </form>
+</dialog>
+<dialog class="dlg m" id="dlg-vod">
+  <form method="dialog">
+    <div class="mh"><h3>Import a stream VOD</h3><button value="cancel" class="ib" title="close"><i data-ic="x"></i></button></div>
+    <div class="mb">
+      <div class="frow"><input class="inp" type="text" id="vod-url" placeholder="https://www.twitch.tv/videos/...   (YouTube, Twitch, Kick, TikTok, Rumble)" autocomplete="off"><button type="button" class="btn" id="vod-look">Look</button></div>
+      <div id="vod-info"><div class="hint">Paste the link of a finished stream (the VOD / replay, not the live channel). It is downloaded into its site's folder and then probed, transcribed and scanned for kills like a recording.</div></div>
+    </div>
+    <div class="dlgacts"><span class="hint" id="vod-note"></span><span class="spacer"></span><button value="cancel" class="btn ghost">Close</button><button type="button" class="btn pri" id="vod-go" disabled>Download</button></div>
+  </form>
+</dialog>
+<dialog class="dlg m pal" id="dlg-pal">
+  <input type="text" id="pal-q" placeholder="Type a command or a search..." autocomplete="off" spellcheck="false">
+  <div class="pal-list" id="pal-list"></div>
+  <div class="pal-foot"><span class="kbd">&uarr;</span><span class="kbd">&darr;</span> choose <span class="kbd">Enter</span> run <span class="kbd">Esc</span> close</div>
+</dialog>
+<dialog class="dlg m help" id="dlg-help">
+  <form method="dialog">
+    <div class="mh"><h3>Keyboard shortcuts</h3><button value="cancel" class="ib" title="close"><i data-ic="x"></i></button></div>
+    <div class="mb" id="help-body"></div>
+  </form>
+</dialog>
+
+<!-- first-run setup wizard (setup.js renders the steps into #su-body) -->
+<dialog class="dlg m setup" id="dlg-setup" aria-labelledby="su-title">
+  <div class="su-wrap">
+    <aside class="su-side">
+      <div class="su-brand"><div class="brand-mark"><svg class="i" viewBox="0 0 24 24"><path d="M4 7l4 12 4-9 4 9 4-12"/></svg></div><div><b id="su-title">Set up WardogClips</b><small id="su-ver"></small></div></div>
+      <ol class="su-steps" id="su-steps" aria-label="setup steps"></ol>
+    </aside>
+    <section class="su-main">
+      <div class="su-body" id="su-body"></div>
+      <div class="dlgacts su-foot"><button type="button" class="lnk" id="su-skip">Skip setup</button><span class="spacer"></span><span class="su-msg" id="su-msg" role="status" aria-live="polite"></span><button type="button" class="btn ghost" id="su-back">Back</button><button type="button" class="btn pri" id="su-next">Next</button></div>
+    </section>
+  </div>
+</dialog>
+
+<script src="/static/js/core.js"></script>
+<script src="/static/js/setup.js"></script>
+<script src="/static/js/app.js"></script>
+<script src="/static/js/zones.js"></script>
+<script src="/static/js/vodbrowse.js"></script>
+<script src="/static/js/mixer.js"></script>
+<script src="/static/js/player.js"></script>
+</body>
+</html>

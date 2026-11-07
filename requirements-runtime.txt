@@ -1,0 +1,72 @@
+# WardogClips -- pinned runtime packages (the installer ships exactly this set). Leaves out the nvidia-* CUDA wheels (~2 GB: they are the in-app
+# "GPU speech-to-text" add-on pack, core/packs.py). No torch: faster-whisper runs on CTranslate2 and its VAD on
+# onnxruntime. onnxruntime-directml (GPU OCR) is NOT here: it shares the onnxruntime package folder with the CPU build,
+# so it is installed separately into its own folder:
+#   pip install --no-deps --target venv\ort-directml onnxruntime-directml==1.24.4
+
+# web server
+fastapi==0.143.3
+starlette==1.8.0
+uvicorn==0.54.0
+pydantic==2.14.1
+pydantic_core==2.50.1
+annotated-doc==0.0.5
+annotated-types==0.8.0
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+opentelemetry-api==1.45.1
+anyio==4.15.1
+h11==0.16.0
+click==8.5.0
+idna==3.20
+
+# http (requests for packs / updates / Rumble listings)
+requests==2.34.2
+urllib3==2.8.0
+certifi==2026.10.23
+charset-normalizer==3.5.2
+
+# numbers + images
+numpy==2.5.4
+pillow==13.0.0
+
+# speech-to-text (faster-whisper on CTranslate2; models from the Hugging Face hub)
+faster-whisper==1.2.1
+ctranslate2==4.8.3
+tokenizers==0.23.3
+huggingface_hub==2.2.0
+hf-xet==1.7.0
+httpx2==2.13.1
+httpcore2==2.13.1
+truststore==0.10.5
+filelock==4.2.0
+fsspec==2026.9.0
+packaging==26.3
+PyYAML==6.0.3
+tqdm==4.70.1
+colorama==0.4.6
+av==19.0.1
+onnxruntime==1.31.0
+flatbuffers==25.12.19
+protobuf==7.36.2
+
+# HUD OCR (RapidOCR on onnxruntime)
+rapidocr-onnxruntime==1.2.3
+opencv-python==5.0.0.93
+pyclipper==1.4.0
+shapely==2.2.0
+six==1.17.0
+
+# stream VOD import: yt-dlp[default,curl-cffi]
+yt-dlp==2026.10.26
+yt-dlp-ejs==0.8.0
+curl_cffi==0.17.0
+cffi==2.1.1
+pycparser==3.12
+brotli==1.2.1
+mutagen==1.48.1
+pycryptodomex==3.24.2
+websockets==17.4
+
+# tray icon (main.py --tray, desktop/tray.py)
+pystray==0.19.5
