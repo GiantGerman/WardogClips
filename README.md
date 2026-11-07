@@ -10,9 +10,22 @@ Twitch, Kick, TikTok and Rumble and find the moments in those.
 
 Everything runs on your own PC.
 
-<!-- screenshot: add docs/screenshot.png and uncomment
-![WardogClips](docs/screenshot.png)
--->
+![WardogClips: a kill clip in the player, with the timeline, audio tracks and the reward ticker that found it](.github/images/main.png)
+
+<table>
+<tr>
+<td width="33%"><img src=".github/images/events.png" alt="Events: every kill, assist and death found in a recording"></td>
+<td width="33%"><img src=".github/images/find-clips.png" alt="Find clips: search every recording by kind, player, distance, streak or what was said"></td>
+<td width="33%"><img src=".github/images/setup.png" alt="First-run setup: speech-to-text choice"></td>
+</tr>
+<tr>
+<td align="center"><b>Events</b>: every kill, assist and death in a recording</td>
+<td align="center"><b>Find clips</b>: search the whole library</td>
+<td align="center"><b>First-run setup</b>: a few plain questions</td>
+</tr>
+</table>
+
+<sub>Screenshots use demo data: player names are invented and other players' names in the game footage are blurred.</sub>
 
 ## Requirements
 
