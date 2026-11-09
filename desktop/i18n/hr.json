@@ -1,0 +1,19 @@
+{
+  "tray.open": "Otvori WardogClips",
+  "tray.update": "Dostupno ažuriranje...",
+  "tray.pause": "Pauziraj dok igram",
+  "tray.speed": "Brzina",
+  "tray.mode_full": "Puna brzina",
+  "tray.mode_balanced": "Uravnoteženo",
+  "tray.mode_background": "U pozadini",
+  "tray.open_data": "Otvori mapu podataka",
+  "tray.open_log": "Otvori zapisnik",
+  "tray.quit": "Izađi",
+  "tray.balloon": "WardogClips radi. Desni klik na ikonu u traci sustava za izlaz.",
+  "tray.update_notify": "Dostupan je WardogClips {version}. Odaberi Dostupno ažuriranje... u izborniku trake sustava da ga vidiš.",
+  "launcher.could_not_start": "WardogClips se nije mogao pokrenuti:\n\n{error}",
+  "launcher.scan_running": "Skeniranje WardogClipsa (scan.bat / --scan) koristi ovu mapu podataka:\n\n{dir}\n\nPričekaj da završi (ili ga zaustavi u njegovom prozoru), zatim ponovno pokreni WardogClips.",
+  "launcher.not_answering": "WardogClips već radi, ali ne odgovara.\n\nZatvori ga preko ikone u traci sustava (ili pričekaj minutu) i pokušaj ponovno.\n\nZapisnik: {log}",
+  "launcher.damaged": "WardogClips je oštećen (nedostaju runtime ili datoteke aplikacije).\n\nPonovno ga instaliraj.\n\nTraženo:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips se zaustavio odmah nakon pokretanja (izlazni kod {code}).\n\nZapisnik možda kaže zašto:\n{log}"
+}

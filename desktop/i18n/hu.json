@@ -1,0 +1,19 @@
+{
+  "tray.open": "WardogClips megnyitása",
+  "tray.update": "Frissítés érhető el...",
+  "tray.pause": "Szünet, amíg játszom",
+  "tray.speed": "Sebesség",
+  "tray.mode_full": "Teljes sebesség",
+  "tray.mode_balanced": "Kiegyensúlyozott",
+  "tray.mode_background": "Háttér",
+  "tray.open_data": "Adatmappa megnyitása",
+  "tray.open_log": "Napló megnyitása",
+  "tray.quit": "Kilépés",
+  "tray.balloon": "A WardogClips fut. A kilépéshez kattints jobb gombbal a tálcaikonra.",
+  "tray.update_notify": "Elérhető a WardogClips {version}. A megtekintéséhez válaszd a tálcamenü Frissítés érhető el... pontját.",
+  "launcher.could_not_start": "A WardogClips nem tudott elindulni:\n\n{error}",
+  "launcher.scan_running": "Egy WardogClips-keresés (scan.bat / --scan) használja ezt az adatmappát:\n\n{dir}\n\nVárd meg, amíg befejeződik (vagy állítsd le az ablakában), majd indítsd újra a WardogClipst.",
+  "launcher.not_answering": "A WardogClips már fut, de nem válaszol.\n\nLépj ki belőle a tálcaikonjáról (vagy várj egy percet), és próbáld újra.\n\nNapló: {log}",
+  "launcher.damaged": "A WardogClips sérült (hiányzik a futtatókörnyezet vagy az alkalmazás fájljai).\n\nTelepítsd újra.\n\nA keresett fájlok:\n{python}\n{main}",
+  "launcher.stopped": "A WardogClips közvetlenül az indulás után leállt (kilépési kód: {code}).\n\nA napló megmutathatja, miért:\n{log}"
+}

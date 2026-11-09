@@ -1,0 +1,19 @@
+{
+  "tray.open": "Atvērt WardogClips",
+  "tray.update": "Pieejams atjauninājums...",
+  "tray.pause": "Pauzēt, kamēr spēlēju",
+  "tray.speed": "Ātrums",
+  "tray.mode_full": "Pilns ātrums",
+  "tray.mode_balanced": "Līdzsvarots",
+  "tray.mode_background": "Fonā",
+  "tray.open_data": "Atvērt datu mapi",
+  "tray.open_log": "Atvērt žurnālu",
+  "tray.quit": "Iziet",
+  "tray.balloon": "WardogClips darbojas. Lai izietu, ar peles labo pogu noklikšķini uz paziņojumu apgabala ikonas.",
+  "tray.update_notify": "Pieejams WardogClips {version}. Lai to apskatītu, paziņojumu apgabala izvēlnē izvēlies „Pieejams atjauninājums...“.",
+  "launcher.could_not_start": "WardogClips neizdevās palaist:\n\n{error}",
+  "launcher.scan_running": "Šo datu mapi izmanto WardogClips skenēšana (scan.bat / --scan):\n\n{dir}\n\nPagaidi, līdz tā beidzas (vai aptur to tās logā), tad palaid WardogClips vēlreiz.",
+  "launcher.not_answering": "WardogClips jau darbojas, bet neatbild.\n\nIzej no tā paziņojumu apgabala ikonā (vai pagaidi minūti) un mēģini vēlreiz.\n\nŽurnāls: {log}",
+  "launcher.damaged": "WardogClips ir bojāts (trūkst izpildvides vai lietotnes failu).\n\nLūdzu, pārinstalē to.\n\nMeklēts:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips apstājās uzreiz pēc palaišanas (izejas kods {code}).\n\nŽurnālā var būt iemesls:\n{log}"
+}

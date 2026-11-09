@@ -29,7 +29,9 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
+from core import workmode
 from utils import paths
+from utils.i18n import msg as _msg
 
 logger = logging.getLogger("wclips.vods")
 
@@ -65,6 +67,11 @@ def provider_of(url: str) -> str | None:
     return None
 
 
+NOT_SUPPORTED = _msg("server.vods.not_supported",
+                     "not a supported site -- YouTube, Twitch, Kick, TikTok and Rumble links work")["message"]
+NO_YTDLP = _msg("server.vods.no_ytdlp", "yt-dlp is not installed (reinstall WardogClips)")["message"]
+
+
 def check_url(url: str) -> tuple[str, str]:
     """(clean url, provider) or VodError."""
     u = (url or "").strip()
@@ -72,10 +79,10 @@ def check_url(url: str) -> tuple[str, str]:
         if re.match(r"^(www\.|m\.)?[a-z0-9.-]+\.[a-z]{2,}/", u, re.I):
             u = "https://" + u
         else:
-            raise VodError("paste the full link of the VOD (https://...)")
+            raise VodError(_msg("server.vods.full_link", "paste the full link of the VOD (https://...)")["message"])
     prov = provider_of(u)
     if prov is None:
-        raise VodError("not a supported site -- YouTube, Twitch, Kick, TikTok and Rumble links work")
+        raise VodError(NOT_SUPPORTED)
     return u, prov
 
 
@@ -313,7 +320,7 @@ def _run_json(cmd: list[str], timeout: float, provider: str | None = None) -> di
         cp = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
                             timeout=timeout, env=child_env(), creationflags=_NO_WINDOW if os.name == "nt" else 0)
     except subprocess.TimeoutExpired:
-        raise VodError(f"the site did not answer within {timeout:.0f} s")
+        raise VodError(_msg("server.vods.site_timeout", "the site did not answer within {seconds} s", seconds=f"{timeout:.0f}")["message"])
     if cp.returncode != 0:
         raise VodError(_ytdlp_error(cp.stderr or cp.stdout, provider))
     try:
@@ -342,7 +349,7 @@ def inspect(cfg, url: str, timeout: float = 90.0) -> dict:
     height, fps, vcodec, size_bytes, url}. Live / upcoming / channel links raise VodError."""
     url, provider = check_url(url)
     if not available():
-        raise VodError("yt-dlp is not installed (reinstall WardogClips)")
+        raise VodError(NO_YTDLP)
     # --flat-playlist: a channel / playlist link answers at once with its listing (refused below) instead of
     # yt-dlp resolving every video in it (a whole channel took > 90 s)
     if provider in IMPERSONATE and not impersonation_available():
@@ -350,7 +357,7 @@ def inspect(cfg, url: str, timeout: float = 90.0) -> dict:
                        "venv\\Scripts\\python.exe -m pip install \"yt-dlp[default,curl-cffi]\"")
     info = _run_json(_base_cmd(provider) + format_args(cfg) + ["--flat-playlist", "-J", "--", url], timeout, provider)
     if info.get("_type") in ("playlist", "multi_video") or info.get("entries") is not None:
-        raise VodError("that is a channel / playlist link -- open one VOD and paste its link")
+        raise VodError(_msg("server.vods.channel_link", "that is a channel / playlist link -- open one VOD and paste its link")["message"])
     status = info.get("live_status")
     if info.get("is_live") or status in LIVE_STATES:
         raise VodError(f"that stream {LIVE_STATES.get(status, 'is live right now')} -- paste the VOD link once "
@@ -428,7 +435,8 @@ def ensure_mp4(path: Path) -> str:
     ff = paths.ffmpeg_exe() or "ffmpeg"
     cmd = [ff, "-v", "error", "-y", "-analyzeduration", "100M", "-probesize", "100M", "-i", str(path),
            "-map", "0:v:0", "-map", "0:a?", "-dn", "-c", "copy", "-bsf:a", "aac_adtstoasc", "-movflags", "+faststart", str(tmp)]
-    cp = subprocess.run(cmd, capture_output=True, text=True, timeout=3 * 3600, creationflags=_NO_WINDOW if os.name == "nt" else 0)
+    cp = subprocess.run(cmd, capture_output=True, text=True, timeout=3 * 3600,
+                        creationflags=workmode.child_flags(_NO_WINDOW if os.name == "nt" else 0))
     if cp.returncode != 0 or not tmp.exists() or tmp.stat().st_size < 1024:
         try:
             tmp.unlink()
@@ -465,8 +473,10 @@ def download(cfg, meta: dict, on_progress=None, stop=None, timeout: float = 12 *
         need = space_needed(float(meta["size_bytes"]), have) + reserved_bytes
         free = shutil.disk_usage(pdir).free
         if free < need:
-            raise VodError(f"not enough space in {pdir}: {free / 1e9:.0f} GB free, about {need / 1e9:.0f} GB needed "
-                           f"(the VOD is ~{meta['size_bytes'] / 1e9:.1f} GB; joining video + audio briefly needs it twice)")
+            raise VodError(_msg("server.vods.no_space", "not enough space in {dir}: {free} GB free, about {need} GB needed "
+                                "(the VOD is ~{size} GB; joining video + audio briefly needs it twice)",
+                                dir=str(pdir), free=f"{free / 1e9:.0f}", need=f"{need / 1e9:.0f}",
+                                size=f"{meta['size_bytes'] / 1e9:.1f}")["message"])
     cmd = _base_cmd(provider) + format_args(cfg) + [
         # --progress: yt-dlp prints no progress when its output is not a terminal (ours is a pipe); --print
         # implies --quiet, so the merge / fix-up phase reports through its own postprocess template
@@ -479,8 +489,10 @@ def download(cfg, meta: dict, on_progress=None, stop=None, timeout: float = 12 *
         "--print", "after_move:WCLIPSFILE %(filepath)s", "--", meta["url"]]
     logger.info("[VODs] download provider=%s id=%s -> %s", provider, meta.get("id"), final)
     env = child_env()          # UTF-8 (paths / errors with any character); the ytdlp pack rides in the cmd
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8",
-                            errors="replace", env=env, creationflags=_NO_WINDOW if os.name == "nt" else 0)
+    # the work mode's priority (core/workmode.py); yt-dlp's own ffmpeg children inherit it
+    proc = workmode.track(subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8",
+                                           errors="replace", env=env,
+                                           creationflags=workmode.child_flags(_NO_WINDOW if os.name == "nt" else 0)))
     # a reader thread: yt-dlp is silent for minutes while ffmpeg merges / fixes up a big VOD, and Stop and
     # the timeout must still be noticed then
     lines: _queue.Queue = _queue.Queue()
@@ -514,8 +526,9 @@ def download(cfg, meta: dict, on_progress=None, stop=None, timeout: float = 12 *
                 bits = line.split()
                 if len(bits) >= 3 and bits[2] == "started" and on_progress:
                     pp = bits[1]
-                    on_progress(0.98, "joining video + audio" if "Merger" in pp else
-                                "fixing up the stream file" if "Fixup" in pp else f"finishing ({pp})")
+                    on_progress(0.98, _msg("server.vods.joining", "joining video + audio")["message"] if "Merger" in pp else
+                                _msg("server.vods.fixing", "fixing up the stream file")["message"] if "Fixup" in pp
+                                else f"finishing ({pp})")
                 continue
             m = _PROG.match(line)
             if m:
@@ -553,9 +566,9 @@ def download(cfg, meta: dict, on_progress=None, stop=None, timeout: float = 12 *
                 pass
         raise VodError(_ytdlp_error("\n".join(tail), provider))
     if not got.exists():
-        raise VodError("yt-dlp finished without a file")
+        raise VodError(_msg("server.vods.no_file", "yt-dlp finished without a file")["message"])
     if on_progress:
-        on_progress(0.99, "checking the file")
+        on_progress(0.99, _msg("server.vods.checking", "checking the file")["message"])
     ensure_mp4(got)
     # the sidecar first, then the move: a library scan in between must already see the title / link
     side = {k: meta.get(k) for k in ("url", "provider", "id", "title", "channel", "channel_key", "channel_url",
@@ -587,7 +600,7 @@ def run_download(ctx, library) -> str:
         raise VodError("this download job has no link")
     cfg = ctx.cfg
     if not meta.get("provider") or not meta.get("id"):
-        ctx.progress(0.01, "asking the site about the link")
+        ctx.progress(0.01, _msg("server.vods.asking", "asking the site about the link")["message"])
         meta = inspect(cfg, meta["url"])
     sweep_tmp(cfg, ctx.db)
     have = existing(cfg, meta["provider"], meta["id"])

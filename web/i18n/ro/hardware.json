@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Decodează video, citește textul din HUD și transformă vorbirea în text.",
+  "can.integrated": "Grafică integrată: decodează video doar când nicio altă placă video nu e setată pe Folosește pentru WardogClips. Textul din HUD și vorbirea rulează pe altă placă sau pe procesor.",
+  "can.other": "Decodează video și citește textul din HUD. Vorbirea devine text pe procesor, pentru că asta necesită o placă NVIDIA.",
+  "none_found": "Nu s-a găsit nicio placă video. WardogClips face toată munca pe procesor.",
+  "role.use": "Folosește pentru WardogClips",
+  "role.leave": "Nu folosi",
+  "all_left_alone": "Toate plăcile sunt setate pe Nu folosi, deci WardogClips face toată munca pe procesor.",
+  "shared_hint": "Placa pe care rulează jocul e partajată: cât timp joci, munca WardogClips pe ea poate costa jocul câteva cadre. Setează placa pe Nu folosi dacă te deranjează.",
+  "apply_hint": "O schimbare se aplică de la următoarea sarcină. Când adaugi o placă, mai multe sarcini video rulează simultan după o repornire.",
+  "load_failed": "Lista plăcilor video nu a putut fi încărcată.",
+  "saved": "Salvat: {keys}",
+  "saved_none": "Salvat: nicio schimbare",
+  "error": "Eroare: {error}"
+}

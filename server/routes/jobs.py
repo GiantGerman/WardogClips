@@ -1,6 +1,9 @@
 """The stage queue: list, pause / resume, retry, skip, clear."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+
+from core.messages import http_error
+from utils.i18n import app_error
 
 
 def build(ctx) -> APIRouter:
@@ -24,20 +27,20 @@ def build(ctx) -> APIRouter:
     @r.post("/api/jobs/{job_id}/retry")
     def retry(job_id: int):
         if not ctx.jobs.retry(job_id):
-            raise HTTPException(409, "job is not in a retryable state")
+            raise app_error(409, "server.jobs.not_retryable", "This job cannot be tried again right now.")
         return {"ok": True}
 
     @r.post("/api/jobs/{job_id}/stop")
     def stop(job_id: int):
         """Stop a running job (a download, a proxy build); it ends as skipped."""
         if not ctx.jobs.stop_job(job_id):
-            raise HTTPException(409, "that job is not running")
+            raise app_error(409, "server.jobs.not_running", "That job is not running.")
         return {"ok": True}
 
     @r.post("/api/jobs/{job_id}/skip")
     def skip(job_id: int):
         if not ctx.jobs.skip(job_id):
-            raise HTTPException(409, "only queued jobs can be skipped")
+            raise app_error(409, "server.jobs.skip_queued_only", "Only waiting jobs can be skipped.")
         return {"ok": True}
 
     @r.post("/api/jobs/retry-failed")
@@ -57,7 +60,19 @@ def build(ctx) -> APIRouter:
     def reorder(body: dict):
         ids = body.get("ids") or []
         if not isinstance(ids, list) or not all(isinstance(i, int) for i in ids):
-            raise HTTPException(400, "ids: a list of job ids, first runs first")
+            raise app_error(400, "server.bad_request", "The request was not understood.")
         return {"ok": True, "moved": ctx.jobs.reorder(ids)}
+
+    @r.post("/api/jobs/move")
+    def move(body: dict):
+        """{ids?, rec_ids?, stages?, to: top | bottom | up | down | {before: id} | {after: id}, queue_missing?}:
+        move queued jobs as one block. "top" keeps the moved recordings' later follow-ups on top too;
+        queue_missing queues the missing stages of a listed recording that has nothing queued."""
+        try:
+            out = ctx.jobs.move(ids=body.get("ids"), rec_ids=body.get("rec_ids"), stages=body.get("stages"),
+                                to=body.get("to", "top"), queue_missing=bool(body.get("queue_missing")))
+        except (TypeError, ValueError) as e:
+            raise http_error(400, e)
+        return {"ok": True, **out}
 
     return r

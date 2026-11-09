@@ -1,0 +1,12 @@
+{
+  "pick_first": "Kies eerst een event of speel een opname af.",
+  "already": "Deze clip wordt al gemaakt.",
+  "making_exact": "De clip wordt frame-exact gemaakt. Dat duurt iets langer, omdat het beeld opnieuw wordt gecodeerd.",
+  "making_copy": "De clip wordt gemaakt. Hij begint op het dichtstbijzijnde keyframe vóór je in-punt.",
+  "open_folder": "Map openen",
+  "saved": "Clip opgeslagen: {name}",
+  "saved_early": "Clip opgeslagen: {name}\nHij begint {seconds} vóór je in-punt (dichtstbijzijnde keyframe).",
+  "check_mismatch": "De clip komt niet helemaal overeen met de opname. Controleer hem voordat je hem gebruikt.",
+  "failed": "De clip kon niet worden gemaakt: {error}",
+  "unknown_error": "onbekende fout"
+}

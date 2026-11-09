@@ -1,0 +1,19 @@
+{
+  "tray.open": "Avaa WardogClips",
+  "tray.update": "Päivitys saatavilla...",
+  "tray.pause": "Tauko pelatessani",
+  "tray.speed": "Nopeus",
+  "tray.mode_full": "Täysi teho",
+  "tray.mode_balanced": "Tasapainoinen",
+  "tray.mode_background": "Tausta",
+  "tray.open_data": "Avaa datakansio",
+  "tray.open_log": "Avaa loki",
+  "tray.quit": "Lopeta",
+  "tray.balloon": "WardogClips on käynnissä. Lopeta napsauttamalla ilmaisinalueen kuvaketta hiiren oikealla.",
+  "tray.update_notify": "WardogClips {version} on saatavilla. Katso se valitsemalla ilmaisinalueen valikosta Päivitys saatavilla...",
+  "launcher.could_not_start": "WardogClips ei käynnistynyt:\n\n{error}",
+  "launcher.scan_running": "WardogClipsin skannaus (scan.bat / --scan) käyttää tätä datakansiota:\n\n{dir}\n\nOdota, että se valmistuu (tai pysäytä se sen ikkunassa), ja käynnistä WardogClips sitten uudelleen.",
+  "launcher.not_answering": "WardogClips on jo käynnissä, mutta ei vastaa.\n\nLopeta se ilmaisinalueen kuvakkeesta (tai odota minuutti) ja yritä uudelleen.\n\nLoki: {log}",
+  "launcher.damaged": "WardogClips on vioittunut (ajoympäristö tai sovelluksen tiedostot puuttuvat).\n\nAsenna se uudelleen.\n\nEtsittiin:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips pysähtyi heti käynnistyttyään (paluukoodi {code}).\n\nLoki voi kertoa syyn:\n{log}"
+}

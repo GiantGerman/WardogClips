@@ -18,6 +18,7 @@ from datetime import datetime
 from pathlib import Path
 
 from core import settings as settings_mod
+from core.messages import annotate, annotate_all
 
 logger = logging.getLogger("wclips.library")
 
@@ -81,6 +82,16 @@ def _drive(path: str) -> str:
     return d.upper() if d else (path.split(os.sep)[0] if path.startswith("\\\\") else "")
 
 
+def _excluded_dirs(cfg) -> list[str]:
+    from media import makeclip           # lazy: media imports this module
+    return makeclip.excluded_dirs(cfg)
+
+
+def _is_under(path, dirs: list[str]) -> bool:
+    from media import makeclip
+    return makeclip.is_under(path, dirs)
+
+
 def rec_to_dict(row: dict) -> dict:
     out = dict(row)
     for k in ("audio_tracks", "stages"):
@@ -89,6 +100,10 @@ def rec_to_dict(row: dict) -> dict:
         except json.JSONDecodeError:
             out[k] = [] if k == "audio_tracks" else {}
     out["missing"] = bool(out.get("missing"))
+    if isinstance(out.get("stages"), dict):
+        for st in out["stages"].values():
+            annotate(st, "note", "error")          # translatable stage notes for the page (<field>_i18n)
+    annotate(out, "error")
     return out
 
 
@@ -116,6 +131,7 @@ class Library:
         summary = {"started_utc": t0, "roots": [], "found": 0, "new": 0, "moved": 0, "duplicates": 0,
                    "missing": 0, "returned": 0, "growing": 0, "queued": 0}
         seen_keys: set[str] = set()
+        skip = _excluded_dirs(self.cfg)
         for root in lib.roots:
             rp = Path(root)
             entry = {"root": root, "ok": rp.is_dir(), "files": 0}
@@ -123,7 +139,10 @@ class Library:
             if not entry["ok"]:
                 logger.warning("[Library] root not reachable root=%s", root)
                 continue
-            for path in self._walk(rp, pats, lib.recursive):
+            if skip and _is_under(rp, skip):
+                logger.warning("[Library] root is inside the clip folder, skipped root=%s", root)
+                continue
+            for path in self._walk(rp, pats, lib.recursive, skip):
                 try:
                     st = path.stat()
                 except OSError:
@@ -164,10 +183,13 @@ class Library:
         return summary
 
     @staticmethod
-    def _walk(root: Path, pats: list[str], recursive: bool):
+    def _walk(root: Path, pats: list[str], recursive: bool, skip: list[str] | None = None):
+        """Footage files under root. `skip` = normalized folders never walked (the clip pool: clips made from
+        recordings are not recordings)."""
         if recursive:
             for dirpath, dirnames, filenames in os.walk(root):
-                dirnames[:] = [d for d in dirnames if not d.startswith((".", "_"))]
+                dirnames[:] = [d for d in dirnames if not d.startswith((".", "_"))
+                               and not (skip and _is_under(os.path.join(dirpath, d), skip))]
                 for fn in filenames:
                     if any(fnmatch.fnmatch(fn.lower(), p) for p in pats):
                         yield Path(dirpath) / fn
@@ -270,7 +292,8 @@ class Library:
             return None
         out = rec_to_dict(row)
         out["tracks"] = self.db.query("SELECT * FROM tracks WHERE rec_id=? ORDER BY idx", (rec_id,))
-        out["jobs"] = self.db.query("SELECT * FROM jobs WHERE rec_id=? ORDER BY id DESC LIMIT 20", (rec_id,))
+        out["jobs"] = annotate_all(self.db.query("SELECT * FROM jobs WHERE rec_id=? ORDER BY id DESC LIMIT 20",
+                                                 (rec_id,)), "message", "error")
         out["event_counts"] = {r["kind"]: r["n"] for r in self.db.query(
             "SELECT kind, COUNT(*) n FROM events WHERE rec_id=? AND status!='false' GROUP BY kind", (rec_id,))}
         from core import transcripts

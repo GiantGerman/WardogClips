@@ -1,0 +1,12 @@
+{
+  "pick_first": "Najprv vyberte udalosť alebo prehrajte nahrávku.",
+  "already": "Tento klip sa už vytvára.",
+  "making_exact": "Vytváram klip s presnosťou na snímku. Trvá to o niečo dlhšie, lebo obraz sa prekóduje.",
+  "making_copy": "Vytváram klip. Začne na najbližšej kľúčovej snímke pred vaším začiatkom.",
+  "open_folder": "Otvoriť priečinok",
+  "saved": "Klip uložený: {name}",
+  "saved_early": "Klip uložený: {name}\nZačína {seconds} pred vaším začiatkom (najbližšia kľúčová snímka).",
+  "check_mismatch": "Klip úplne nezodpovedá nahrávke. Pred použitím ho skontrolujte.",
+  "failed": "Klip sa nepodarilo vytvoriť: {error}",
+  "unknown_error": "neznáma chyba"
+}

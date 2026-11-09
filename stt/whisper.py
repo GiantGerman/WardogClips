@@ -20,8 +20,38 @@ from pathlib import Path
 
 logger = logging.getLogger("wclips.stt")
 
-JUNK_TEXTS = {"thank you.", "thanks for watching.", "thanks for watching!", "bye.", "you", "thank you", "."}
+# Short lines whisper writes on silence, per speech language (compared without punctuation / case; dropped when the
+# line lasts < 2 s -- a real "thank you" is usually part of a longer line).
+JUNK_TEXTS: dict[str, set[str]] = {
+    "en": {"thank you.", "thanks for watching.", "thanks for watching!", "bye.", "you", "thank you", ".",
+           "thank you for watching.", "please subscribe.", "see you next time."},
+    "es": {"gracias.", "gracias por ver.", "gracias por ver el video.", "¡gracias por ver el video!",
+           "suscríbete.", "chau.", "adiós."},
+    "pt": {"obrigado.", "obrigada.", "obrigado por assistir.", "obrigada por assistir.", "tchau."},
+    "fr": {"merci.", "merci d'avoir regardé.", "merci d'avoir regardé cette vidéo.", "au revoir."},
+    "de": {"danke.", "vielen dank.", "danke fürs zuschauen.", "vielen dank fürs zuschauen.", "tschüss."},
+    "it": {"grazie.", "grazie per la visione.", "grazie a tutti.", "ciao."},
+    "nl": {"dank je.", "bedankt.", "bedankt voor het kijken.", "dank je wel."},
+    "pl": {"dziękuję.", "dzięki.", "dziękuję za uwagę.", "dzięki za oglądanie."},
+}
+# Subtitle credits whisper learned from fan-subtitled videos and writes on silence or music: never real speech,
+# dropped at any length (matched inside the lower-cased line).
+JUNK_MARKERS: tuple[str, ...] = (
+    "amara.org",                                   # every language's "subtitles by the Amara.org community"
+    "subtitles by the", "subtitled by",
+    "subtítulos realizados por", "subtítulos por la comunidad", "subtitulado por",
+    "legendas pela comunidade", "legendado por",
+    "sous-titres réalisés par", "sous-titrage société radio-canada", "sous-titrage st'",
+    "untertitel der", "untertitel im auftrag des zdf", "untertitelung des zdf", "untertitelung im auftrag",
+    "sottotitoli creati dalla comunità", "sottotitoli a cura di",
+    "ondertiteld door", "ondertiteling door",
+    "napisy stworzone przez społeczność", "napisy wykonane przez",
+)
 
+
+# language detection runs the voice detector over this much of a track at a time and stops once it has enough
+# speech (a long track with talk early on is not scanned to the end)
+DETECT_VAD_BLOCK_S = 600.0
 
 CUDA_SUBDIRS = ("cublas", "cudnn", "cuda_nvrtc", "cuda_runtime")
 _wired: list[str] = []          # dirs wire_cuda_dlls() added (cuda_ready() looks only there)
@@ -133,10 +163,28 @@ _WORD = re.compile(r"[a-z0-9']+")
 _STUTTER = re.compile(r"^(\w{1,4}?)\1{7,}\w{0,4}$")      # "hehehehehehe...": one syllable on repeat
 
 
+_PUNCT = re.compile(r"[^\w]+", re.UNICODE)
+
+
+def _plain(text: str) -> str:
+    return _PUNCT.sub(" ", text.lower()).strip()
+
+
+_JUNK_PLAIN = {lang: {_plain(t) for t in lines} for lang, lines in JUNK_TEXTS.items()}
+
+
+def junk_lines(lang: str | None) -> set[str]:
+    """The short silence lines for a language (+ English, which whisper falls back to); every language's when the
+    line's language is unknown. Punctuation-free, lower case."""
+    if not lang:
+        return set().union(*_JUNK_PLAIN.values())
+    return _JUNK_PLAIN.get(lang, set()) | _JUNK_PLAIN["en"]
+
+
 def is_junk(seg: dict, hotwords: str | list[str] | None = None) -> bool:
-    """Segments the model itself scored as nothing, the classic silence hallucinations, and
-    echoes of the decoder's hotwords: on a track with no speech whisper writes the prompt back
-    ("PlayerOne, SquadMate" -- the player + squad names -- on every 30 s window of a silent mic)."""
+    """Segments the model itself scored as nothing, the classic silence hallucinations (per speech language: the
+    line's `lang`), subtitle credits, and echoes of the decoder's hotwords: on a track with no speech whisper writes
+    the prompt back ("PlayerOne, SquadMate" -- the player + squad names -- on every 30 s window of a silent mic)."""
     text = (seg.get("text") or "").strip().lower()
     if not text:
         return True
@@ -144,7 +192,9 @@ def is_junk(seg: dict, hotwords: str | list[str] | None = None) -> bool:
         return True
     if seg.get("compression_ratio", 0) > 2.6:
         return True
-    if text in JUNK_TEXTS and (seg["t1"] - seg["t0"]) < 2.0:
+    if any(m in text for m in JUNK_MARKERS):
+        return True
+    if (seg["t1"] - seg["t0"]) < 2.0 and _plain(text) in junk_lines(seg.get("lang")) | {""}:
         return True
     words = _WORD.findall(text)
     if hotwords and words and seg.get("no_speech_prob", 0) >= 0.5:
@@ -186,7 +236,7 @@ class Engine:
     def __init__(self):
         self._lock = threading.RLock()
         self._model = None
-        self._key: tuple[str, str] | None = None
+        self._key: tuple | None = None      # (model, compute, device, device index)
         self.device = ""
         self.loaded_utc: float | None = None
         self.last_error: str | None = None
@@ -194,7 +244,14 @@ class Engine:
 
     # -- lifecycle ----------------------------------------------------------------
     def load(self, name: str, compute: str = "float16"):
-        key = (name, compute)
+        # the card: the first NVIDIA card Settings > Hardware lets us use (CUDA number); none -> the CPU (int8).
+        # CTranslate2 runs on CUDA only, so an AMD / Intel card never transcribes.
+        try:
+            from utils import gpus
+            want, index = gpus.whisper_device()
+        except Exception:  # noqa: BLE001 - the card list is a hint; CUDA 0 as before
+            want, index = "cuda", 0
+        key = (name, compute, want, index)
         with self._lock:
             if self.reload_pending:
                 self.reload_pending = False
@@ -210,15 +267,23 @@ class Engine:
             # a cached model loads without touching huggingface.co (works offline); an uncached
             # one downloads on first use
             local_only = is_cached(name)
-            try:
-                model = WhisperModel(name, device="cuda", compute_type=compute, local_files_only=local_only)
-                dev = f"cuda/{compute}"
-                list(model.transcribe(np.zeros(16000, np.float32), beam_size=1, vad_filter=False,
-                                      without_timestamps=True, language="en")[0])
-            except Exception as e:  # noqa: BLE001 - any CUDA trouble means CPU fallback
-                self.last_error = f"cuda: {type(e).__name__}: {str(e)[:160]}"
-                logger.warning("[STT] CUDA load failed (%s) -- CPU int8 fallback", self.last_error)
-                model = WhisperModel(name, device="cpu", compute_type="int8", local_files_only=local_only)
+            if want == "cuda":
+                try:
+                    model = WhisperModel(name, device="cuda", device_index=index, compute_type=compute,
+                                         local_files_only=local_only)
+                    dev = f"cuda/{compute}" + (f"/gpu{index}" if index else "")
+                    list(model.transcribe(np.zeros(16000, np.float32), beam_size=1, vad_filter=False,
+                                          without_timestamps=True, language="en")[0])
+                except Exception as e:  # noqa: BLE001 - any CUDA trouble means CPU fallback
+                    model = None
+                    self.last_error = f"cuda: {type(e).__name__}: {str(e)[:160]}"
+                    logger.warning("[STT] CUDA load failed (%s) -- CPU int8 fallback", self.last_error)
+            else:
+                logger.info("[STT] no NVIDIA graphics card in use -- speech runs on the CPU (int8)")
+            if model is None:
+                from core import workmode
+                model = WhisperModel(name, device="cpu", compute_type="int8", local_files_only=local_only,
+                                     cpu_threads=workmode.whisper_cpu_threads())     # fewer while you play (0 = default)
                 dev = "cpu/int8"
             self._model, self._key, self.device = model, key, dev
             self.loaded_utc = time.time()
@@ -241,16 +306,18 @@ class Engine:
 
     # -- work ---------------------------------------------------------------------
     def transcribe(self, wav_path, *, model: str, compute: str = "float16", hotwords: str = "",
-                   word_timestamps: bool = True, vad: bool = True, language: str = "en", offset_s: float = 0.0,
-                   batched: bool = False, batch_size: int = 8):
+                   word_timestamps: bool = True, vad: bool = True, language: str | None = "en", offset_s: float = 0.0,
+                   batched: bool = False, batch_size: int = 8, task: str = "transcribe", multilingual: bool = False):
         """Yields one dict per segment: t0, t1, text, words [{w, t0, t1, p}], avg_logprob,
         no_speech_prob, compression_ratio. `offset_s` (a resumed transcribe) starts that far into the wav; the
         times stay those of the whole file. `batched` = faster-whisper's BatchedInferencePipeline (speech chunks
-        of <= 30 s decoded `batch_size` at a time; see _batched)."""
+        of <= 30 s decoded `batch_size` at a time; see _batched). `language` None = whisper detects it;
+        `task` "translate" writes English; `multilingual` = the language is detected again for every 30 s window
+        (mixed-language talk) and each line carries the `lang` detected on its own audio."""
         if batched:
             yield from self._batched(wav_path, model=model, compute=compute, hotwords=hotwords,
                                      word_timestamps=word_timestamps, vad=vad, language=language,
-                                     offset_s=offset_s, batch_size=batch_size)
+                                     offset_s=offset_s, batch_size=batch_size, task=task, multilingual=multilingual)
             return
         m = self.load(model, compute)
         # Decode the wav ourselves (wave + numpy): faster-whisper's decoder goes through PyAV and
@@ -268,12 +335,77 @@ class Engine:
                   temperature=[0.0, 0.2, 0.4], log_prob_threshold=-1.0, no_speech_threshold=0.6)
         if hotwords:
             kw["hotwords"] = hotwords
+        if task and task != "transcribe":
+            kw["task"] = task
+        if multilingual:
+            kw["multilingual"] = True
         with self._lock:
             segments, _info = m.transcribe(audio, **kw)
+            # no language given: whisper picked one for the file -- the lines carry it
+            picked = None if language else getattr(_info, "language", None)
             for s in segments:
-                yield _seg_dict(s, off, word_timestamps)
+                d = _seg_dict(s, off, word_timestamps)
+                if multilingual:
+                    d["lang"] = self._segment_lang(m, audio, float(s.start), float(s.end))
+                elif picked and task == "transcribe":
+                    d["lang"] = picked
+                yield d
 
-    def _batched(self, wav_path, *, model, compute, hotwords, word_timestamps, vad, language, offset_s, batch_size):
+    def _segment_lang(self, m, audio, t0: float, t1: float) -> str | None:
+        """The language of one line, detected on its own audio (one encoder pass); None for a line too short to tell."""
+        from media.audio import SAMPLE_RATE
+        a, b = int(max(0.0, t0) * SAMPLE_RATE), int(max(0.0, t1) * SAMPLE_RATE)
+        if b - a < SAMPLE_RATE:                    # under a second: a guess, not a detection
+            return None
+        try:
+            probs = _window_probs(m, audio[a:b], 1)
+        except Exception as e:  # noqa: BLE001 - a tag is optional
+            logger.debug("[STT] line language detection failed err=%s", e)
+            return None
+        return max(probs, key=probs.get) if probs else None
+
+    def detect_language(self, wav_path, *, model: str, compute: str = "float16", allowed: list[str] | None = None,
+                        windows: int = 3, offset_s: float = 0.0) -> dict | None:
+        """The language spoken on a track: Silero VAD keeps the speech, then whisper's language token is read on up
+        to `windows` 30 s windows of that speech and the probabilities averaged. `allowed` = only these languages
+        count (the user's short list); the probability is then the share among them. None when the track has
+        less than a second of speech. Returns {"lang", "prob", "top": [[code, p], ...]}."""
+        m = self.load(model, compute)
+        import numpy as np
+        from media.audio import SAMPLE_RATE, read_wav
+        audio = read_wav(wav_path)
+        off = max(0.0, float(offset_s or 0.0))
+        if off:
+            audio = audio[int(off * SAMPLE_RATE):]
+        if not getattr(getattr(m, "model", None), "is_multilingual", True):
+            return {"lang": "en", "prob": 1.0, "top": [["en", 1.0]]}       # an English-only model knows one language
+        from faster_whisper.vad import VadOptions, collect_chunks, get_speech_timestamps
+        windows = max(1, int(windows))
+        need = windows * 30 * SAMPLE_RATE           # speech samples the detection reads
+        block = int(DETECT_VAD_BLOCK_S * SAMPLE_RATE)   # VAD a block at a time: stop once there is enough speech
+        opts = VadOptions(min_silence_duration_ms=500, speech_pad_ms=200)
+        with self._lock:
+            got, n = [], 0
+            for a in range(0, len(audio), block):
+                part = audio[a:a + block]
+                chunks = get_speech_timestamps(part, opts)
+                if not chunks:
+                    continue
+                pieces = collect_chunks(part, chunks)
+                if isinstance(pieces, tuple):      # 1.1+: (chunks, metadata)
+                    pieces = pieces[0]
+                pieces = list(pieces) if isinstance(pieces, list) else [pieces]
+                got += pieces
+                n += sum(int(p.size) for p in pieces)
+                if n >= need:
+                    break
+            if n < SAMPLE_RATE:
+                return None
+            probs = _window_probs(m, np.concatenate(got), windows)
+        return pick_language(probs, allowed)
+
+    def _batched(self, wav_path, *, model, compute, hotwords, word_timestamps, vad, language, offset_s, batch_size,
+                 task="transcribe", multilingual=False):
         """BatchedInferencePipeline (faster-whisper 1.2.1). What it does differently from the sequential path:
         - the audio is cut into speech chunks first (Silero VAD, merged up to 30 s) and those are decoded
           `batch_size` at a time; with vad off there are no chunks, so we hand it fixed 30 s windows
@@ -304,13 +436,56 @@ class Engine:
                                      for a in _windows(dur, 30.0)]
         if hotwords:
             kw["hotwords"] = hotwords
+        if task and task != "transcribe":
+            kw["task"] = task
+        if multilingual:
+            kw["multilingual"] = True
         with self._lock:
             pipe = BatchedInferencePipeline(model=m)
             segments, _info = pipe.transcribe(audio, **kw)
+            picked = None if language else getattr(_info, "language", None)
             for s in segments:
                 if float(s.no_speech_prob) > 0.6 and float(s.avg_logprob) < -1.0:
                     continue                    # the sequential decoder skips such a window as silence
-                yield _seg_dict(s, off, word_timestamps)
+                d = _seg_dict(s, off, word_timestamps)
+                if multilingual:
+                    d["lang"] = self._segment_lang(m, audio, float(s.start), float(s.end))
+                elif picked and task == "transcribe":
+                    d["lang"] = picked
+                yield d
+
+
+def _window_probs(m, audio, windows: int) -> dict[str, float]:
+    """Mean language probabilities over up to `windows` 30 s windows of `audio` (faster-whisper's own
+    detect_language stops at the first confident window and returns only that window's list)."""
+    from faster_whisper.audio import pad_or_trim
+    fe = m.feature_extractor
+    feats = fe(audio[: windows * fe.n_samples])
+    totals: dict[str, float] = {}
+    n = 0
+    for i in range(0, feats.shape[-1], fe.nb_max_frames):
+        enc = m.encode(pad_or_trim(feats[..., i:i + fe.nb_max_frames]))
+        for tok, p in m.model.detect_language(enc)[0]:
+            code = tok[2:-2]
+            totals[code] = totals.get(code, 0.0) + float(p)
+        n += 1
+        if n >= windows:
+            break
+    return {c: p / n for c, p in totals.items()} if n else {}
+
+
+def pick_language(probs: dict[str, float], allowed: list[str] | None = None) -> dict | None:
+    """The most likely language of `probs`, among `allowed` when given (its probability = its share of the allowed
+    languages' total). None when nothing is left."""
+    if allowed:
+        probs = {c: p for c, p in probs.items() if c in allowed}
+        tot = sum(probs.values())
+        if tot > 0:
+            probs = {c: p / tot for c, p in probs.items()}
+    if not probs:
+        return None
+    top = sorted(probs.items(), key=lambda cp: -cp[1])[:5]
+    return {"lang": top[0][0], "prob": round(top[0][1], 3), "top": [[c, round(p, 3)] for c, p in top]}
 
 
 def _windows(dur: float, step: float) -> list[float]:

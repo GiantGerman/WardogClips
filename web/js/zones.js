@@ -1,4 +1,4 @@
-/* Zones editor: per-streamer detection zones (reward ticker, kill feed, money band, respawn centre)
+/* Zones editor: per-streamer detection zones (reward ticker, kill feed, money band, respawn center)
    drawn as boxes over a sample frame of that streamer's footage. A full-page view in #main like the
    Calibration view. The boxes live in NORMALIZED frame coordinates (0..1, what core/zones.py stores):
    the overlay is positioned in % of a frame element sized to the fitted image, so it stays right when
@@ -6,16 +6,20 @@
    Drag / resize math reads the image's rendered box (getBoundingClientRect) at pointerdown.
    The other main-area elements are hidden with a class on #main (zones.css), not their `hidden` flag:
    the player / mixer keep toggling theirs while this view is open, so on close they are simply right.
-   Backend: server/routes/zones.py. */
+   Backend: server/routes/zones.py.
+   Text: the "zones" catalog, read at render time (zone names via zl(k)); a language switch re-translates the
+   view's static parts (data-i18n* in build()) and redraws the rest. */
 "use strict";
 
 window.ZN = (() => {
+  // the zones; their names / tips are zones.zone.<k> / zones.zone.<k>_tip
   const ZONES = {
-    ticker: { color: "#ff5a52", label: "ticker", tip: "reward ticker (KILL +$1,500, ASSIST ...): the lines under the money readout" },
-    money: { color: "#ffd54a", label: "money", tip: "the money readout band at the top of the ticker; its bottom edge splits the readout from the ticker lines", opt: true },
-    feed: { color: "#4ca7ef", label: "kill feed", tip: "the kill feed (rows with the [60 m] distance tag)" },
-    center: { color: "#49c463", label: "center", tip: "where RESPAWNING shows (the death check reads this box)", opt: true },
+    ticker: { color: "#ff5a52" },
+    money: { color: "#ffd54a", opt: true },
+    feed: { color: "#4ca7ef" },
+    center: { color: "#49c463", opt: true },
   };
+  const zl = (k) => t("zones.zone." + k);
   const PAINT = ["center", "feed", "ticker", "money"];      // money is drawn inside (on top of) the ticker
   const HANDLES = ["nw", "n", "ne", "e", "se", "s", "sw", "w"];
   const MIN_PX = 12, MIN_MONEY_H = 6;                      // smallest box, in sample pixels
@@ -73,8 +77,21 @@ window.ZN = (() => {
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
   }
   function fromLocalInput(v) { if (!v) return 0; const t = new Date(v).getTime(); return isNaN(t) ? 0 : Math.floor(t / 1000); }
-  function effLabel(utc) { return utc ? "from " + fmtDate(utc).slice(0, 10) : "from the start"; }
-  function streamerName(s) { return s ? (s.channel_name || (s.channel_key === "*" ? `all ${s.provider}` : s.channel_key)) : ""; }
+  // how a recording's version was chosen (for-recording "source": pinned / streamer / provider / default), in words
+  const SOURCES = ["pinned", "streamer", "provider", "default"];
+  const srcName = (s) => SOURCES.includes(s) ? t("zones.source." + s) : String(s || "");
+  function effLabel(utc) { return utc ? t("zones.eff.from", { date: fmtDateTime(utc, "date") }) : t("zones.eff.start"); }
+  // the server names its catch-all rows in English (core/zones OBS_NAME, "All <provider> VODs"): shown translated
+  function streamerName(s) {
+    if (!s) return "";
+    const nm = s.channel_name || "";
+    if (s.channel_key === "*") {
+      if (s.provider === "OBS" && (!nm || nm === "My OBS recordings")) return t("zones.streamer.my_obs");
+      if (!nm) return t("zones.streamer.all", { provider: s.provider });
+      if (nm === `All ${s.provider} VODs`) return t("zones.streamer.all_vods", { provider: s.provider });
+    }
+    return nm || s.channel_key;
+  }
 
   // built-in Season 2 proportions (vision/hud.py) -- only used when /api/zones/default does not answer
   function localDefaults(W, H) {
@@ -101,15 +118,15 @@ window.ZN = (() => {
   function checkZones(p) {
     for (const k of ["ticker", "feed", "money", "center"]) {
       const b = p[k];
-      if (!b) { if (k === "ticker" || k === "feed") return `the ${ZONES[k].label} box is required`; continue; }
-      if (!isBox(b)) return `${ZONES[k].label}: not a box`;
-      if (!(b[2] > MIN_SIDE && b[3] > MIN_SIDE)) return `${ZONES[k].label}: too small`;
-      if (b[0] < -EPS || b[1] < -EPS || b[0] + b[2] > 1 + EPS || b[1] + b[3] > 1 + EPS) return `${ZONES[k].label}: outside the frame`;
+      if (!b) { if (k === "ticker" || k === "feed") return t("zones.check.required", { zone: zl(k) }); continue; }
+      if (!isBox(b)) return t("zones.check.not_box", { zone: zl(k) });
+      if (!(b[2] > MIN_SIDE && b[3] > MIN_SIDE)) return t("zones.check.too_small", { zone: zl(k) });
+      if (b[0] < -EPS || b[1] < -EPS || b[0] + b[2] > 1 + EPS || b[1] + b[3] > 1 + EPS) return t("zones.check.outside", { zone: zl(k) });
     }
-    const m = p.money, t = p.ticker;
-    if (m && (m[0] < t[0] - EPS || m[1] < t[1] - EPS || m[0] + m[2] > t[0] + t[2] + EPS || m[1] + m[3] > t[1] + t[3] + EPS))
-      return "money: must lie inside the ticker box";
-    if (p.feed_row_h != null && !(p.feed_row_h > 0 && p.feed_row_h <= p.feed[3] + EPS)) return "feed row: must be > 0 and no taller than the feed box";
+    const m = p.money, tk = p.ticker;
+    if (m && (m[0] < tk[0] - EPS || m[1] < tk[1] - EPS || m[0] + m[2] > tk[0] + tk[2] + EPS || m[1] + m[3] > tk[1] + tk[3] + EPS))
+      return t("zones.check.money_inside");
+    if (p.feed_row_h != null && !(p.feed_row_h > 0 && p.feed_row_h <= p.feed[3] + EPS)) return t("zones.check.feed_row");
     return null;
   }
   // keep feed_row_h between 4 px and the feed box's height (after a feed resize / nudge / number edit)
@@ -120,7 +137,8 @@ window.ZN = (() => {
   }
   // does a template belong to this streamer row (a site-wide '*' template or a pinned one of another row does not)
   const ownedBy = (t, row) => !!(t && row && String(t.provider || "").toLowerCase() === String(row.provider || "").toLowerCase() && sameKey(t.channel_key, row.channel_key));
-  const seedLabel = (t) => t.channel_key === "*" ? `the ${t.provider}-wide template` : `"${t.name || "#" + t.id}" of ${t.provider} ${t.channel_name || t.channel_key}`;
+  const seedLabel = (tp) => tp.channel_key === "*" ? t("zones.seed.provider_wide", { provider: tp.provider })
+    : t("zones.seed.other", { name: tp.name || "#" + tp.id, provider: tp.provider, channel: tp.channel_name || tp.channel_key });
   const snap = () => JSON.stringify({ z: payload(), m: S.meta });
   const isDirty = () => !!(S.open && S.z && snap() !== S.saved);
 
@@ -152,8 +170,8 @@ window.ZN = (() => {
   }
   async function guard() {
     if (!isDirty()) return true;
-    const v = await ask("Unsaved zone changes", `<div class="hint">The boxes of <b>${esc(S.meta.name || streamerName(S.cur))}</b> were changed and not saved.</div>`,
-      [["cancel", "Keep editing"], ["discard", "Discard"], ["save", "Save", "acc"]]);
+    const v = await ask(t("zones.guard.title"), `<div class="hint">${tHtml("zones.guard.body_html", { name: S.meta.name || streamerName(S.cur) })}</div>`,
+      [["cancel", t("zones.guard.keep")], ["discard", t("zones.guard.discard")], ["save", t("zones.btn.save"), "acc"]]);
     if (v === "save") { await save(); return !isDirty(); }
     return v === "discard";
   }
@@ -164,49 +182,51 @@ window.ZN = (() => {
     let v = view();
     if (!v) { v = document.createElement("section"); v.id = "zones-view"; v.hidden = true; $("main").appendChild(v); }
     v.classList.add("zn");
+    // static text carries data-i18n* keys (translate(v) below fills it, again on a switch); what scripts rewrite
+    // (title, pin, hints, lists, numbers) is drawn with t() in the render functions instead.
     // the zone toggles: a swatch + the zone's name; the optional zones carry a "default" switch beside them
-    const chip = (k) => `<button type="button" class="zn-chip" data-z="${k}" data-tip="${esc(ZONES[k].tip)}"><i style="background:${ZONES[k].color}"></i>${esc(ZONES[k].label)}</button>`;
-    const defSw = (k, tip) => `<label class="zn-def" data-tip="${esc(tip)}"><input type="checkbox" class="toggle" data-def="${k}">default</label>`;
+    const chip = (k) => `<button type="button" class="zn-chip" data-z="${k}" data-i18n="zones.zone.${k}" data-i18n-tip="zones.zone.${k}_tip"><i style="background:${ZONES[k].color}"></i>${esc(zl(k))}</button>`;
+    const defSw = (k, tipKey) => `<label class="zn-def" data-i18n-tip="zones.${tipKey}" data-i18n="zones.default"><input type="checkbox" class="toggle" data-def="${k}">default</label>`;
     v.innerHTML = `
       <aside class="zn-side">
-        <div class="phd"><h2>Detection zones</h2><span class="sp"></span>
-          <button type="button" class="ib sm" id="zn-more-lib" data-tip="Import / export templates">${ic("more")}</button>
+        <div class="phd"><h2 data-i18n="zones.title">Detection zones</h2><span class="sp"></span>
+          <button type="button" class="ib sm" id="zn-more-lib" data-i18n-tip="zones.lib_tip" data-i18n-aria-label="zones.lib_tip">${ic("more")}</button>
           <input type="file" id="zn-file" accept=".json,application/json" hidden></div>
-        <div class="zn-shead">Streamers<span class="cnt" id="zn-nstr"></span></div>
-        <div class="zn-list" id="zn-streamers"><div class="empty">loading...</div></div>
-        <div class="zn-shead">Versions<span class="sp"></span>
-          <button type="button" class="btn sm ghost" id="zn-new" data-tip="A new template for this streamer, starting from the built-in boxes">${ic("plus")}New</button></div>
+        <div class="zn-shead" data-i18n="zones.streamers">Streamers<span class="cnt" id="zn-nstr"></span></div>
+        <div class="zn-list" id="zn-streamers"><div class="empty">${te("zones.loading")}</div></div>
+        <div class="zn-shead" data-i18n="zones.versions">Versions<span class="sp"></span>
+          <button type="button" class="btn sm ghost" id="zn-new" data-i18n="zones.new" data-i18n-tip="zones.new_tip">${ic("plus")}New</button></div>
         <div class="zn-list zn-tpls" id="zn-tpls"></div>
-        <div class="zn-sfoot">Boxes are stored per streamer, dated: a recording uses the newest version that started before it.</div>
+        <div class="zn-sfoot" data-i18n="zones.side_foot">Boxes are stored per streamer, dated: a recording uses the newest version that started before it.</div>
       </aside>
       <div class="zn-ed">
         <div class="zn-head">
           <div class="zn-ttl">
-            <div class="zn-l1"><span class="prov" id="zn-prov" hidden></span><h2 id="zn-title">Detection zones</h2><span class="badge warn" id="zn-dirty" hidden>unsaved</span></div>
+            <div class="zn-l1"><span class="prov" id="zn-prov" hidden></span><h2 id="zn-title">${te("zones.title")}</h2><span class="badge warn" id="zn-dirty" data-i18n="zones.unsaved" hidden>unsaved</span></div>
             <div class="zn-src" id="zn-src"></div>
           </div>
           <span class="sp"></span>
           <div class="zn-acts">
             <button type="button" class="btn sm" id="zn-pin" hidden></button>
-            <button type="button" class="btn sm" id="zn-redet" data-tip="Queue detect again for every recording of this streamer (uses the SAVED zones)">${ic("refresh")}Re-detect</button>
-            <button type="button" class="btn sm" id="zn-ver" data-tip="Keep this version as it was saved and store these boxes as a NEW version from a date on (the stream layout changed)">Save as new version...</button>
-            <button type="button" class="btn sm pri" id="zn-save" data-tip="Save this version" data-k="Ctrl S">${ic("check")}Save</button>
-            <button type="button" class="ib" id="zn-more" data-tip="More: reset, delete, export">${ic("more")}</button>
-            <button type="button" class="ib" id="zn-close" data-tip="Back to the player" data-k="Esc">${ic("x")}</button>
+            <button type="button" class="btn sm" id="zn-redet" data-i18n="zones.redetect" data-i18n-tip="zones.redetect_tip">${ic("refresh")}Re-detect</button>
+            <button type="button" class="btn sm" id="zn-ver" data-i18n="zones.ver" data-i18n-tip="zones.ver_tip">Save as new version...</button>
+            <button type="button" class="btn sm pri" id="zn-save" data-i18n="zones.btn.save" data-i18n-tip="zones.save_tip" data-k="Ctrl S">${ic("check")}Save</button>
+            <button type="button" class="ib" id="zn-more" data-i18n-tip="zones.more_tip" data-i18n-aria-label="zones.more_tip">${ic("more")}</button>
+            <button type="button" class="ib" id="zn-close" data-i18n-tip="zones.close_tip" data-i18n-aria-label="zones.close_tip" data-k="Esc">${ic("x")}</button>
           </div>
         </div>
         <div class="zn-meta">
-          <label class="zn-f"><span>Name</span><input type="text" class="inp sm" id="zn-name" placeholder="template name" autocomplete="off"></label>
-          <label class="zn-f" data-tip="This version applies to recordings that START at / after this moment; empty = from the start (the earliest version also covers older recordings)"><span>Applies from</span><input type="datetime-local" class="inp sm" id="zn-eff" step="60"></label>
-          <label class="zn-f zn-grow"><span>Note</span><input type="text" class="inp sm" id="zn-note" placeholder="e.g. new overlay since the 1.4 patch" autocomplete="off"></label>
+          <label class="zn-f"><span data-i18n="zones.name">Name</span><input type="text" class="inp sm" id="zn-name" data-i18n-placeholder="zones.name_ph" autocomplete="off"></label>
+          <label class="zn-f" data-i18n-tip="zones.eff_tip"><span data-i18n="zones.eff">Applies from</span><input type="datetime-local" class="inp sm" id="zn-eff" step="60"></label>
+          <label class="zn-f zn-grow"><span data-i18n="zones.note">Note</span><input type="text" class="inp sm" id="zn-note" data-i18n-placeholder="zones.note_ph" autocomplete="off"></label>
         </div>
         <div class="zn-fbar">
-          <span class="zn-lab">Frame</span>
-          <select class="inp sm" id="zn-rec" data-tip="The recording the sample frame is grabbed from"></select>
-          <input type="text" id="zn-t" class="inp sm mono" size="8" data-tip="h:mm:ss, m:ss or seconds (Enter = grab)">
-          <input type="range" id="zn-tr" min="0" max="60" step="1" value="0" data-tip="Drag, release = grab that moment">
-          <button type="button" class="btn sm" id="zn-grab" data-tip="Grab the frame at that moment of that recording" data-k="Enter">Grab</button>
-          <button type="button" class="btn sm ghost" id="zn-tplframe" data-tip="Show the template's stored sample frame again" hidden>Sample</button>
+          <span class="zn-lab" data-i18n="zones.frame">Frame</span>
+          <select class="inp sm" id="zn-rec" data-i18n-tip="zones.rec_tip" data-i18n-aria-label="zones.rec_tip"></select>
+          <input type="text" id="zn-t" class="inp sm mono" size="8" data-i18n-tip="zones.t_tip" data-i18n-aria-label="zones.t_tip">
+          <input type="range" id="zn-tr" min="0" max="60" step="1" value="0" data-i18n-tip="zones.tr_tip" data-i18n-aria-label="zones.tr_tip">
+          <button type="button" class="btn sm" id="zn-grab" data-i18n="zones.grab" data-i18n-tip="zones.grab_tip" data-k="Enter">Grab</button>
+          <button type="button" class="btn sm ghost" id="zn-tplframe" data-i18n="zones.sample" data-i18n-tip="zones.sample_tip" hidden>Sample</button>
         </div>
         <div class="zn-canvas" id="zn-canvas">
           <div class="zn-frame" id="zn-frame">
@@ -219,21 +239,22 @@ window.ZN = (() => {
         <div class="zn-tools">
           <div class="zn-grp">
             ${chip("ticker")}${chip("feed")}
-            <span class="zn-pair">${chip("money")}${defSw("money", "Use the built-in band: the top 70/160 of the ticker")}</span>
-            <span class="zn-pair">${chip("center")}${defSw("center", "Use the built-in 1400x440 (at 1440p) centre box")}</span>
+            <span class="zn-pair">${chip("money")}${defSw("money", "money_def_tip")}</span>
+            <span class="zn-pair">${chip("center")}${defSw("center", "center_def_tip")}</span>
           </div>
           <span class="zn-sep"></span>
           <div class="zn-grp">
-            <label class="zn-f" data-tip="One kill-feed row's height (the dashed lines in the feed box)"><span>Feed row</span><input type="number" class="inp sm mono" id="zn-rowh" min="4" step="1"><span class="faint">px</span></label>
-            <label class="zn-def" data-tip="Built-in: feed height x 26/300"><input type="checkbox" class="toggle" id="zn-rowdef">default</label>
+            <label class="zn-f" data-i18n-tip="zones.rowh_tip"><span data-i18n="zones.rowh">Feed row</span><input type="number" class="inp sm mono" id="zn-rowh" min="4" step="1"><span class="faint" data-i18n="zones.px">px</span></label>
+            <label class="zn-def" data-i18n-tip="zones.rowdef_tip" data-i18n="zones.default"><input type="checkbox" class="toggle" id="zn-rowdef">default</label>
           </div>
           <span class="zn-sep"></span>
-          <span class="zn-num" id="zn-num" data-tip="The selected box in sample pixels (arrows nudge 1 px, shift 10 px)">
-            <b id="zn-numk">-</b><span>x</span><input type="number" class="inp sm num" data-n="0"><span>y</span><input type="number" class="inp sm num" data-n="1"><span>w</span><input type="number" class="inp sm num" data-n="2"><span>h</span><input type="number" class="inp sm num" data-n="3"></span>
+          <span class="zn-num" id="zn-num" data-i18n-tip="zones.num_tip">
+            <b id="zn-numk">-</b><span data-i18n="zones.num.x">x</span><input type="number" class="inp sm num" data-n="0"><span data-i18n="zones.num.y">y</span><input type="number" class="inp sm num" data-n="1"><span data-i18n="zones.num.w">w</span><input type="number" class="inp sm num" data-n="2"><span data-i18n="zones.num.h">h</span><input type="number" class="inp sm num" data-n="3"></span>
         </div>
         <div class="zn-foot"><span class="zn-hint" id="zn-hint"></span><span class="sp"></span>
-          <span class="faint t-xs zn-keys"><span class="kbd">&larr;</span><span class="kbd">&rarr;</span> nudge 1 px, <span class="kbd">Shift</span> 10 px &middot; <span class="kbd">Ctrl S</span> save &middot; <span class="kbd">Esc</span> close</span></div>
+          <span class="faint t-xs zn-keys" data-i18n-html="zones.keys_html"></span></div>
       </div>`;
+    translate(v);
     wire();
     S.built = true;
   }
@@ -267,7 +288,7 @@ window.ZN = (() => {
     $("zn-rowh").onchange = () => {
       const px = +$("zn-rowh").value; if (!S.z || !S.z.feed || !(px > 0)) { syncCtl(); return; }
       const h = res().h, maxPx = S.z.feed[3] * h;
-      if (px > maxPx + 0.5) toast(`a feed row is at most the feed box's height (${Math.floor(maxPx)} px)`);
+      if (px > maxPx + 0.5) toast(t("zones.toast.row_max", { px: fmtNum(Math.floor(maxPx)) }));
       S.z.feed_row_h = px / h; clampRow(); syncCtl(); layout(); updateDirty();
     };
     $("zn-num").querySelectorAll("input[data-n]").forEach(inp => inp.onchange = () => setFromNumbers());
@@ -289,23 +310,23 @@ window.ZN = (() => {
   // the "..." menus: the shell's popover menu (app.js openMenu), read at open time so the states are current
   function editorMenu() {
     return [
-      { ic: "reset", label: "Reset to default", sub: "the built-in Season 2 boxes for this frame size", act: () => resetDefault(), disabled: !S.z },
-      { ic: "download", label: "Export streamer", sub: "this streamer's templates, with their sample frames", act: () => exportTemplates(true), disabled: !S.templates.length },
+      { ic: "reset", label: t("zones.menu.reset"), sub: t("zones.menu.reset_sub"), act: () => resetDefault(), disabled: !S.z },
+      { ic: "download", label: t("zones.menu.export_streamer"), sub: t("zones.menu.export_streamer_sub"), act: () => exportTemplates(true), disabled: !S.templates.length },
       "-",
-      { ic: "trash", label: "Delete version", sub: S.tpl ? `"${S.tpl.name || "#" + S.tpl.id}"` : "nothing saved to delete", act: () => deleteVersion(), danger: true, disabled: !S.tpl },
+      { ic: "trash", label: t("zones.menu.delete"), sub: S.tpl ? t("zones.menu.delete_sub", { name: S.tpl.name || "#" + S.tpl.id }) : t("zones.menu.nothing_to_delete"), act: () => deleteVersion(), danger: true, disabled: !S.tpl },
     ];
   }
   function libraryMenu() {
     return [
-      { ic: "folder", label: "Import...", sub: "templates from a .json file exported here (or on another PC)", act: () => $("zn-file").click() },
-      { ic: "download", label: "Export all", sub: "every template of every streamer, with their sample frames", act: () => exportTemplates(false) },
-      { ic: "download", label: "Export this streamer", sub: "its templates, with their sample frames", act: () => exportTemplates(true), disabled: !S.templates.length },
+      { ic: "folder", label: t("zones.menu.import"), sub: t("zones.menu.import_sub"), act: () => $("zn-file").click() },
+      { ic: "download", label: t("zones.menu.export_all"), sub: t("zones.menu.export_all_sub"), act: () => exportTemplates(false) },
+      { ic: "download", label: t("zones.menu.export_this"), sub: t("zones.menu.export_this_sub"), act: () => exportTemplates(true), disabled: !S.templates.length },
     ];
   }
   function menu(anchor, items) {
-    if (S.busy) { toast("wait for the save to finish"); return; }
+    if (S.busy) { toast(t("zones.toast.wait_save")); return; }
     if (typeof openMenu === "function") openMenu(anchor, items);
-    else toast("the menu did not load (app.js)");
+    else toast(t("zones.toast.menu_missing"));
   }
 
   /* ---------------- open / close ---------------- */
@@ -331,7 +352,7 @@ window.ZN = (() => {
     await loadStreamers();
     if (tok !== S.token) return;
     if (S.originRec) {
-      try { S.forRec = await api(`/api/zones/for-recording/${S.originRec}`); } catch (err) { toast("zones of this recording: " + err.message, 4000); }
+      try { S.forRec = await api(`/api/zones/for-recording/${S.originRec}`); } catch (err) { toast(t("zones.toast.for_rec_failed", { error: err.message }), 4000); }
       if (tok !== S.token) return;
       const f = S.forRec;
       if (f && f.provider) {
@@ -408,7 +429,7 @@ window.ZN = (() => {
   /* ---------------- data ---------------- */
   async function loadStreamers() {
     let list = [];
-    try { list = asList(await api("/api/zones/streamers"), "streamers"); } catch (err) { toast("streamers: " + err.message, 4000); }
+    try { list = asList(await api("/api/zones/streamers"), "streamers"); } catch (err) { toast(t("zones.toast.streamers_failed", { error: err.message }), 4000); }
     list = list.filter(s => s && s.provider);
     list.sort((a, b) => (a.provider === "OBS" ? 0 : 1) - (b.provider === "OBS" ? 0 : 1));
     if (!list.some(s => s.provider === "OBS")) list.unshift({ provider: "OBS", channel_key: "*", channel_name: "My OBS recordings" });
@@ -421,12 +442,12 @@ window.ZN = (() => {
 
   async function loadTemplates(row) {
     try { return asList(await api(`/api/zones/templates?provider=${enc(row.provider)}&channel_key=${enc(row.channel_key)}`), "templates").filter(t => t && t.id != null); }
-    catch (err) { if (!/not found/i.test(err.message)) toast("templates: " + err.message, 4000); return []; }
+    catch (err) { if (err.status !== 404) toast(t("zones.toast.templates_failed", { error: err.message }), 4000); return []; }
   }
   async function ensureRecs() {
     if (S.recs) return;
     try { S.recs = asList(await api("/api/recordings?limit=5000"), "recordings").filter(r => !r.missing && r.status === "probed" && r.width && r.height); }
-    catch (err) { toast("recordings: " + err.message, 4000); S.recs = []; }
+    catch (err) { toast(t("zones.toast.recordings_failed", { error: err.message }), 4000); S.recs = []; }
   }
   function recsOf(row) {
     const all = S.recs || [];
@@ -455,7 +476,7 @@ window.ZN = (() => {
     const tok = ++S.token;
     S.cur = row; S.sel = null;
     renderStreamers();
-    $("zn-tpls").innerHTML = `<div class="empty">loading...</div>`;
+    $("zn-tpls").innerHTML = `<div class="empty">${te("zones.loading")}</div>`;
     const [list] = await Promise.all([loadTemplates(row), ensureRecs()]);
     if (tok !== S.token) return;
     S.templates = list;
@@ -464,8 +485,8 @@ window.ZN = (() => {
       const r = (S.recs || []).find(x => x.id === want.recId); if (r) S.streamRecs.unshift(r);
     }
     let tpl = null;
-    if (want.tplObj) tpl = S.templates.find(t => t.id === want.tplObj.id) || want.tplObj;
-    else if (want.tplId != null) tpl = S.templates.find(t => t.id === want.tplId) || null;
+    if (want.tplObj) tpl = S.templates.find(x => x.id === want.tplObj.id) || want.tplObj;
+    else if (want.tplId != null) tpl = S.templates.find(x => x.id === want.tplId) || null;
     else if (!want.useDefault) tpl = S.templates[0] || null;            // newest version
     await chooseTemplate(tpl, want, tok);
   }
@@ -495,7 +516,7 @@ window.ZN = (() => {
     clampRow();
     S.saved = tpl ? snap() : ((want.fresh || seed) ? "" : snap());     // "New" / a seeded copy is unsaved from the start
     renderAll();
-    if (seed) toast(`${streamerName(S.cur)} has no template of its own: starting from ${S.seed} - Save creates one for this streamer`, 6000);
+    if (seed) toast(t("zones.toast.seeded", { streamer: streamerName(S.cur), seed: S.seed }), 6000);
   }
 
   function suggestT(rec) {
@@ -518,12 +539,13 @@ window.ZN = (() => {
       if (id && !list.some(r => r.id === id)) { const r = recById(id); if (r) list.push(r); }
     }
     if (!list.length) {
-      sel.innerHTML = `<option value="">no probed recordings of this streamer</option>`; sel.disabled = true;
+      sel.innerHTML = `<option value="">${te("zones.rec.none")}</option>`; sel.disabled = true;
       $("zn-t").value = ""; $("zn-tr").disabled = true; $("zn-grab").disabled = true;
       return;
     }
     sel.disabled = false; $("zn-tr").disabled = false; $("zn-grab").disabled = false;
-    sel.innerHTML = list.map(r => `<option value="${r.id}">${esc(fmtDate(recStartOf(r)))}  ${esc(r.kind === "vod" && r.title ? r.title : r.name)}  (${r.width}x${r.height}, ${esc(fmtDur(r.duration_s))})</option>`).join("");
+    // date, name, resolution and length: data in the locale's formats, no words to translate
+    sel.innerHTML = list.map(r => `<option value="${r.id}">${esc(fmtDateTime(recStartOf(r), "datetime"))}  ${esc(r.kind === "vod" && r.title ? r.title : r.name)}  (${r.width}x${r.height}, ${esc(fmtDuration(r.duration_s))})</option>`).join("");
     if (rec) { sel.value = String(rec.id); setTimeCtl(rec, suggestT(rec)); }
   }
   function setTimeCtl(rec, t) {
@@ -534,13 +556,13 @@ window.ZN = (() => {
   }
   async function grab() {
     const rec = recById(+$("zn-rec").value);
-    if (!rec) { toast("pick a recording of this streamer first"); return; }
-    let t = parseT($("zn-t").value);
-    if (t == null) { toast("time: h:mm:ss, m:ss or seconds"); return; }
-    if (rec.duration_s) t = clamp(t, 0, Math.max(0, rec.duration_s - 0.5));
-    setTimeCtl(rec, t);
+    if (!rec) { toast(t("zones.toast.pick_rec")); return; }
+    let at = parseT($("zn-t").value);
+    if (at == null) { toast(t("zones.toast.bad_time")); return; }
+    if (rec.duration_s) at = clamp(at, 0, Math.max(0, rec.duration_s - 0.5));
+    setTimeCtl(rec, at);
     const tpl0 = S.tpl, fresh = !S.tpl && !isDirty();
-    showFrame("rec", frameUrl(rec.id, t), rec.width, rec.height, rec.id, t);
+    showFrame("rec", frameUrl(rec.id, at), rec.width, rec.height, rec.id, at);
     // an untouched built-in default follows the frame's aspect (the ticker width is normalized to the width)
     const tok = S.token;
     await loadDefaults(rec.width, rec.height);
@@ -554,15 +576,15 @@ window.ZN = (() => {
     const r = tpl.sample_rec_id && recById(tpl.sample_rec_id);
     if (r) { $("zn-rec").value = String(r.id); setTimeCtl(r, tpl.sample_t || 0); }
   }
-  function showFrame(kind, src, w, h, recId, t) {
-    S.frame = { kind, src, w: w || 0, h: h || 0, rec_id: recId, t };
+  function showFrame(kind, src, w, h, recId, at) {
+    S.frame = { kind, src, w: w || 0, h: h || 0, rec_id: recId, t: at };
     const img = $("zn-img"), msg = $("zn-fmsg");
     if (!src) {
       img.hidden = true; img.removeAttribute("src");
-      msg.textContent = S.cur ? "No sample frame: this streamer has no probed recording yet. The boxes can still be set on this blank frame." : "Pick a streamer on the left.";
+      msg.textContent = t(S.cur ? "zones.frame.no_rec" : "zones.frame.pick_streamer");
       msg.hidden = false;
     } else {
-      msg.textContent = "grabbing frame..."; msg.hidden = false; $("zn-frame").classList.add("loading");
+      msg.textContent = t("zones.frame.grabbing"); msg.hidden = false; $("zn-frame").classList.add("loading");
       if (img.getAttribute("src") !== src) img.src = src;
       else if (img.complete) { if (img.naturalWidth) onImgLoad(); else onImgError(); }   // same frame again: no new load event
       // else: that load is still in flight and fires its own event
@@ -579,8 +601,8 @@ window.ZN = (() => {
   function onImgError() {
     if (!S.frame.src) return;
     const img = $("zn-img"); img.hidden = true; $("zn-frame").classList.remove("loading");
-    $("zn-fmsg").textContent = S.frame.kind === "tpl" ? "the template's sample frame is missing - grab a frame of a recording"
-      : `could not grab a frame at ${tc(S.frame.t)} of recording #${S.frame.rec_id} (file missing or past the end?)`;
+    $("zn-fmsg").textContent = S.frame.kind === "tpl" ? t("zones.frame.tpl_missing")
+      : t("zones.frame.grab_failed", { time: tc(S.frame.t), id: S.frame.rec_id });
     $("zn-fmsg").hidden = false;
     fit(); layout();
   }
@@ -623,7 +645,7 @@ window.ZN = (() => {
       el.classList.toggle("sel", S.sel === k);
       el.classList.toggle("lblin", b[1] < 0.05);               // no room above: the chip goes below the box
       el.classList.toggle("lblr", b[0] + b[2] > 0.75);          // right side: the chip hugs the right edge
-      el.querySelector(".zn-lbl").textContent = `${ZONES[k].label} ${Math.round(b[2] * r.w)}x${Math.round(b[3] * r.h)}`;
+      el.querySelector(".zn-lbl").textContent = t("zones.box.label", { zone: zl(k), w: Math.round(b[2] * r.w), h: Math.round(b[3] * r.h) });
       if (k === "feed") {
         const rh = S.z.feed_row_h || rowDefault();
         const pctH = clamp(rh / b[3] * 100, 0.5, 100);
@@ -667,24 +689,24 @@ window.ZN = (() => {
   }
   function resizeBox(k, b0, hd, dx, dy) {
     const [bx, by, bw, bh] = bounds(k); const [mw, mh] = minWH(k);
-    let l = b0[0], t = b0[1], r = b0[0] + b0[2], b = b0[1] + b0[3];
+    let l = b0[0], tp = b0[1], r = b0[0] + b0[2], b = b0[1] + b0[3];
     if (hd.includes("w")) l = clamp(l + dx, bx, r - mw);
     if (hd.includes("e")) r = clamp(r + dx, l + mw, bx + bw);
-    if (hd.includes("n")) t = clamp(t + dy, by, b - mh);
-    if (hd.includes("s")) b = clamp(b + dy, t + mh, by + bh);
-    return [l, t, Math.max(mw, r - l), Math.max(mh, b - t)];
+    if (hd.includes("n")) tp = clamp(tp + dy, by, b - mh);
+    if (hd.includes("s")) b = clamp(b + dy, tp + mh, by + bh);
+    return [l, tp, Math.max(mw, r - l), Math.max(mh, b - tp)];
   }
   // the money band must stay inside the ticker: shrink it to fit, then clamp its position
   function containMoney(m) {
-    const t = S.z && S.z.ticker; if (!t || !m) return m;
-    const w = Math.min(m[2], t[2]), h = Math.min(m[3], t[3]);
-    return [clamp(m[0], t[0], t[0] + t[2] - w), clamp(m[1], t[1], t[1] + t[3] - h), w, h];
+    const tk = S.z && S.z.ticker; if (!tk || !m) return m;
+    const w = Math.min(m[2], tk[2]), h = Math.min(m[3], tk[3]);
+    return [clamp(m[0], tk[0], tk[0] + tk[2] - w), clamp(m[1], tk[1], tk[1] + tk[3] - h), w, h];
   }
   // after the ticker moved / resized: money rides along with the ticker's move, then is contained
   function carryMoney(t0, m0) {
     if (!m0 || !S.z.ticker) return;
-    const t = S.z.ticker;
-    S.z.money = containMoney([m0[0] + (t[0] - t0[0]), m0[1] + (t[1] - t0[1]), m0[2], m0[3]]);
+    const tk = S.z.ticker;
+    S.z.money = containMoney([m0[0] + (tk[0] - t0[0]), m0[1] + (tk[1] - t0[1]), m0[2], m0[3]]);
   }
 
   function onDown(e) {
@@ -738,7 +760,7 @@ window.ZN = (() => {
   }
   function syncNumbers() {
     const k = S.sel, b = k && S.z && S.z[k], r = res();
-    $("zn-numk").textContent = b ? ZONES[k].label : "Select a box to edit its position";
+    $("zn-numk").textContent = b ? zl(k) : t("zones.num.none");
     $("zn-num").classList.toggle("none", !b);
     $("zn-num").querySelectorAll("input[data-n]").forEach(inp => {
       inp.disabled = !b;
@@ -754,18 +776,18 @@ window.ZN = (() => {
   function renderStreamers() {
     const el = $("zn-streamers"); if (!el) return;
     if ($("zn-nstr")) $("zn-nstr").textContent = S.streamers.length ? String(S.streamers.length) : "";
-    if (!S.streamers.length) { el.innerHTML = `<div class="empty"><b>No streamers yet</b><small>Import a VOD first: its streamer shows up here.</small></div>`; return; }
+    if (!S.streamers.length) { el.innerHTML = `<div class="empty"><b>${te("zones.streamers.none")}</b><small>${te("zones.streamers.none_help")}</small></div>`; return; }
     el.innerHTML = S.streamers.map((s, i) => {
       const on = S.cur && s.provider === S.cur.provider && sameKey(s.channel_key, S.cur.channel_key);
       const nt = s.n_templates || 0, nr = s.n_recordings || 0;
-      const meta = [nt ? `${nt} version${nt === 1 ? "" : "s"}` : "built-in boxes", nr ? `${nr} rec` : ""].filter(Boolean).join(" · ");
+      const meta = [nt ? t("zones.streamer.versions", { count: nt }) : t("zones.streamer.builtin"), nr ? t("zones.streamer.recs", { count: nr }) : ""].filter(Boolean).join(" · ");
       return `<div class="zn-item ${on ? "on" : ""}" data-i="${i}" data-tip="${esc(s.provider)} ${esc(s.channel_key)}">
         <span class="${provCls(s.provider)}">${esc(s.provider)}</span><span class="zn-nm">${esc(streamerName(s))}</span><span class="zn-ct">${esc(meta)}</span></div>`;
     }).join("");
     el.querySelectorAll(".zn-item").forEach(it => it.onclick = async () => {
       const s = S.streamers[+it.dataset.i]; if (!s || s === S.cur) return;
       // a save / import in flight reloads the current streamer when it answers: no switching meanwhile
-      if (S.busy) { toast("wait for the save to finish"); return; }
+      if (S.busy) { toast(t("zones.toast.wait_save")); return; }
       if (!(await guard()) || S.busy) return;
       chooseStreamer(s, {});
     });
@@ -775,36 +797,36 @@ window.ZN = (() => {
     const el = $("zn-tpls"); if (!el) return;
     if (!S.cur) { el.innerHTML = ""; return; }
     const f = S.forRec, fid = f && f.template ? f.template.id : null;
-    let html = S.templates.map(t => {
-      const on = S.tpl && S.tpl.id === t.id;
-      const used = fid === t.id ? `<span class="badge acc" data-tip="recording #${S.originRec} uses this version (${esc(f.source)})">${f.source === "pinned" ? "pinned here" : "this rec"}</span>` : "";
-      return `<div class="zn-item ${on ? "on" : ""}" data-id="${t.id}"><span class="zn-nm">${esc(t.name || "(unnamed)")}</span>${used}<span class="zn-ct">${esc(effLabel(t.effective_from))}</span></div>`;
+    let html = S.templates.map(tp => {
+      const on = S.tpl && S.tpl.id === tp.id;
+      const used = fid === tp.id ? `<span class="badge acc" data-tip="${te("zones.tpl.used_tip", { id: S.originRec, source: srcName(f.source) })}">${te(f.source === "pinned" ? "zones.tpl.pinned_here" : "zones.tpl.this_rec")}</span>` : "";
+      return `<div class="zn-item ${on ? "on" : ""}" data-id="${tp.id}"><span class="zn-nm">${esc(tp.name || t("zones.tpl.unnamed"))}</span>${used}<span class="zn-ct">${esc(effLabel(tp.effective_from))}</span></div>`;
     }).join("");
     if (S.tpl && !S.templates.some(t => t.id === S.tpl.id)) {
       // a pinned / provider-wide template of another row: shown so it is clear what is being edited
-      html = `<div class="zn-item on"><span class="zn-nm">${esc(S.tpl.name || "(unnamed)")}</span><span class="badge">${esc(S.tpl.provider)} ${esc(S.tpl.channel_key)}</span><span class="zn-ct">${esc(effLabel(S.tpl.effective_from))}</span></div>` + html;
+      html = `<div class="zn-item on"><span class="zn-nm">${esc(S.tpl.name || t("zones.tpl.unnamed"))}</span><span class="badge">${esc(S.tpl.provider)} ${esc(S.tpl.channel_key)}</span><span class="zn-ct">${esc(effLabel(S.tpl.effective_from))}</span></div>` + html;
     }
     if (!S.tpl) {
-      const lab = S.seed ? `new template, starting from ${S.seed} (not saved yet)`
-        : S.templates.length ? "new version (not saved yet)" : "default (built-in Season 2 boxes)";
-      const tip = S.seed ? `a copy of ${S.seed}'s boxes for this streamer; Save stores it as this streamer's own template (the other one is left as it is)`
-        : S.templates.length ? "starts from the built-in boxes; Save stores it" : "no template for this streamer yet: detection uses the built-in boxes; Save stores these as its first template";
+      const lab = S.seed ? t("zones.tpl.new_seed", { seed: S.seed })
+        : t(S.templates.length ? "zones.tpl.new_version" : "zones.tpl.default");
+      const tip = S.seed ? t("zones.tpl.new_seed_tip", { seed: S.seed })
+        : t(S.templates.length ? "zones.tpl.new_version_tip" : "zones.tpl.default_tip");
       const thisRec = !S.seed && f && fid == null && f.source === "default";   // a seeded copy is not what the rec uses yet
-      html = `<div class="zn-item on" data-tip="${esc(tip)}"><span class="zn-nm">${esc(lab)}</span>${thisRec ? `<span class="badge acc">this rec</span>` : ""}</div>` + html;
+      html = `<div class="zn-item on" data-tip="${esc(tip)}"><span class="zn-nm">${esc(lab)}</span>${thisRec ? `<span class="badge acc">${te("zones.tpl.this_rec")}</span>` : ""}</div>` + html;
     }
     el.innerHTML = html;
     el.querySelectorAll(".zn-item[data-id]").forEach(it => it.onclick = async () => {
-      const t = S.templates.find(x => x.id === +it.dataset.id); if (!t || t === S.tpl) return;
-      if (S.busy) { toast("wait for the save to finish"); return; }
+      const tp = S.templates.find(x => x.id === +it.dataset.id); if (!tp || tp === S.tpl) return;
+      if (S.busy) { toast(t("zones.toast.wait_save")); return; }
       if (!(await guard()) || S.busy) return;
-      chooseTemplate(t, {}, S.token);
+      chooseTemplate(tp, {}, S.token);
     });
   }
 
   function renderEditor() {
     if (!view()) return;
     const has = !!S.cur;
-    $("zn-title").textContent = has ? streamerName(S.cur) : "Pick a streamer";
+    $("zn-title").textContent = has ? streamerName(S.cur) : t("zones.editor.pick");
     const pv = $("zn-prov"); pv.hidden = !has; if (has) { pv.className = provCls(S.cur.provider); pv.textContent = S.cur.provider; }
     $("zn-name").value = S.meta.name || ""; $("zn-note").value = S.meta.note || ""; $("zn-eff").value = toLocalInput(S.meta.eff);
     ["zn-name", "zn-note", "zn-eff", "zn-save", "zn-ver", "zn-redet"].forEach(id => { $(id).disabled = !has; });
@@ -815,18 +837,19 @@ window.ZN = (() => {
       // pinned to this version -- or to another row's template this editor only seeded a copy from (no version to
       // pin here then, so the button offers the unpin instead)
       const pinnedHere = S.forRec && S.forRec.source === "pinned" && S.forRec.template && (S.tpl ? S.forRec.template.id === S.tpl.id : !!S.seed);
-      pin.textContent = pinnedHere ? "Unpin from this recording" : "Pin to this recording";
+      pin.textContent = t(pinnedHere ? "zones.pin.unpin" : "zones.pin.pin");
       pin.dataset.unpin = pinnedHere ? "1" : "";
       pin.disabled = !pinnedHere && !S.tpl;
-      pin.dataset.tip = pinnedHere ? `recording #${S.originRec} goes back to its streamer's dated versions`
-        : `recording #${S.originRec} always uses this version, whatever its date${S.tpl ? "" : " (save it first)"}`;
+      pin.dataset.tip = t(pinnedHere ? "zones.pin.unpin_tip" : S.tpl ? "zones.pin.pin_tip" : "zones.pin.pin_tip_unsaved", { id: S.originRec });
     }
     let src = "";
     if (S.originRec && S.forRec) {
       const f = S.forRec;
-      src = `rec #${S.originRec} uses ${f.template ? `"${f.template.name || "#" + f.template.id}"` : "the built-in boxes"} (${f.source || "default"})`;
+      src = f.template ? t("zones.src.uses_tpl", { id: S.originRec, name: f.template.name || "#" + f.template.id, source: srcName(f.source || "default") })
+        : t("zones.src.uses_builtin", { id: S.originRec, source: srcName(f.source || "default") });
     }
-    if (!S.tpl && S.seed) src = (src ? src + " - " : "") + `editing a new template starting from ${S.seed}`;
+    // two separate statements, shown one after the other
+    if (!S.tpl && S.seed) src = (src ? src + " - " : "") + t("zones.src.seed", { seed: S.seed });
     $("zn-src").textContent = src;
     syncCtl(); fit(); layout(); renderFrameNote(); updateDirty();
   }
@@ -845,9 +868,9 @@ window.ZN = (() => {
   function renderFrameNote() {
     const h = $("zn-hint"); if (!h) return;
     const r = res(), f = S.frame;
-    if (f.kind === "rec") h.textContent = `frame: rec #${f.rec_id} at ${tc(f.t)} (${r.w}x${r.h}) - Save stores it as the sample`;
-    else if (f.kind === "tpl") h.textContent = `the template's sample frame (${r.w}x${r.h})`;
-    else h.textContent = S.cur ? `blank ${r.w}x${r.h} frame` : "";
+    if (f.kind === "rec") h.textContent = t("zones.note.rec", { id: f.rec_id, time: tc(f.t), w: r.w, h: r.h });
+    else if (f.kind === "tpl") h.textContent = t("zones.note.tpl", { w: r.w, h: r.h });
+    else h.textContent = S.cur ? t("zones.note.blank", { w: r.w, h: r.h }) : "";
   }
 
   function updateDirty() {
@@ -869,8 +892,8 @@ window.ZN = (() => {
   // went out; any await that comes back after a streamer switch / close / reopen stops here (the old streamer's
   // template must never land in another streamer's editor). sent = snap() when it went out: boxes moved while
   // the request was in flight stay in the editor (and stay unsaved) instead of being overwritten.
-  async function reloadAfter(t, tok, sent) {
-    const id = t && t.id != null ? t.id : (S.tpl && S.tpl.id);
+  async function reloadAfter(saved, tok, sent) {
+    const id = saved && saved.id != null ? saved.id : (S.tpl && S.tpl.id);
     await loadStreamers();
     if (tok !== S.token || !S.open) return false;
     if (S.cur) {
@@ -886,7 +909,7 @@ window.ZN = (() => {
     if (forRec) S.forRec = forRec;
     const edited = sent != null && snap() !== sent;
     const keepZ = S.z, keepMeta = S.meta;
-    const fresh = S.templates.find(x => x.id === id) || (t && t.id != null ? t : null);
+    const fresh = S.templates.find(x => x.id === id) || (saved && saved.id != null ? saved : null);
     if (fresh) {
       S.tpl = fresh; S.seed = "";
       S.meta = { name: fresh.name || "", eff: fresh.effective_from || 0, note: fresh.note || "" };
@@ -898,27 +921,31 @@ window.ZN = (() => {
     renderAll();
     return true;
   }
-  // the server stores the boxes even when the sample frame could not be grabbed: say so
-  function sampleNote(t) { return t && t.sample_error ? ` - sample frame NOT stored: ${t.sample_error}` : ""; }
+  // the server stores the boxes even when the sample frame could not be grabbed: say so (the key's _nosample twin
+  // carries the reason); -> [text, ms or 0]
+  function savedToast(key, saved, params) {
+    const e = saved && saved.sample_error;
+    return [t(e ? key + "_nosample" : key, Object.assign({}, params || {}, e ? { error: String(e) } : {})), e ? 8000 : 0];
+  }
   function checked() {
     const p = payload(), err = checkZones(p);
-    if (err) { toast(`not saved: ${err}`, 5000); return null; }
+    if (err) { toast(t("zones.toast.not_saved", { error: err }), 5000); return null; }
     return p;
   }
 
   async function save() {
     if (!S.open || !S.cur || !S.z) return;
-    if (!S.z.ticker || !S.z.feed) { toast("the ticker and the kill feed boxes are required"); return; }
+    if (!S.z.ticker || !S.z.feed) { toast(t("zones.toast.required")); return; }
     const zones = checked(); if (!zones) return;
     await busy(async () => {
       const tok = S.token, sent = snap(), wasTpl = !!S.tpl;
       const body = Object.assign({ name: S.meta.name || streamerName(S.cur), effective_from: S.meta.eff || 0, zones, note: S.meta.note || "" }, sampleFields());
-      let t;
-      if (S.tpl) t = await put(`/api/zones/templates/${S.tpl.id}`, body);
-      else t = await post("/api/zones/templates", Object.assign({ provider: S.cur.provider, channel_key: S.cur.channel_key, channel_name: S.cur.channel_name || "" }, body));
-      const note = sampleNote(t);
-      toast((wasTpl ? "zones saved - Re-detect applies them to recordings already scanned" : "template created") + note, note ? 8000 : 3500);
-      await reloadAfter(t, tok, sent);
+      let saved;
+      if (S.tpl) saved = await put(`/api/zones/templates/${S.tpl.id}`, body);
+      else saved = await post("/api/zones/templates", Object.assign({ provider: S.cur.provider, channel_key: S.cur.channel_key, channel_name: S.cur.channel_name || "" }, body));
+      const [msg, ms] = savedToast(wasTpl ? "zones.toast.saved" : "zones.toast.created", saved);
+      toast(msg, ms || 3500);
+      await reloadAfter(saved, tok, sent);
     });
   }
 
@@ -927,12 +954,14 @@ window.ZN = (() => {
     const rec = S.frame.rec_id ? recById(S.frame.rec_id) : null;
     const def = recStartOf(rec) || Math.floor(Date.now() / 1000);
     const base = S.meta.name || streamerName(S.cur);
-    const v = await ask("Save as a new version",
-      `<div class="zn-form"><label>Applies from <input type="datetime-local" id="znv-eff" step="60" value="${esc(toLocalInput(def))}"></label>
-       <label>Name <input type="text" id="znv-name" value="${esc(base)}" autocomplete="off"></label></div>
-       <div class="hint">Recordings that start at / after this moment use the new version; older ones keep ${S.tpl ? `"${esc(S.tpl.name || "the current version")}"` : "the earlier versions"}.
-       Default: the start of the frame's recording${rec ? ` (#${rec.id})` : ""}.${S.tpl ? " The current version stays as it was last saved." : ""}</div>`,
-      [["cancel", "Cancel"], ["go", "Create version", "acc"]], (d) => { const i = d.querySelector("#znv-eff"); if (i) i.focus(); });
+    // the hint: separate sentences, one after the other
+    const hint = [S.tpl ? te("zones.ver.hint_tpl", { name: S.tpl.name || t("zones.ver.current") }) : te("zones.ver.hint_none"),
+      rec ? te("zones.ver.default_rec", { id: rec.id }) : te("zones.ver.default"), S.tpl ? te("zones.ver.kept") : ""].filter(Boolean).join(" ");
+    const v = await ask(t("zones.ver.title"),
+      `<div class="zn-form"><label>${te("zones.eff")} <input type="datetime-local" id="znv-eff" step="60" value="${esc(toLocalInput(def))}"></label>
+       <label>${te("zones.name")} <input type="text" id="znv-name" value="${esc(base)}" autocomplete="off"></label></div>
+       <div class="hint">${hint}</div>`,
+      [["cancel", t("zones.btn.cancel")], ["go", t("zones.ver.create"), "acc"]], (d) => { const i = d.querySelector("#znv-eff"); if (i) i.focus(); });
     if (v !== "go") return;
     const eff = fromLocalInput(($("znv-eff") || {}).value);
     const name = (($("znv-name") || {}).value || base).trim();
@@ -940,33 +969,32 @@ window.ZN = (() => {
     const zones = checked(); if (!zones) return;
     await busy(async () => {
       const tok = S.token, sent = snap();
-      let t;
+      let saved;
       if (S.tpl) {
         // ONE request: the version is created with these boxes / name / note (the route validates them), so a
         // failure leaves nothing behind -- a create-then-PUT left a stale dated copy when the PUT failed
-        t = await post(`/api/zones/templates/${S.tpl.id}/version`,
+        saved = await post(`/api/zones/templates/${S.tpl.id}/version`,
           Object.assign({ effective_from: eff, name, zones, note: S.meta.note || "" }, sampleFields()));
-        if (!t || t.id == null) throw new Error("the server did not return the new version");
+        if (!saved || saved.id == null) throw new Error(t("zones.err.no_version"));
       } else {
-        t = await post("/api/zones/templates", Object.assign({ provider: S.cur.provider, channel_key: S.cur.channel_key, channel_name: S.cur.channel_name || "",
+        saved = await post("/api/zones/templates", Object.assign({ provider: S.cur.provider, channel_key: S.cur.channel_key, channel_name: S.cur.channel_name || "",
           name, effective_from: eff, zones, note: S.meta.note || "" }, sampleFields()));
       }
-      const note = sampleNote(t);
-      toast(`new version ${effLabel(eff)}${note}`, note ? 8000 : 3000);
-      await reloadAfter(t, tok, sent);
+      const [msg, ms] = savedToast(eff ? "zones.toast.version_from" : "zones.toast.version_start", saved, { date: fmtDateTime(eff, "date") });
+      toast(msg, ms || 3000);
+      await reloadAfter(saved, tok, sent);
     });
   }
 
   async function deleteVersion() {
     if (!S.tpl) return;
-    const v = await ask("Delete this version?", `<div class="hint">"${esc(S.tpl.name || "#" + S.tpl.id)}" (${esc(effLabel(S.tpl.effective_from))}) is deleted;
-      recordings pinned to it go back to their streamer's versions. Recordings already scanned keep their events until they are detected again.</div>`,
-      [["cancel", "Cancel"], ["del", "Delete", "zn-danger"]]);
+    const v = await ask(t("zones.del.title"), `<div class="hint">${te("zones.del.body", { name: S.tpl.name || "#" + S.tpl.id, from: effLabel(S.tpl.effective_from) })}</div>`,
+      [["cancel", t("zones.btn.cancel")], ["del", t("zones.del.delete"), "zn-danger"]]);
     if (v !== "del") return;
     await busy(async () => {
       const tok = S.token;
       await del(`/api/zones/templates/${S.tpl.id}`);
-      toast("version deleted");
+      toast(t("zones.toast.deleted"));
       if (tok !== S.token || !S.open) return;
       S.saved = snap();                                // nothing left to save
       const row = S.cur;
@@ -988,18 +1016,18 @@ window.ZN = (() => {
     if (tok !== S.token || !S.z) return;
     S.z = defaultZones(); S.sel = null;
     syncCtl(); layout(); updateDirty();
-    toast("built-in boxes loaded - Save to keep them");
+    toast(t("zones.toast.reset"));
   }
 
   async function pin() {
     if (!S.originRec) return;
     const unpin = $("zn-pin").dataset.unpin === "1";
     if (!unpin && !S.tpl) return;
-    if (!unpin && isDirty()) { toast("save the version first: a pinned recording uses the saved zones"); return; }
+    if (!unpin && isDirty()) { toast(t("zones.toast.pin_save_first")); return; }
     await busy(async () => {
       const tok = S.token, rid = S.originRec, tpl = S.tpl;
       await post(`/api/recordings/${rid}/zone-template`, { template_id: unpin ? null : tpl.id });
-      toast(unpin ? `recording #${rid} unpinned` : `recording #${rid} pinned to "${tpl.name || "#" + tpl.id}" - re-detect it to apply`, 3500);
+      toast(unpin ? t("zones.toast.unpinned", { id: rid }) : t("zones.toast.pinned", { id: rid, name: tpl.name || "#" + tpl.id }), 3500);
       let f = null; try { f = await api(`/api/zones/for-recording/${rid}`); } catch (err) { /* keep the old line */ }
       if (tok !== S.token || !S.open) return;
       if (f) S.forRec = f;
@@ -1009,15 +1037,14 @@ window.ZN = (() => {
 
   async function redetect() {
     if (!S.cur) return;
-    if (isDirty()) { toast("save first: re-detect uses the saved zones", 3500); return; }
-    const n = S.cur.n_recordings;
-    const v = await ask("Re-detect this streamer", `<div class="hint">Queue detect again for ${n != null ? `the ${n} recording${n === 1 ? "" : "s"}` : "every probed recording"} of
-      <b>${esc(streamerName(S.cur))}</b> (${esc(S.cur.provider)}), ahead of the normal queue. Your keep / false-positive verdicts and notes carry over.</div>`,
-      [["cancel", "Cancel"], ["go", "Queue detect", "acc"]]);
+    if (isDirty()) { toast(t("zones.toast.redetect_save_first"), 3500); return; }
+    const n = S.cur.n_recordings, who = { name: streamerName(S.cur), provider: S.cur.provider };
+    const v = await ask(t("zones.redet.title"), `<div class="hint">${n != null ? tHtml("zones.redet.body_n_html", Object.assign({ count: n }, who)) : tHtml("zones.redet.body_all_html", who)}</div>`,
+      [["cancel", t("zones.btn.cancel")], ["go", t("zones.redet.go"), "acc"]]);
     if (v !== "go") return;
     await busy(async () => {
       const r = await post("/api/zones/redetect", { provider: S.cur.provider, channel_key: S.cur.channel_key });
-      toast(`queued detect for ${r && r.queued != null ? r.queued : "?"} recording${r && r.queued === 1 ? "" : "s"}`, 3500);
+      toast(r && r.queued != null ? t("zones.toast.queued", { count: r.queued }) : t("zones.toast.queued_unknown"), 3500);
       if (typeof loadJobs === "function" && hasST() && ST.tab === "jobs") { try { loadJobs(); } catch (err) { /* the SSE feed refreshes it */ } }
     });
   }
@@ -1025,8 +1052,8 @@ window.ZN = (() => {
   function exportTemplates(streamerOnly) {
     let url = "/api/zones/export?samples=1";
     if (streamerOnly) {
-      if (!S.templates.length) { toast("this streamer has no saved templates"); return; }
-      url += "&ids=" + S.templates.map(t => t.id).join(",");
+      if (!S.templates.length) { toast(t("zones.toast.no_templates")); return; }
+      url += "&ids=" + S.templates.map(x => x.id).join(",");
     }
     const a = document.createElement("a");
     a.href = url; a.download = ""; a.rel = "noopener";
@@ -1038,14 +1065,15 @@ window.ZN = (() => {
     inp.value = "";                                                    // the same file can be picked again
     if (!file) return;
     let data;
-    try { data = JSON.parse(await file.text()); } catch (err) { toast(`${file.name}: not a JSON file`, 5000); return; }
+    try { data = JSON.parse(await file.text()); } catch (err) { toast(t("zones.toast.not_json", { file: file.name }), 5000); return; }
     const list = data && Array.isArray(data.templates) ? data.templates : null;
-    if (!list || data.format !== "wardogclips-zone-templates") { toast(`${file.name}: not a WardogClips zone-template export`, 5000); return; }
-    const names = [...new Set(list.map(t => `${t.provider || "?"} ${t.channel_name || t.channel_key || "?"}`))];
-    const v = await ask("Import zone templates", `<div class="hint"><b>${list.length}</b> template${list.length === 1 ? "" : "s"} in ${esc(file.name)}:
-      ${esc(names.slice(0, 8).join(", "))}${names.length > 8 ? ` and ${names.length - 8} more` : ""}.</div>
-      <div class="hint">Overwrite existing versions? A version already here (same streamer and date) is replaced with "Overwrite", kept with "Keep mine".</div>`,
-      [["cancel", "Cancel"], ["keep", "Keep mine"], ["over", "Overwrite", "acc"]]);
+    if (!list || data.format !== "wardogclips-zone-templates") { toast(t("zones.toast.not_export", { file: file.name }), 5000); return; }
+    const names = [...new Set(list.map(x => `${x.provider || "?"} ${x.channel_name || x.channel_key || "?"}`))];
+    const shown = fmtList(names.slice(0, 8));
+    const nm = names.length > 8 ? t("zones.imp.names_more", { names: shown, count: names.length - 8 }) : shown;
+    const v = await ask(t("zones.imp.title"), `<div class="hint">${tHtml("zones.imp.count_html", { count: list.length, file: file.name, names: nm })}</div>
+      <div class="hint">${te("zones.imp.overwrite")}</div>`,
+      [["cancel", t("zones.btn.cancel")], ["keep", t("zones.imp.keep")], ["over", t("zones.imp.over"), "acc"]]);
     if (v !== "keep" && v !== "over") return;
     await busy(async () => {
       const tok = S.token;
@@ -1054,9 +1082,10 @@ window.ZN = (() => {
       const msgs = Array.isArray(r.messages) ? r.messages : (Array.isArray(r.errors) ? r.errors : []);
       const nerr = typeof r.errors === "number" ? r.errors : msgs.length;
       const first = msgs.slice(0, 2).map(String).join("; ");
-      toast(`imported: ${r.added || 0} added, ${r.updated || 0} updated, ${r.skipped || 0} skipped`
-        + (nerr ? `, ${nerr} error${nerr === 1 ? "" : "s"}${first ? `: ${first}${msgs.length > 2 ? ` (+${msgs.length - 2} more in the console)` : ""}` : ""}` : ""),
-        nerr ? 10000 : 3500);
+      const counts = { added: fmtNum(r.added || 0), updated: fmtNum(r.updated || 0), skipped: fmtNum(r.skipped || 0) };
+      const errs = !nerr ? "" : !first ? t("zones.imp.errors", { count: nerr })
+        : msgs.length > 2 ? t("zones.imp.errors_more", { count: nerr, first, more: fmtNum(msgs.length - 2) }) : t("zones.imp.errors_first", { count: nerr, first });
+      toast(nerr ? t("zones.imp.result_err", Object.assign(counts, { errors: errs })) : t("zones.imp.result", counts), nerr ? 10000 : 3500);
       if (nerr) console.warn("[Zones] import errors", nerr, msgs);
       if (tok !== S.token || !S.open) return;
       await loadStreamers();
@@ -1067,11 +1096,31 @@ window.ZN = (() => {
       S.templates = list;
       // an untouched editor shows what was imported for this streamer; unsaved edits are left alone
       if (!isDirty()) {
-        const keep = S.tpl && S.templates.find(t => t.id === S.tpl.id);
+        const keep = S.tpl && S.templates.find(x => x.id === S.tpl.id);
         await chooseTemplate(keep || S.templates[0] || null, { recId: S.frame.kind === "rec" ? S.frame.rec_id : undefined }, tok);
       } else renderTemplates();
     });
   }
+
+  // a language switch: the static parts re-translate (data-i18n*), the rest is redrawn; the editor's inputs keep
+  // what was typed (S.meta), the frame and the boxes stay as they are
+  function onLanguage() {
+    const v = view(); if (!v || !S.built) return;
+    translate(v);
+    if (!S.open) return;
+    renderStreamers(); renderTemplates();
+    const sel = $("zn-rec"), keepT = $("zn-t").value, keepR = $("zn-tr").value;
+    const rec = sel && sel.value ? recById(+sel.value) : null;
+    if (sel && (rec || !S.streamRecs.length)) { fillRecSelect(rec); $("zn-t").value = keepT; $("zn-tr").value = keepR; }
+    renderEditor();
+    const fm = $("zn-fmsg");
+    if (fm && !fm.hidden) {
+      if (!S.frame.src) fm.textContent = t(S.cur ? "zones.frame.no_rec" : "zones.frame.pick_streamer");
+      else if ($("zn-frame").classList.contains("loading")) fm.textContent = t("zones.frame.grabbing");
+      else onImgError();
+    }
+  }
+  if (typeof I18N !== "undefined" && I18N.onChange) I18N.onChange(onLanguage);
 
   return {
     open, close,

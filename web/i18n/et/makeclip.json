@@ -1,0 +1,13 @@
+{
+  "@": "Eesti (et). Klipi tegemine.",
+  "pick_first": "Vali esmalt sündmus või esita salvestis.",
+  "already": "Seda klippi juba tehakse.",
+  "making_exact": "Klipp tehakse kaadritäpselt. See võtab veidi kauem, sest pilt kodeeritakse uuesti.",
+  "making_copy": "Klippi tehakse. See algab lähimast võtmekaadrist enne su alguspunkti.",
+  "open_folder": "Ava kaust",
+  "saved": "Klipp salvestatud: {name}",
+  "saved_early": "Klipp salvestatud: {name}\nSee algab {seconds} enne su alguspunkti (lähim võtmekaader).",
+  "check_mismatch": "Klipp ei vasta täielikult salvestisele. Kontrolli seda enne kasutamist.",
+  "failed": "Klippi ei saanud teha: {error}",
+  "unknown_error": "tundmatu viga"
+}

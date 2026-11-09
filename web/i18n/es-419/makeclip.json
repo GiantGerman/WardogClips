@@ -1,0 +1,12 @@
+{
+  "pick_first": "Primero elige un evento o reproduce una grabación.",
+  "already": "Este clip ya se está creando.",
+  "making_exact": "Creando el clip con precisión de fotograma. Tarda un poco más porque la imagen se vuelve a codificar.",
+  "making_copy": "Creando el clip. Empezará en el fotograma clave más cercano antes de tu punto de entrada.",
+  "open_folder": "Abrir carpeta",
+  "saved": "Clip guardado: {name}",
+  "saved_early": "Clip guardado: {name}\nEmpieza {seconds} antes de tu punto de entrada (fotograma clave más cercano).",
+  "check_mismatch": "El clip no coincide del todo con la grabación. Revísalo antes de usarlo.",
+  "failed": "No se pudo crear el clip: {error}",
+  "unknown_error": "error desconocido"
+}

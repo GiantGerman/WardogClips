@@ -1,0 +1,20 @@
+{
+  "@": "Eesti (et). Salve ikooni menüü ja käivitaja teated.",
+  "tray.open": "Ava WardogClips",
+  "tray.update": "Uuendus saadaval...",
+  "tray.pause": "Peata mängimise ajaks",
+  "tray.speed": "Kiirus",
+  "tray.mode_full": "Täiskiirus",
+  "tray.mode_balanced": "Tasakaalus",
+  "tray.mode_background": "Taustal",
+  "tray.open_data": "Ava andmekaust",
+  "tray.open_log": "Ava logi",
+  "tray.quit": "Välju",
+  "tray.balloon": "WardogClips töötab. Väljumiseks paremklõpsa salve ikoonil.",
+  "tray.update_notify": "WardogClips {version} on saadaval. Selle nägemiseks vali salve menüüst Uuendus saadaval...",
+  "launcher.could_not_start": "WardogClipsi ei saanud käivitada:\n\n{error}",
+  "launcher.scan_running": "WardogClipsi skannimine (scan.bat / --scan) kasutab seda andmekausta:\n\n{dir}\n\nOota, kuni see lõpeb (või peata see selle aknas), ja käivita siis WardogClips uuesti.",
+  "launcher.not_answering": "WardogClips juba töötab, kuid ei vasta.\n\nVälju sellest salve ikooni kaudu (või oota minut) ja proovi uuesti.\n\nLogi: {log}",
+  "launcher.damaged": "WardogClips on kahjustatud (käituskeskkond või rakenduse failid puuduvad).\n\nPalun paigalda see uuesti.\n\nOtsiti:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips peatus kohe pärast käivitumist (väljumiskood {code}).\n\nLogis võib olla põhjus kirjas:\n{log}"
+}

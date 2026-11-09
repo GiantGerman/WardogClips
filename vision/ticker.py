@@ -70,7 +70,7 @@ class Line:
         return max((b.x1 for b in self.boxes), default=0)
 
 
-def normalise(text: str) -> str:
+def normalize(text: str) -> str:
     """OCR noise -> something the rules can read: upper-case, O->0 inside digit runs,
     stray punctuation collapsed."""
     t = text.upper().strip()
@@ -92,7 +92,7 @@ def _amount(s: str) -> int | None:
 def parse_line(text: str, user_rules: list[tuple[str, str]] | None = None) -> tuple[str, int | None, int | None]:
     """(label, cash, xp). User rules are (substring-or-regex, label) and win over the
     built-ins; unknown text is 'other'."""
-    t = normalise(text)
+    t = normalize(text)
     cash = xp = None
     m = _XP.search(t)
     if m:
@@ -120,7 +120,7 @@ def parse_line(text: str, user_rules: list[tuple[str, str]] | None = None) -> tu
 
 
 def group_rows(boxes: list[Box], row_h: int) -> list[list[Box]]:
-    """Boxes -> rows by vertical centre, each row left-to-right."""
+    """Boxes -> rows by vertical center, each row left-to-right."""
     rows: list[list[Box]] = []
     for b in sorted(boxes, key=lambda b: (b.cy, b.cx)):
         for row in rows:
@@ -139,7 +139,7 @@ def read_money(boxes: list[Box], money_y: int) -> tuple[int | None, int | None]:
     """(profit, account) from the readout above money_y: the two $ figures left to right."""
     vals = []
     for b in sorted((b for b in boxes if b.cy < money_y), key=lambda b: b.cx):
-        for m in _MONEY.finditer(normalise(b.text)):
+        for m in _MONEY.finditer(normalize(b.text)):
             v = _amount(m.group(2))
             if v is not None:
                 vals.append(-v if m.group(1) == "-" else v)

@@ -1,0 +1,99 @@
+{
+  "title.none": "inget klipp",
+  "title.rendering": "{kind} vid {time} · renderar {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · hela inspelningen",
+  "title.no_proxy": "Ingen proxy än",
+  "tip.event": "{kind} vid {time}: {render}",
+  "tip.around": "runt {time}: {render}",
+  "tip.cached": "{height}p från klippcachen",
+  "tip.rendered": "{height}p renderat på {seconds} s",
+  "tip.rendered_enc": "{height}p renderat på {seconds} s ({encoder})",
+  "tip.proxy": "{name}: proxy för hela inspelningen",
+  "tip.no_proxy": "{name}: ingen proxy för hela inspelningen än",
+  "busy.clip": "renderar klippet ({height}p)...",
+  "busy.at": "renderar {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Klippet kunde inte renderas",
+  "err.at": "{time} kunde inte renderas",
+  "err.retry": "Försök igen",
+  "err.encoding": "Kodningsinställningar",
+  "err.play_clip": "Klippet kunde inte spelas upp.",
+  "err.play_proxy": "Proxyn kunde inte spelas upp.",
+  "pick.title": "Välj en händelse",
+  "pick.text": "Välj en i Händelser (eller tryck N): dess klipp spelas här från inledningen.",
+  "pick.more": "Eller klicka på tidslinjen nedan för att titta på valfritt ögonblick i inspelningen.",
+  "pick.short": "Välj en i Händelser (eller tryck N), eller klicka på tidslinjen nedan.",
+  "proxy.card_title": "Ingen proxy för den här inspelningen än",
+  "proxy.card_text": "En {height}p-proxy är en kopia av hela filen på {duration} så att du kan spola genom den från början till slut (den görs flera gånger snabbare än realtid).",
+  "proxy.building": "byggs",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "köad",
+  "proxy.build": "Bygg proxy",
+  "proxy.all": "Proxyer för alla med händelser",
+  "proxy.all_tip": "Köa proxyer för alla inspelningar med händelser",
+  "proxy.queued_toast": "proxy köad",
+  "proxy.all_toast": {
+    "one": "köade {count} proxy ({candidates} inspelningar med händelser saknar en)",
+    "other": "köade {count} proxyer ({candidates} inspelningar med händelser saknar en)"
+  },
+  "mode.full_tip": "Hela inspelningen, uppspelad från sin proxy",
+  "mode.full_noproxy_tip": "Hela inspelningen: ingen proxy än (bygg en härifrån)",
+  "bound.wait": "vänta tills händelsens klipp har lästs in",
+  "bound.in_before_out": "in måste vara före ut",
+  "bound.out_after_in": "ut måste vara efter in",
+  "bound.reset": "klippet tillbaka till inledning / avslutning",
+  "bound.in_set": "in = {time} (klipp {length} s)",
+  "bound.out_set": "ut = {time} (klipp {length} s)",
+  "mark.nothing": "inget spelas",
+  "mark.done": "manuell markering vid {time}",
+  "play_aria": "Spela",
+  "pause_aria": "Pausa",
+  "time.pos": "{pos} av {total}",
+  "time.rel": "{offset} s från händelsen",
+  "time.clip": "klipp {in} – {out} = {length} s",
+  "pip.loop": "Loopa in → ut",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · poäng {score}",
+  "tl.tip_status": "{kind} · {time} · poäng {score} · {status}",
+  "tl.status_kept": "behållen",
+  "tl.status_false": "falsklarm",
+  "tl.whole": "Hela inspelningen",
+  "tl.no_events": "inga händelser",
+  "tl.not_detected": "inte detekterad än",
+  "tl.no_proxy": "ingen proxy",
+  "tl.no_proxy_tip": "Läget Hela inspelningen kräver en proxy (bygg den från spelaren)",
+  "tl.kind.kill": {
+    "one": "{count} kill",
+    "other": "{count} kills"
+  },
+  "tl.kind.assist": {
+    "one": "{count} assist",
+    "other": "{count} assists"
+  },
+  "tl.kind.death": {
+    "one": "{count} dödsfall",
+    "other": "{count} dödsfall"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} upptäckt",
+    "other": "{count} upptäckta"
+  },
+  "tl.kind.revive": {
+    "one": "{count} återupplivning",
+    "other": "{count} återupplivningar"
+  },
+  "tl.kind.squad": {
+    "one": "{count} squad",
+    "other": "{count} squad"
+  },
+  "tl.kind.voice": {
+    "one": "{count} röst",
+    "other": "{count} röst"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manuell",
+    "other": "{count} manuella"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

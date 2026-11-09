@@ -1,0 +1,99 @@
+{
+  "title.none": "kein Clip",
+  "title.rendering": "{kind} bei {time} · rendert {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · ganze Aufnahme",
+  "title.no_proxy": "Noch kein Proxy",
+  "tip.event": "{kind} bei {time}: {render}",
+  "tip.around": "um {time}: {render}",
+  "tip.cached": "{height}p aus dem Clip-Cache",
+  "tip.rendered": "{height}p in {seconds} s gerendert",
+  "tip.rendered_enc": "{height}p in {seconds} s gerendert ({encoder})",
+  "tip.proxy": "{name}: der Proxy der ganzen Aufnahme",
+  "tip.no_proxy": "{name}: noch kein Proxy der ganzen Aufnahme",
+  "busy.clip": "Clip wird gerendert ({height}p)...",
+  "busy.at": "{time} wird gerendert ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Dieser Clip konnte nicht gerendert werden",
+  "err.at": "{time} konnte nicht gerendert werden",
+  "err.retry": "Erneut versuchen",
+  "err.encoding": "Kodiereinstellungen",
+  "err.play_clip": "Dieser Clip konnte nicht abgespielt werden.",
+  "err.play_proxy": "Der Proxy konnte nicht abgespielt werden.",
+  "pick.title": "Wähle ein Ereignis",
+  "pick.text": "Wähle eins unter Ereignisse (oder drück N): Sein Clip läuft hier ab dem Vorlauf.",
+  "pick.more": "Oder klick unten auf die Timeline, um dir jeden Moment dieser Aufnahme anzusehen.",
+  "pick.short": "Wähle eins unter Ereignisse (oder drück N) oder klick unten auf die Timeline.",
+  "proxy.card_title": "Noch kein Proxy für diese Aufnahme",
+  "proxy.card_text": "Ein {height}p-Proxy ist eine Kopie der ganzen Datei ({duration}), um sie von Anfang bis Ende durchzuscrubben (er entsteht um ein Vielfaches schneller als Echtzeit).",
+  "proxy.building": "wird erstellt",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "eingereiht",
+  "proxy.build": "Proxy erstellen",
+  "proxy.all": "Proxys für alle mit Ereignissen",
+  "proxy.all_tip": "Proxys für jede Aufnahme mit Ereignissen einreihen",
+  "proxy.queued_toast": "Proxy eingereiht",
+  "proxy.all_toast": {
+    "one": "{count} Proxy eingereiht ({candidates} Aufnahmen mit Ereignissen haben keinen)",
+    "other": "{count} Proxys eingereiht ({candidates} Aufnahmen mit Ereignissen haben keinen)"
+  },
+  "mode.full_tip": "Die ganze Aufnahme, abgespielt von ihrem Proxy",
+  "mode.full_noproxy_tip": "Die ganze Aufnahme: noch kein Proxy (hier einen erstellen)",
+  "bound.wait": "warte, bis der Clip dieses Ereignisses geladen ist",
+  "bound.in_before_out": "In muss vor Out liegen",
+  "bound.out_after_in": "Out muss nach In liegen",
+  "bound.reset": "Clip zurück auf Vor- / Nachlauf",
+  "bound.in_set": "In = {time} (Clip {length} s)",
+  "bound.out_set": "Out = {time} (Clip {length} s)",
+  "mark.nothing": "nichts wird abgespielt",
+  "mark.done": "manuelle Markierung bei {time}",
+  "play_aria": "Abspielen",
+  "pause_aria": "Pause",
+  "time.pos": "{pos} von {total}",
+  "time.rel": "{offset} s vom Ereignis",
+  "time.clip": "Clip {in} – {out} = {length} s",
+  "pip.loop": "Schleife In → Out",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · Wert {score}",
+  "tl.tip_status": "{kind} · {time} · Wert {score} · {status}",
+  "tl.status_kept": "behalten",
+  "tl.status_false": "Fehlalarm",
+  "tl.whole": "Ganze Aufnahme",
+  "tl.no_events": "keine Ereignisse",
+  "tl.not_detected": "noch nicht erkannt",
+  "tl.no_proxy": "kein Proxy",
+  "tl.no_proxy_tip": "Der Modus „Ganze Aufnahme“ braucht einen Proxy (im Player erstellen)",
+  "tl.kind.kill": {
+    "one": "{count} Kill",
+    "other": "{count} Kills"
+  },
+  "tl.kind.assist": {
+    "one": "{count} Assist",
+    "other": "{count} Assists"
+  },
+  "tl.kind.death": {
+    "one": "{count} Tod",
+    "other": "{count} Tode"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} gesichtet",
+    "other": "{count} gesichtet"
+  },
+  "tl.kind.revive": {
+    "one": "{count} Wiederbelebung",
+    "other": "{count} Wiederbelebungen"
+  },
+  "tl.kind.squad": {
+    "one": "{count} Squad",
+    "other": "{count} Squad"
+  },
+  "tl.kind.voice": {
+    "one": "{count} Stimme",
+    "other": "{count} Stimme"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manuell",
+    "other": "{count} manuell"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

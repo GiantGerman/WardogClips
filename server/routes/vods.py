@@ -7,10 +7,12 @@ import json
 import os
 import time
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 
+from core.messages import annotate_all, http_error
 from media import vods
+from utils.i18n import AppError, app_error, with_msg
 
 
 def already_imported(ctx, meta: dict) -> dict | None:
@@ -51,8 +53,8 @@ def queue_vod_import(ctx, url: str, meta: dict | None = None, again: bool = Fals
     dest = str(vods.provider_dir(ctx.cfg, meta["provider"], create=False))
     have = already_imported(ctx, meta)
     if have and not again:
-        return {"ok": False, "error": f"already imported: {have['name']}", "code": 409, "already": have,
-                "meta": meta, "dest": dest}
+        return with_msg({"ok": False, "code": 409, "already": have, "meta": meta, "dest": dest}, "error",
+                        "server.vods.already_imported", "This VOD was already imported as {name}.", name=have["name"])
     q = queued_download(ctx, meta)
     if q is not None:
         return {"ok": True, "job": q, "already_queued": True, "already": have, "meta": meta, "dest": dest}
@@ -72,7 +74,7 @@ def build(ctx) -> APIRouter:
 
     def _enabled():
         if not ctx.cfg.vods.enabled:
-            raise HTTPException(409, "VOD import is off (Settings > VODs)")
+            raise app_error(409, "server.vods_off", "VOD import is off (Settings > VODs).")
 
     @r.get("/api/vods")
     def vods_status():
@@ -91,6 +93,7 @@ def build(ctx) -> APIRouter:
             except ValueError:
                 a = {}
             j.update({k: a.get(k) for k in ("url", "provider", "title", "channel")})
+        annotate_all(jobs, "message", "error")      # translatable job texts: <field>_i18n
         return {"enabled": ctx.cfg.vods.enabled, "available": vods.available(), "root": str(root),
                 "in_library": any(str(root).lower() == str(x).lower() for x in ctx.cfg.library.roots),
                 "providers": provs, "jobs": jobs, "max_height": ctx.cfg.vods.max_height}
@@ -102,7 +105,7 @@ def build(ctx) -> APIRouter:
         try:
             meta = await run_in_threadpool(vods.inspect, ctx.cfg, str((body or {}).get("url") or ""))
         except vods.VodError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         meta["already"] = already_imported(ctx, meta)
         meta["dest"] = str(vods.provider_dir(ctx.cfg, meta["provider"], create=False))
         return meta
@@ -116,7 +119,12 @@ def build(ctx) -> APIRouter:
         res = await run_in_threadpool(queue_vod_import, ctx, str(b.get("url") or ""),
                                       b.get("meta") if isinstance(b.get("meta"), dict) else None, bool(b.get("again")))
         if not res["ok"]:
-            raise HTTPException(res["code"], res["error"])
+            meta = res.get("error_i18n")
+            if meta:
+                err = AppError(res["code"], meta["code"], res["error"])
+                err.params = dict(meta.get("params") or {})
+                raise err
+            raise http_error(res["code"], vods.VodError(res["error"]))
         res.pop("already", None)                 # only refusals carry 'already'
         return res
 

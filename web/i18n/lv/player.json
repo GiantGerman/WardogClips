@@ -1,0 +1,108 @@
+{
+  "title.none": "nav klipa",
+  "title.rendering": "{kind} {time} · renderē {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · viss ieraksts",
+  "title.no_proxy": "Vēl nav proxy",
+  "tip.event": "{kind} {time}: {render}",
+  "tip.around": "ap {time}: {render}",
+  "tip.cached": "{height}p no klipu kešatmiņas",
+  "tip.rendered": "{height}p renderēts {seconds} s",
+  "tip.rendered_enc": "{height}p renderēts {seconds} s ({encoder})",
+  "tip.proxy": "{name}: visa ieraksta proxy",
+  "tip.no_proxy": "{name}: visa ieraksta proxy vēl nav",
+  "busy.clip": "renderē klipu ({height}p)...",
+  "busy.at": "renderē {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Šo klipu neizdevās renderēt",
+  "err.at": "Neizdevās renderēt {time}",
+  "err.retry": "Mēģināt vēlreiz",
+  "err.encoding": "Kodēšanas iestatījumi",
+  "err.play_clip": "Šo klipu neizdevās atskaņot.",
+  "err.play_proxy": "Proxy neizdevās atskaņot.",
+  "pick.title": "Izvēlies notikumu",
+  "pick.text": "Izvēlies to sadaļā Notikumi (vai nospied N): tā klips sāks skanēt šeit no ievada.",
+  "pick.more": "Vai noklikšķini uz laika joslas zemāk, lai apskatītu jebkuru šī ieraksta brīdi.",
+  "pick.short": "Izvēlies to sadaļā Notikumi (vai nospied N) vai noklikšķini uz laika joslas zemāk.",
+  "proxy.card_title": "Šim ierakstam vēl nav proxy",
+  "proxy.card_text": "{height}p proxy ir visa {duration} faila kopija, lai to varētu pārtīt no sākuma līdz beigām (tā tiek izveidota vairākas reizes ātrāk par reālo laiku).",
+  "proxy.building": "veido",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "rindā",
+  "proxy.build": "Veidot proxy",
+  "proxy.all": "Proxy visiem ar notikumiem",
+  "proxy.all_tip": "Ielikt rindā proxy katram ierakstam ar notikumiem",
+  "proxy.queued_toast": "proxy ielikts rindā",
+  "proxy.all_toast": {
+    "zero": "rindā ielikti {count} proxy (to trūkst {candidates} ierakstiem ar notikumiem)",
+    "one": "rindā ielikts {count} proxy (to trūkst {candidates} ierakstiem ar notikumiem)",
+    "other": "rindā ielikti {count} proxy (to trūkst {candidates} ierakstiem ar notikumiem)"
+  },
+  "mode.full_tip": "Viss ieraksts, atskaņots no tā proxy",
+  "mode.full_noproxy_tip": "Viss ieraksts: vēl nav proxy (izveido to šeit)",
+  "bound.wait": "pagaidi, līdz ielādējas šī notikuma klips",
+  "bound.in_before_out": "sākumam jābūt pirms beigām",
+  "bound.out_after_in": "beigām jābūt pēc sākuma",
+  "bound.reset": "klips atpakaļ uz ievadu / nobeigumu",
+  "bound.in_set": "sākums = {time} (klips {length} s)",
+  "bound.out_set": "beigas = {time} (klips {length} s)",
+  "mark.nothing": "nekas neskan",
+  "mark.done": "manuāla atzīme {time}",
+  "play_aria": "Atskaņot",
+  "pause_aria": "Pauze",
+  "time.pos": "{pos} no {total}",
+  "time.rel": "{offset} s no notikuma",
+  "time.clip": "klips {in} – {out} = {length} s",
+  "pip.loop": "Cilpa sākums → beigas",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · vērtējums {score}",
+  "tl.tip_status": "{kind} · {time} · vērtējums {score} · {status}",
+  "tl.status_kept": "paturēts",
+  "tl.status_false": "kļūdains",
+  "tl.whole": "Viss ieraksts",
+  "tl.no_events": "nav notikumu",
+  "tl.not_detected": "vēl nav atpazīts",
+  "tl.no_proxy": "nav proxy",
+  "tl.no_proxy_tip": "Pilnā ieraksta režīmam vajag proxy (izveido to atskaņotājā)",
+  "tl.kind.kill": {
+    "zero": "{count} nogalinājumi",
+    "one": "{count} nogalinājums",
+    "other": "{count} nogalinājumi"
+  },
+  "tl.kind.assist": {
+    "zero": "{count} asistences",
+    "one": "{count} asistence",
+    "other": "{count} asistences"
+  },
+  "tl.kind.death": {
+    "zero": "{count} nāves",
+    "one": "{count} nāve",
+    "other": "{count} nāves"
+  },
+  "tl.kind.spotted": {
+    "zero": "{count} pamanīti",
+    "one": "{count} pamanīts",
+    "other": "{count} pamanīti"
+  },
+  "tl.kind.revive": {
+    "zero": "{count} atdzīvināšanas",
+    "one": "{count} atdzīvināšana",
+    "other": "{count} atdzīvināšanas"
+  },
+  "tl.kind.squad": {
+    "zero": "{count} komanda",
+    "one": "{count} komanda",
+    "other": "{count} komanda"
+  },
+  "tl.kind.voice": {
+    "zero": "{count} balss",
+    "one": "{count} balss",
+    "other": "{count} balss"
+  },
+  "tl.kind.manual": {
+    "zero": "{count} manuāli",
+    "one": "{count} manuāls",
+    "other": "{count} manuāli"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

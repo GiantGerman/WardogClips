@@ -9,7 +9,9 @@
    - Full recording mode: the whole-recording proxy (a `proxy` job builds it).
    - The timeline strip under the stage shows every event of the recording; click a tick to
      select it, click anywhere else to look at that moment.
-   Times inside the player are always absolute seconds into the recording ("abs"). */
+   Times inside the player are always absolute seconds into the recording ("abs").
+   Every visible text comes from the "player" catalog; the title, the overlay card and the timeline are drawn again
+   when the UI language changes (relabel, registered in wire()). */
 "use strict";
 
 const PL = (() => {
@@ -23,10 +25,13 @@ const PL = (() => {
     raf: 0, over: null, drag: false,
     loadedEv: null,     // the event whose media is in the <video> (in / out may only be set against it)
     prevA: null,        // last painted playhead: loop fires on crossing the out point, never on a seek past it
+    titleFn: null,      // () => [text, tip] of the header title, drawn again on a language switch
+    overFn: null,       // draws the overlay again (language switch); null when the overlay holds nothing to redraw
+    pxQueued: null,     // the recording whose proxy was just queued from the card
   };
   const FRAME = 1 / 60;
   // which encoder rendered the clip (media/encoder.py: x264 while OBS holds the GPU's NVENC engine)
-  const encLabel = (r) => r.encoder ? ` (${r.encoder === "libx264" ? "x264" : "NVENC"})` : "";
+  const encName = (r) => r.encoder ? (r.encoder === "libx264" ? "x264" : "NVENC") : "";
 
   const fmt = (s, dec = 2) => {
     if (s == null || isNaN(s)) return "-";
@@ -51,24 +56,37 @@ const PL = (() => {
   function overlay(html) {
     const o = $("pl-over");
     if (S.over) { clearInterval(S.over); S.over = null; }
+    S.overFn = null;
     if (!html) { o.hidden = true; return; }
     o.hidden = false; o.innerHTML = html;
   }
-  // a centred card on the dimmed video: a bold title, a line of text, optional actions
+  // an overlay drawn by draw() (which calls overlay() and wires its buttons): drawn again on a language switch
+  function overlayLive(draw) { draw(); S.overFn = draw; }
+  // a centered card on the dimmed video: a bold title, a line of text, optional actions (all HTML, already escaped)
   const card = (title, text, acts) => `<div class="empty plcard"><b>${title}</b>${text || ""}${acts ? `<div class="acts">${acts}</div>` : ""}</div>`;
+  // msg: () => text, so a language switch while it waits shows the new language
   function busy(msg) {
     const t0 = performance.now();
-    overlay(`<div class="plbusy"><div class="spin"></div><div id="pl-busy">${esc(msg)}</div><small class="faint" id="pl-busy-t"></small></div>`);
-    S.over = setInterval(() => { const el = $("pl-busy-t"); if (el) el.textContent = ((performance.now() - t0) / 1000).toFixed(0) + " s"; }, 500);
+    overlayLive(() => {
+      overlay(`<div class="plbusy"><div class="spin"></div><div id="pl-busy">${esc(msg())}</div><small class="faint" id="pl-busy-t"></small></div>`);
+      S.over = setInterval(() => { const el = $("pl-busy-t"); if (el) el.textContent = t("player.busy.seconds", { seconds: fmtNum(Math.round((performance.now() - t0) / 1000)) }); }, 500);
+    });
   }
 
-  // the header title: what is in the player (window + height); the render details go in its tooltip
-  function title(text, tip) {
+  // the header title: what is in the player (window + height); the render details go in its tooltip.
+  // fn() returns [text, tip]; it is kept and called again when the UI language changes
+  function title(fn) {
+    S.titleFn = fn;
+    const [text, tip] = fn();
     const el = $("pl-title"); el.textContent = text;
     if (tip) el.dataset.tip = tip; else delete el.dataset.tip;
   }
-  const renderTip = (r) => `${r.height}p ${r.cached ? "from the clip cache" : `rendered in ${r.render_s} s${encLabel(r)}`}`;
-  const errActs = `<button type="button" class="btn sm pri" id="pl-retry">Try again</button><button type="button" class="btn sm ghost" id="pl-enc">Encoding settings</button>`;
+  const secs = (x, d = 1) => fmtNum(x, { minimumFractionDigits: d, maximumFractionDigits: d });
+  const renderTip = (r) => r.cached ? t("player.tip.cached", { height: r.height })
+    : encName(r) ? t("player.tip.rendered_enc", { height: r.height, seconds: fmtNum(r.render_s), encoder: encName(r) })
+    : t("player.tip.rendered", { height: r.height, seconds: fmtNum(r.render_s) });
+  const kindName = (k) => KIND_NAME[k] || k;
+  const errActs = () => `<button type="button" class="btn sm pri" id="pl-retry">${te("player.err.retry")}</button><button type="button" class="btn sm ghost" id="pl-enc">${te("player.err.encoding")}</button>`;
   function wireErr(retry) {
     const b = $("pl-retry"); if (b) b.onclick = retry;
     const s = $("pl-enc"); if (s) s.onclick = () => { if (typeof openSettings === "function") openSettings("encoding"); };
@@ -108,43 +126,51 @@ const PL = (() => {
       modeButtons(); paint(); return;
     }
     const tok = ++S.token; S.loading = true; S.loadedEv = null; modeButtons();
-    busy(`rendering the clip (${S.h}p)...`);
-    title(`${KIND_NAME[e.kind] || e.kind} at ${tc(e.t_s)} \u00b7 rendering ${S.h}p`);
+    const h = S.h;
+    busy(() => t("player.busy.clip", { height: h }));
+    title(() => [t("player.title.rendering", { kind: kindName(e.kind), time: tc(e.t_s), height: h })]);
     try {
       const r = await api(`/api/events/${e.id}/clip?h=${S.h}&handles=${opts.handles || 5}`);
       if (tok !== S.token) return;
       S.kind = "event"; S.w0 = r.t0; S.w1 = r.t1; S.inT = r.in; S.outT = r.out; S.t = r.t; S.loadedEv = e.id;
-      title(`${tc(r.t0)} \u2013 ${tc(r.t1)} \u00b7 ${r.height}p`, `${KIND_NAME[e.kind] || e.kind} at ${tc(e.t_s)}: ${renderTip(r)}`);
+      title(() => [t("player.title.window", { t0: tc(r.t0), t1: tc(r.t1), height: r.height }),
+        t("player.tip.event", { kind: kindName(e.kind), time: tc(e.t_s), render: renderTip(r) })]);
       setSrc(r.url, S.inT, autoplay);
     } catch (err) {
       if (tok !== S.token) return;
       S.kind = null; S.url = null; v.removeAttribute("src"); v.load();
       if (window.MX) MX.clear(null);
-      overlay(card("Could not render this clip", `<small class="plerr">${esc(err.message)}</small>`, errActs));
-      wireErr(() => playEvent(e, opts));
+      overlayLive(() => {
+        overlay(card(te("player.err.clip"), `<small class="plerr">${esc(err.message)}</small>`, errActs()));
+        wireErr(() => playEvent(e, opts));
+      });
     } finally { if (tok === S.token) S.loading = false; modeButtons(); paint(); }
   }
 
-  async function playAt(recId, t, opts = {}) {
+  async function playAt(recId, at, opts = {}) {
     if (!S.rec || S.rec.id !== recId) return;
-    t = Math.max(0, Math.min(t, dur()));
+    at = Math.max(0, Math.min(at, dur()));
     const autoplay = opts.autoplay !== false;
     if (S.kind === "full" || (S.mode === "full" && hasProxy())) {
-      S.kind = "full"; setSrc(`/api/recordings/${recId}/proxy`, t, autoplay); paint(); return;
+      S.kind = "full"; setSrc(`/api/recordings/${recId}/proxy`, at, autoplay); paint(); return;
     }
-    if (S.url && S.kind && t >= S.w0 && t <= S.w1 - 0.2) { S.token++; S.loading = false; overlay(null); seek(t); if (autoplay && onView()) v.play().catch(() => { }); return; }
+    if (S.url && S.kind && at >= S.w0 && at <= S.w1 - 0.2) { S.token++; S.loading = false; overlay(null); seek(at); if (autoplay && onView()) v.play().catch(() => { }); return; }
     const tok = ++S.token; S.loading = true;
-    busy(`rendering ${tc(t)} (${S.h}p)...`);
+    const h = S.h;
+    busy(() => t("player.busy.at", { time: tc(at), height: h }));
     try {
-      const r = await api(`/api/recordings/${recId}/clip?t0=${Math.max(0, Math.floor(t - 5))}&t1=${Math.ceil(t + 15)}&h=${S.h}`);
+      const r = await api(`/api/recordings/${recId}/clip?t0=${Math.max(0, Math.floor(at - 5))}&t1=${Math.ceil(at + 15)}&h=${S.h}`);
       if (tok !== S.token) return;
       S.kind = "free"; S.ev = null; S.inT = null; S.outT = null; S.t = null; S.w0 = r.t0; S.w1 = r.t1; S.loadedEv = null;
-      title(`${tc(r.t0)} \u2013 ${tc(r.t1)} \u00b7 ${r.height}p`, `around ${tc(t)}: ${renderTip(r)}`);
-      setSrc(r.url, t, autoplay);
+      title(() => [t("player.title.window", { t0: tc(r.t0), t1: tc(r.t1), height: r.height }),
+        t("player.tip.around", { time: tc(at), render: renderTip(r) })]);
+      setSrc(r.url, at, autoplay);
     } catch (err) {
       if (tok !== S.token) return;
-      overlay(card(`Could not render ${tc(t)}`, `<small class="plerr">${esc(err.message)}</small>`, errActs));
-      wireErr(() => playAt(recId, t, opts));
+      overlayLive(() => {
+        overlay(card(te("player.err.at", { time: tc(at) }), `<small class="plerr">${esc(err.message)}</small>`, errActs()));
+        wireErr(() => playAt(recId, at, opts));
+      });
     } finally { if (tok === S.token) S.loading = false; modeButtons(); paint(); }
   }
 
@@ -160,7 +186,7 @@ const PL = (() => {
   const canEdit = () => !!(S.ev && S.loadedEv === S.ev.id && S.url && S.kind && !S.loading);
   // In / Out button: the timecode goes into its .tc span (empty = hidden by CSS); .on = set by hand on this event
   function setTc(id, text, on) {
-    const t = $(id + "-t"); if (t && t.textContent !== text) t.textContent = text;
+    const el = $(id + "-t"); if (el && el.textContent !== text) el.textContent = text;
     $(id).classList.toggle("on", !!on);
   }
 
@@ -188,8 +214,10 @@ const PL = (() => {
       S.w0 = S.w1 = 0; S.loadedEv = null; S.prevA = null;
       v.removeAttribute("src"); v.load();
       if (window.MX) MX.clear(null);
-      title("no clip", rec.name);
-      if (S.mode === "full") showFull(); else overlay(card("Pick an event", "Choose one in Events (or press N): its clip plays here from the pre-roll.<small>Or click the timeline below to look at any moment of this recording.</small>"));
+      const name = rec.name;
+      title(() => [t("player.title.none"), name]);
+      if (S.mode === "full") showFull();
+      else overlayLive(() => overlay(card(te("player.pick.title"), `${te("player.pick.text")}<small>${te("player.pick.more")}</small>`)));
     } else if (S.mode === "full" && hasProxy() && S.kind !== "full") {
       // a proxy just became available; a clip playing because there was none is left alone otherwise
       showFull();
@@ -204,33 +232,42 @@ const PL = (() => {
       const at = S.kind && S.url ? abs() : (S.inT != null ? S.inT : 0);
       S.kind = "full"; S.url = null; overlay(null);
       setSrc(`/api/recordings/${S.rec.id}/proxy`, at, false);
-      title(`Proxy ${ST.settings ? ST.settings.proxies.height : 536}p \u00b7 whole recording`, `${S.rec.name}: the whole-recording proxy`);
+      const ph = ST.settings ? ST.settings.proxies.height : 536, name = S.rec.name;
+      title(() => [t("player.title.proxy", { height: ph }), t("player.tip.proxy", { name })]);
       return;
     }
     // no proxy: drop the clip too, so the next event / timeline click loads afresh (setSrc's same-URL
     // shortcut would otherwise keep the clip playing with the track panel hidden)
     S.kind = null; S.url = null; v.removeAttribute("src"); v.load();
     if (window.MX) MX.clear(null);
-    title("No proxy yet", `${S.rec.name}: no whole-recording proxy yet`);
+    const name = S.rec.name;
+    title(() => [t("player.title.no_proxy"), t("player.tip.no_proxy", { name })]);
+    overlayLive(noProxyCard);
+  }
+  // the "no proxy" card, with live progress while a proxy job runs (drawn again on a language switch)
+  const pxMsg = (j) => t("player.proxy.progress", { message: (j.message && srvText(j, "message")) || t("player.proxy.building"), percent: pct(j.progress) });
+  function noProxyCard() {
+    if (!S.rec) return;
     const jp = ST.jobprog[S.rec.id];
-    const queued = (S.rec.jobs || []).some(j => j.stage === "proxy" && (j.state === "queued" || j.state === "running"));
+    const queued = S.pxQueued === S.rec.id || (S.rec.jobs || []).some(j => j.stage === "proxy" && (j.state === "queued" || j.state === "running"));
     const ph = ST.settings ? ST.settings.proxies.height : 536;
     const building = !!(jp && jp.stage === "proxy");
-    overlay(card("No proxy for this recording yet",
-      `A ${ph}p proxy is a copy of the whole ${fmtDurShort(dur())} file for scrubbing it end to end (several times realtime).`
-      + `<div class="plprog"${building ? "" : " hidden"}><span class="badge acc" id="pl-pxmsg">${building ? `${esc(jp.message || "building")} ${pct(jp.progress)}` : ""}</span><div class="pg"><i id="pl-pxbar" style="width:${building ? Math.round((jp.progress || 0) * 100) : 0}%"></i></div></div>`,
-      (building ? "" : queued ? `<span class="badge" id="pl-pxq">queued</span>` : `<button type="button" class="btn sm pri" id="pl-mkproxy">Build proxy</button>`)
-      + `<button type="button" class="btn sm" id="pl-allproxy" data-tip="Queue proxies for every recording with events">Proxies for all with events</button>`));
-    const b = $("pl-mkproxy"); if (b) b.onclick = () => post(`/api/recordings/${S.rec.id}/proxy`).then(() => { toast("proxy queued"); b.outerHTML = `<span class="badge" id="pl-pxq">queued</span>`; }).catch(err => toast(err.message, 5000));
-    $("pl-allproxy").onclick = () => post("/api/proxies/build-all").then(r => toast(`queued ${r.queued} proxies (${r.candidates} recordings with events lack one)`)).catch(err => toast(err.message, 5000));
-    if (S.over) clearInterval(S.over);
+    const qBadge = `<span class="badge" id="pl-pxq">${te("player.proxy.queued")}</span>`;
+    overlay(card(te("player.proxy.card_title"),
+      te("player.proxy.card_text", { height: ph, duration: fmtDurShort(dur()) })
+      + `<div class="plprog"${building ? "" : " hidden"}><span class="badge acc" id="pl-pxmsg">${building ? esc(pxMsg(jp)) : ""}</span><div class="pg"><i id="pl-pxbar" style="width:${building ? Math.round((jp.progress || 0) * 100) : 0}%"></i></div></div>`,
+      (building ? "" : queued ? qBadge : `<button type="button" class="btn sm pri" id="pl-mkproxy">${te("player.proxy.build")}</button>`)
+      + `<button type="button" class="btn sm" id="pl-allproxy" data-tip="${te("player.proxy.all_tip")}">${te("player.proxy.all")}</button>`));
+    const rid = S.rec.id;
+    const b = $("pl-mkproxy"); if (b) b.onclick = () => post(`/api/recordings/${rid}/proxy`).then(() => { toast(t("player.proxy.queued_toast")); S.pxQueued = rid; if (b.isConnected) b.outerHTML = qBadge; }).catch(err => toast(err.message, 5000));
+    $("pl-allproxy").onclick = () => post("/api/proxies/build-all").then(r => toast(t("player.proxy.all_toast", { count: r.queued, candidates: fmtNum(r.candidates) }))).catch(err => toast(err.message, 5000));
     S.over = setInterval(() => {
       const j = ST.jobprog[S.rec && S.rec.id];
       if (!(j && j.stage === "proxy" && S.mode === "full" && !hasProxy())) return;
       const box = $("pl-over").querySelector(".plprog"); if (box) box.hidden = false;
       const q = $("pl-pxq"); if (q) q.remove();
       const mk = $("pl-mkproxy"); if (mk) mk.remove();
-      const m = $("pl-pxmsg"); if (m) m.textContent = `${j.message || "building"} ${pct(j.progress)}`;
+      const m = $("pl-pxmsg"); if (m) m.textContent = pxMsg(j);
       const bar = $("pl-pxbar"); if (bar) bar.style.width = Math.round((j.progress || 0) * 100) + "%";
     }, 1000);
   }
@@ -245,24 +282,24 @@ const PL = (() => {
       if (window.MX) MX.clear(null);
       if (S.ev) playEvent(S.ev, { autoplay: false });
       else if (at != null && S.rec) playAt(S.rec.id, at, { autoplay: false });
-      else overlay(card("Pick an event", "Choose one in Events (or press N), or click the timeline below."));
+      else overlayLive(() => overlay(card(te("player.pick.title"), te("player.pick.short"))));
     }
   }
   function modeButtons() {
     $("pl-modes").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
     const full = $("pl-modes").querySelector('[data-mode="full"]');
     full.classList.toggle("noproxy", !hasProxy());
-    full.dataset.tip = hasProxy() ? "The whole recording off its proxy" : "The whole recording: no proxy yet (build one from here)";
+    full.dataset.tip = hasProxy() ? t("player.mode.full_tip") : t("player.mode.full_noproxy_tip");
     ["pl-in", "pl-out", "pl-reset", "pl-wider"].forEach(id => $(id).disabled = !canEdit());
     $("pl-loop").classList.toggle("on", !!S.loop);
   }
 
   /* ---------- clip bounds ---------- */
   async function setBound(which, val) {
-    if (!canEdit()) { toast("wait for this event's clip to load"); return; }
+    if (!canEdit()) { toast(t("player.bound.wait")); return; }
     const body = which === "reset" ? { clip_in: null, clip_out: null } : { [which === "in" ? "clip_in" : "clip_out"]: Math.round(val * 1000) / 1000 };
-    if (which === "in" && S.outT != null && val >= S.outT) { toast("in must be before out"); return; }
-    if (which === "out" && S.inT != null && val <= S.inT) { toast("out must be after in"); return; }
+    if (which === "in" && S.outT != null && val >= S.outT) { toast(t("player.bound.in_before_out")); return; }
+    if (which === "out" && S.inT != null && val <= S.inT) { toast(t("player.bound.out_after_in")); return; }
     try {
       const u = await post(`/api/events/${S.ev.id}/clip`, body);
       Object.assign(S.ev, u);
@@ -270,18 +307,19 @@ const PL = (() => {
       if (ST.event && ST.event.id === u.id) Object.assign(ST.event, u);
       S.inT = u.clip_in != null ? u.clip_in : Math.max(0, u.t_s - preRoll());
       S.outT = u.clip_out != null ? u.clip_out : Math.min(dur() || 1e9, u.t_s + postRoll());
-      toast(which === "reset" ? "clip back to the pre / post roll" : `${which} = ${fmt(val)} (clip ${(S.outT - S.inT).toFixed(1)} s)`);
+      toast(which === "reset" ? t("player.bound.reset")
+        : t(which === "in" ? "player.bound.in_set" : "player.bound.out_set", { time: fmt(val), length: secs(S.outT - S.inT) }));
       if (S.kind === "event" && (S.inT < S.w0 || S.outT > S.w1)) playEvent(S.ev, { autoplay: !v.paused });
       paint(); renderTimeline();
     } catch (err) { toast(err.message, 5000); }
   }
 
   async function markHere() {
-    if (!S.rec || !S.kind) { toast("nothing playing"); return; }
-    const t = abs(); v.pause();
+    if (!S.rec || !S.kind) { toast(t("player.mark.nothing")); return; }
+    const at = abs(); v.pause();
     try {
-      const e = await post(`/api/recordings/${S.rec.id}/events`, { t_s: Math.round(t * 1000) / 1000, note: "" });
-      toast(`manual mark at ${fmt(t)}`);
+      const e = await post(`/api/recordings/${S.rec.id}/events`, { t_s: Math.round(at * 1000) / 1000, note: "" });
+      toast(t("player.mark.done", { time: fmt(at) }));
       await loadEvents(S.rec.id);
       ST.event = ST.events.list.find(x => x.id === e.id) || e;
       S.ev = ST.event; S.t = e.t_s; S.loadedEv = e.id;     // the loaded media holds the mark (it is the playhead)
@@ -306,12 +344,12 @@ const PL = (() => {
     if (live && S.rec && ST.events.rec_id === S.rec.id) {
       for (const e of ST.events.list) {
         if (e.t_s < s0 || e.t_s > s1 || (S.ev && e.id === S.ev.id) || e.status === "false") continue;
-        const d = document.createElement("div"); d.className = "evt"; d.style.left = pc(e.t_s); d.style.background = KIND_COLORS[e.kind] || "var(--dim)"; d.title = `${KIND_NAME[e.kind] || e.kind} ${tc(e.t_s)}`;
+        const d = document.createElement("div"); d.className = "evt"; d.style.left = pc(e.t_s); d.style.background = KIND_COLORS[e.kind] || "var(--dim)"; d.title = t("player.evt.title", { kind: kindName(e.kind), time: tc(e.t_s) });
         bar.insertBefore(d, hd);                                    // under the playhead
       }
     }
     const pl = $("pl-play"); const ic = v.paused ? "play" : "pause";
-    if (pl.dataset.ic !== ic) { pl.dataset.ic = ic; pl.innerHTML = icon(ic); pl.setAttribute("aria-label", v.paused ? "Play" : "Pause"); }
+    if (pl.dataset.ic !== ic) { pl.dataset.ic = ic; pl.innerHTML = icon(ic); pl.setAttribute("aria-label", v.paused ? t("player.play_aria") : t("player.pause_aria")); }
     const pip = $("pl-pip"); if (pip) pip.hidden = !(live && S.loop && S.kind !== "free" && S.kind !== "full");
     const hov = $("pl-hov"); if (hov && !live) hov.hidden = true;
     const played = bar.querySelector(".played");
@@ -324,9 +362,9 @@ const PL = (() => {
     const tm = $("pl-time");
     const txt = a != null ? fmt1(a) : "-", end = a != null ? ` / ${fmt1(S.kind === "full" ? dur() : s1)}` : "";
     if (tm.dataset.v !== txt + end) { tm.dataset.v = txt + end; tm.innerHTML = `<b>${txt}</b><span class="faint">${end}</span>`; }
-    const rel = a != null && S.t != null ? `${a - S.t >= 0 ? "+" : ""}${(a - S.t).toFixed(2)} s from the event` : "";
-    const clipLen = bounds ? `clip ${fmt(S.inT)} \u2013 ${fmt(S.outT)} = ${(S.outT - S.inT).toFixed(1)} s` : "";
-    const tip = [a != null ? `${fmt(a)} of ${fmt(dur())}` : "", rel, clipLen].filter(Boolean).join(" \u00b7 ");
+    const rel = a != null && S.t != null ? t("player.time.rel", { offset: fmtNum(a - S.t, { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: "always" }) }) : "";
+    const clipLen = bounds ? t("player.time.clip", { in: fmt(S.inT), out: fmt(S.outT), length: secs(S.outT - S.inT) }) : "";
+    const tip = [a != null ? t("player.time.pos", { pos: fmt(a), total: fmt(dur()) }) : "", rel, clipLen].filter(Boolean).join(" \u00b7 ");
     if (tip) tm.dataset.tip = tip; else delete tm.dataset.tip;
     paintTimelineHead(a);
     if (window.MX) MX.paint(a, S.kind === "free" ? null : S.inT, S.kind === "free" ? null : S.outT);
@@ -359,7 +397,9 @@ const PL = (() => {
     if (S.rec && S.rec.id === rec.id && S.kind && S.kind !== "full" && S.url) html += `<div class="win" style="left:${(S.w0 / D * 100).toFixed(3)}%;width:${((S.w1 - S.w0) / D * 100).toFixed(3)}%"></div>`;
     for (const e of evs) {
       if (ST.chips[e.kind] === false) continue;
-      const tip = `${KIND_NAME[e.kind] || e.kind} \u00b7 ${tc(e.t_s)} \u00b7 score ${e.score.toFixed(2)}${e.status !== "new" ? " \u00b7 " + (e.status === "false" ? "false positive" : e.status) : ""}`;
+      const tp = { kind: kindName(e.kind), time: tc(e.t_s), score: fmtNum(e.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) };
+      const tip = e.status === "new" ? t("player.tl.tip", tp)
+        : t("player.tl.tip_status", Object.assign(tp, { status: e.status === "false" ? t("player.tl.status_false") : e.status === "kept" ? t("player.tl.status_kept") : e.status }));
       html += `<div class="tk ${e.status === "false" ? "false" : ""} ${ST.event && ST.event.id === e.id ? "cur" : ""}" data-id="${e.id}" style="left:${(e.t_s / D * 100).toFixed(3)}%;background:${KIND_COLORS[e.kind] || "var(--dim)"};--kc:${KIND_COLORS[e.kind] || "var(--dim)"}" data-tip="${esc(tip)}"></div>`;
     }
     html += `<div class="ph" id="tl-ph" hidden></div><div class="hover" id="tl-hover" hidden></div>`;
@@ -367,10 +407,10 @@ const PL = (() => {
     // the line above the strip: "Whole recording  9:58  * 1 kill  * 5 voice ... (hover time)"; kinds the filter hides are dimmed
     const counts = {}; for (const e of evs) if (e.status !== "false") counts[e.kind] = (counts[e.kind] || 0) + 1;
     const kinds = Object.keys(KIND_COLORS).filter(k => counts[k]).map(k =>
-      `<span class="tlk${ST.chips[k] === false ? " off" : ""}"><i style="background:${KIND_COLORS[k]}"></i>${counts[k]} ${KIND_LABEL[k] || k}</span>`).join("");
-    const none = rec.stages && rec.stages.detect ? "no events" : "not detected yet";
-    $("tl-info").innerHTML = `<b>Whole recording</b><span class="num">${fmtDurShort(D)}</span>${kinds || `<span class="faint">${none}</span>`}`
-      + (hasProxyRec(rec) ? "" : `<span class="faint" data-tip="Full recording mode needs a proxy (build it from the player)">no proxy</span>`)
+      `<span class="tlk${ST.chips[k] === false ? " off" : ""}"><i style="background:${KIND_COLORS[k]}"></i>${kindCount(k, counts[k])}</span>`).join("");
+    const none = rec.stages && rec.stages.detect ? te("player.tl.no_events") : te("player.tl.not_detected");
+    $("tl-info").innerHTML = `<b>${te("player.tl.whole")}</b><span class="num">${fmtDurShort(D)}</span>${kinds || `<span class="faint">${none}</span>`}`
+      + (hasProxyRec(rec) ? "" : `<span class="faint" data-tip="${te("player.tl.no_proxy_tip")}">${te("player.tl.no_proxy")}</span>`)
       + `<span class="spacer"></span><span id="tl-at" class="num"></span>`;
     tr.querySelectorAll(".tk").forEach(k => k.onclick = (ev) => {
       ev.stopPropagation();
@@ -380,6 +420,9 @@ const PL = (() => {
     });
     paintTimelineHead(S.kind && S.url ? abs() : null);
   }
+  // "3 kills": a plural text per event type; a type without one shows its lower-case name (escaped)
+  const kindCount = (k, n) => I18N.has("player.tl.kind." + k) ? te("player.tl.kind." + k, { count: n })
+    : te("player.tl.kind_other", { count: n, kind: KIND_LABEL[k] || k });
   const hasProxyRec = (rec) => !!(rec.proxy_path && rec.stages && rec.stages.proxy && rec.stages.proxy.state === "done");
   function paintTimelineHead(a) {
     const ph = $("tl-ph"); if (!ph || !ST.detail || !S.rec || ST.detail.id !== S.rec.id) return;
@@ -413,7 +456,7 @@ const PL = (() => {
     if (!$("pl-pip")) {
       const pip = document.createElement("div"); pip.id = "pl-pip"; pip.className = "plpip"; pip.hidden = true;
       pip.style.cssText = "position:absolute;left:12px;top:12px;pointer-events:none";
-      pip.innerHTML = `<span class="badge acc">${icon("loop")}Loop in \u2192 out</span>`;
+      pip.innerHTML = `<span class="badge acc">${icon("loop")}<span class="pl-pip-t">${te("player.pip.loop")}</span></span>`;
       $("pl-box").appendChild(pip);
     }
     // tooltips through the shell's [data-tip] instead of the browser's title
@@ -468,17 +511,17 @@ const PL = (() => {
       S.url = null;
       const now = performance.now(); const again = S.lastErr && S.lastErr.url === url && now - S.lastErr.t < 5000;
       S.lastErr = { url, t: now };
-      if (again && S.kind !== "full") { overlay(`<div class="empty">This clip could not be played.<br><small>${esc(url)}</small></div>`); return; }
+      if (again && S.kind !== "full") { overlayLive(() => overlay(`<div class="empty">${te("player.err.play_clip")}<br><small>${esc(url)}</small></div>`)); return; }
       if (S.kind === "event" && S.ev) playEvent(S.ev, { autoplay: S.autoplay });
       else if (S.kind === "free" && S.rec) { S.w0 = S.w1 = 0; playAt(S.rec.id, at, { autoplay: S.autoplay }); }
-      else if (S.kind === "full") overlay(`<div class="empty">The proxy could not be played.<br><small>${esc(url)}</small></div>`);
+      else if (S.kind === "full") overlayLive(() => overlay(`<div class="empty">${te("player.err.play_proxy")}<br><small>${esc(url)}</small></div>`));
     });
     // timeline: click anywhere = look at that moment
     const tr = $("tl-track");
     tr.onclick = (e) => {
       if (!ST.detail || !ST.detail.duration_s) return;
-      const r = tr.getBoundingClientRect(); const t = (e.clientX - r.left) / r.width * ST.detail.duration_s;
-      playAt(ST.detail.id, t);
+      const r = tr.getBoundingClientRect(); const at = (e.clientX - r.left) / r.width * ST.detail.duration_s;
+      playAt(ST.detail.id, at);
     };
     tr.onmousemove = (e) => {
       if (!ST.detail || !ST.detail.duration_s) return;
@@ -505,12 +548,26 @@ const PL = (() => {
     });
     S.mode = LS("mode", "clip") === "full" ? "full" : "clip";
     modeButtons();
+    title(() => [t("player.title.none")]);              // the static "no clip" of index.html, in the UI language
+    I18N.onChange(relabel);
+  }
+
+  // a UI language switch: i18n.js has just put the index.html texts back (the mode buttons' title included), so
+  // move those titles into data-tip again, then draw this module's own texts in the new language
+  function relabel() {
+    $("pl-modes").querySelectorAll("button[title]").forEach(b => { b.dataset.tip = b.title; b.removeAttribute("title"); });
+    const pt = document.querySelector("#pl-pip .pl-pip-t"); if (pt) pt.textContent = t("player.pip.loop");
+    if (S.titleFn) title(S.titleFn);
+    const o = $("pl-over");
+    if (S.overFn && !o.hidden) overlayLive(S.overFn);
+    const pl = $("pl-play"); if (pl) delete pl.dataset.ic;      // paint() sets the play / pause label again
+    modeButtons(); paint(); renderTimeline();
   }
 
   wire();
   return {
     playEvent, playAt, setRecording, renderTimeline, clearEvent, syncEvent,
-    seekAbs: (recId, t) => playAt(recId, t),
+    seekAbs: (recId, at) => playAt(recId, at),
     seekTo: (a) => { if (S.kind && S.url) seek(a); },
     repaint: () => paint(),
     pause: () => v.pause(),

@@ -1,0 +1,109 @@
+{
+  "@": "Hrvatski (hr). Reproduktor isječaka. Ulaz / izlaz = početna i završna točka isječka.",
+  "title.none": "nema isječka",
+  "title.rendering": "{kind} u {time} · renderiram {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · cijela snimka",
+  "title.no_proxy": "Još nema proxyja",
+  "tip.event": "{kind} u {time}: {render}",
+  "tip.around": "oko {time}: {render}",
+  "tip.cached": "{height}p iz predmemorije isječaka",
+  "tip.rendered": "{height}p renderirano za {seconds} s",
+  "tip.rendered_enc": "{height}p renderirano za {seconds} s ({encoder})",
+  "tip.proxy": "{name}: proxy cijele snimke",
+  "tip.no_proxy": "{name}: još nema proxyja cijele snimke",
+  "busy.clip": "renderiram isječak ({height}p)...",
+  "busy.at": "renderiram {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Ovaj isječak nije moguće renderirati",
+  "err.at": "Nije moguće renderirati {time}",
+  "err.retry": "Pokušaj ponovno",
+  "err.encoding": "Postavke kodiranja",
+  "err.play_clip": "Ovaj isječak nije moguće reproducirati.",
+  "err.play_proxy": "Proxy nije moguće reproducirati.",
+  "pick.title": "Odaberi događaj",
+  "pick.text": "Odaberi jedan u Događajima (ili pritisni N): njegov se isječak ovdje reproducira od predtrajanja.",
+  "pick.more": "Ili klikni vremensku crtu ispod da pogledaš bilo koji trenutak ove snimke.",
+  "pick.short": "Odaberi jedan u Događajima (ili pritisni N) ili klikni vremensku crtu ispod.",
+  "proxy.card_title": "Za ovu snimku još nema proxyja",
+  "proxy.card_text": "Proxy od {height}p je kopija cijele datoteke ({duration}) za premotavanje od početka do kraja (izrađuje se nekoliko puta brže od stvarnog vremena).",
+  "proxy.building": "izrađuje se",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "u redu čekanja",
+  "proxy.build": "Izradi proxy",
+  "proxy.all": "Proxyji za sve s događajima",
+  "proxy.all_tip": "Stavi u red proxyje za sve snimke s događajima",
+  "proxy.queued_toast": "proxy u redu čekanja",
+  "proxy.all_toast": {
+    "one": "u red stavljen {count} proxy ({candidates} snimki s događajima nema ga)",
+    "few": "u red stavljena {count} proxyja ({candidates} snimki s događajima nema ga)",
+    "other": "u red stavljeno {count} proxyja ({candidates} snimki s događajima nema ga)"
+  },
+  "mode.full_tip": "Cijela snimka, reproducirana iz proxyja",
+  "mode.full_noproxy_tip": "Cijela snimka: još nema proxyja (izradi ga odavde)",
+  "bound.wait": "pričekaj da se učita isječak ovog događaja",
+  "bound.in_before_out": "ulaz mora biti prije izlaza",
+  "bound.out_after_in": "izlaz mora biti nakon ulaza",
+  "bound.reset": "isječak vraćen na pred / potrajanje",
+  "bound.in_set": "ulaz = {time} (isječak {length} s)",
+  "bound.out_set": "izlaz = {time} (isječak {length} s)",
+  "mark.nothing": "ništa se ne reproducira",
+  "mark.done": "ručna oznaka u {time}",
+  "play_aria": "Reproduciraj",
+  "pause_aria": "Pauziraj",
+  "time.pos": "{pos} od {total}",
+  "time.rel": "{offset} s od događaja",
+  "time.clip": "isječak {in} – {out} = {length} s",
+  "pip.loop": "Petlja ulaz → izlaz",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · ocjena {score}",
+  "tl.tip_status": "{kind} · {time} · ocjena {score} · {status}",
+  "tl.status_kept": "zadržano",
+  "tl.status_false": "lažno pozitivno",
+  "tl.whole": "Cijela snimka",
+  "tl.no_events": "nema događaja",
+  "tl.not_detected": "još nije detektirano",
+  "tl.no_proxy": "nema proxyja",
+  "tl.no_proxy_tip": "Način cijele snimke treba proxy (izradi ga iz reproduktora)",
+  "tl.kind.kill": {
+    "one": "{count} ubojstvo",
+    "few": "{count} ubojstva",
+    "other": "{count} ubojstava"
+  },
+  "tl.kind.assist": {
+    "one": "{count} asistencija",
+    "few": "{count} asistencije",
+    "other": "{count} asistencija"
+  },
+  "tl.kind.death": {
+    "one": "{count} smrt",
+    "few": "{count} smrti",
+    "other": "{count} smrti"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} uočen",
+    "few": "{count} uočena",
+    "other": "{count} uočenih"
+  },
+  "tl.kind.revive": {
+    "one": "{count} oživljavanje",
+    "few": "{count} oživljavanja",
+    "other": "{count} oživljavanja"
+  },
+  "tl.kind.squad": {
+    "one": "{count} ekipa",
+    "few": "{count} ekipa",
+    "other": "{count} ekipa"
+  },
+  "tl.kind.voice": {
+    "one": "{count} glas",
+    "few": "{count} glasa",
+    "other": "{count} glasova"
+  },
+  "tl.kind.manual": {
+    "one": "{count} ručni",
+    "few": "{count} ručna",
+    "other": "{count} ručnih"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

@@ -6,11 +6,13 @@ one streamer's footage after their zones changed. The zones editor (web/js/zones
 import logging
 import time
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import FileResponse, JSONResponse
 
 from core import zones
 from core.library import rec_to_dict, vod_provider
+from core.messages import http_error
+from utils.i18n import app_error
 
 logger = logging.getLogger("wclips.zones")
 
@@ -37,13 +39,13 @@ def build(ctx) -> APIRouter:
         except (TypeError, ValueError):
             rec = None
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         return rec
 
     def _tpl(tpl_id: int) -> dict:
         t = zones.get(ctx.db, tpl_id)
         if t is None:
-            raise HTTPException(404, "no such template")
+            raise app_error(404, "server.zones.no_template", "That zone template does not exist anymore.")
         return t
 
     def _changed(action: str, **kw) -> None:
@@ -122,7 +124,7 @@ def build(ctx) -> APIRouter:
                              effective_from=body.get("effective_from") or 0, note=body.get("note") or "",
                              sample_w=body.get("sample_w"), sample_h=body.get("sample_h"))
         except ValueError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         err = _grab(t["id"], body) if body.get("sample_rec_id") not in (None, "") else None
         _changed("created", id=t["id"], provider=t["provider"], channel_key=t["channel_key"])
         out = _out(zones.get(ctx.db, t["id"]))
@@ -140,7 +142,7 @@ def build(ctx) -> APIRouter:
         try:
             t = zones.update(ctx.db, tpl_id, **fields) if fields else _tpl(tpl_id)
         except ValueError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         err = _grab(tpl_id, body) if grab else None
         _changed("updated", id=tpl_id, provider=t["provider"], channel_key=t["channel_key"])
         out = _out(zones.get(ctx.db, tpl_id))
@@ -159,7 +161,7 @@ def build(ctx) -> APIRouter:
     def new_version(tpl_id: int, body: dict):
         _tpl(tpl_id)
         if "effective_from" not in body:
-            raise HTTPException(400, "effective_from required")
+            raise app_error(400, "server.zones.date_required", "Pick the date this version starts from.")
         grab = body.get("sample_rec_id") not in (None, "")
         if grab:
             _rec(body["sample_rec_id"])
@@ -167,7 +169,7 @@ def build(ctx) -> APIRouter:
         try:
             t = zones.new_version(ctx.db, tpl_id, body.get("effective_from") or 0, **over)
         except ValueError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         err = _grab(t["id"], body) if grab else None
         _changed("created", id=t["id"], provider=t["provider"], channel_key=t["channel_key"])
         out = _out(zones.get(ctx.db, t["id"]))
@@ -179,13 +181,13 @@ def build(ctx) -> APIRouter:
     def sample(tpl_id: int):
         p = zones.sample_path(_tpl(tpl_id).get("sample_jpg"))
         if p is None:
-            raise HTTPException(404, "this template has no sample frame")
+            raise app_error(404, "server.zones.no_sample", "This template has no sample frame.")
         return FileResponse(str(p), media_type="image/jpeg", headers={"Cache-Control": "no-cache"})
 
     @r.get("/api/zones/default")
     def default(width: int = 3440, height: int = 1440):
         if not (16 <= width <= 16384 and 16 <= height <= 16384):
-            raise HTTPException(400, "width / height out of range")
+            raise app_error(400, "server.zones.bad_size", "The width or height is out of range.")
         z = zones.default_zones(width, height)
         return {"zones": z, "width": width, "height": height,
                 "geometry": zones.geometry_json(zones.geometry(z, width, height))}
@@ -215,9 +217,9 @@ def build(ctx) -> APIRouter:
         try:
             zones.pin(ctx.db, rec_id, None if tid in (None, "") else int(tid))
         except (TypeError, ValueError):
-            raise HTTPException(400, "template_id must be a number or null")
+            raise app_error(400, "server.bad_request", "The request was not understood.")
         except zones.NotFound as e:
-            raise HTTPException(404, str(e))
+            raise http_error(404, e)
         fresh = ctx.db.one("SELECT * FROM recordings WHERE id=?", (rec_id,))
         ctx.bus.publish("recording", action="updated", rec=rec_to_dict(fresh))
         return {"ok": True, "rec_id": rec_id, "template_id": fresh["zone_template_id"]}
@@ -228,7 +230,7 @@ def build(ctx) -> APIRouter:
         try:
             id_list = [int(x) for x in ids.split(",") if x.strip()] if ids else None
         except ValueError:
-            raise HTTPException(400, "ids must be numbers separated by commas")
+            raise app_error(400, "server.bad_request", "The request was not understood.")
         data = zones.export(ctx.db, id_list, include_samples=bool(samples))
         fname = f"wardogclips-zones-{time.strftime('%Y-%m-%d')}.json"
         return JSONResponse(data, headers={"Content-Disposition": f'attachment; filename="{fname}"'})
@@ -236,11 +238,11 @@ def build(ctx) -> APIRouter:
     @r.post("/api/zones/import")
     def import_(body: dict):
         if "data" not in body:
-            raise HTTPException(400, "data required (the exported JSON)")
+            raise app_error(400, "server.zones.import_empty", "Choose a zone template file to import.")
         try:
             res = zones.import_(ctx.db, body["data"], overwrite=bool(body.get("overwrite")))
         except ValueError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         if res["added"] or res["updated"]:
             _changed("imported", added=res["added"], updated=res["updated"])
         return res
@@ -251,7 +253,7 @@ def build(ctx) -> APIRouter:
         provider = zones.canon_provider(body.get("provider") or "")
         key = zones.canon_key(body.get("channel_key") or "")
         if not provider or not key:
-            raise HTTPException(400, "provider and channel_key required")
+            raise app_error(400, "server.zones.streamer_required", "Pick a site and a streamer.")
         recs = ctx.db.query("SELECT * FROM recordings WHERE status='probed' AND missing=0")
         mine = []
         for rec in recs:

@@ -2,7 +2,7 @@
    #main carries .zn-open and every other main-area element is hidden by this rule (not by its `hidden` flag, which
    the player and the mixer keep toggling), so closing the view leaves them exactly as their own code last set them.
    The shell folds the side panel while the view is open (app.js onMainView); the view brings its own streamer
-   column, styled like the side panel. Colours = the tokens in style.css; the four zone colours are the boxes' own. */
+   column, styled like the side panel. Colors = the tokens in style.css; the four zone colors are the boxes' own. */
 #main.zn-open > :not(#zones-view) { display: none !important; }
 #main.zn-open { padding: 0; overflow: hidden; }
 
@@ -27,12 +27,14 @@
 .zn-item:hover { background: var(--surface); }
 .zn-item.on { background: var(--accent-bg); border-color: rgba(107,140,255,.25); }
 .zn-item > .prov, .zn-item > .badge { grid-area: pv; justify-self: start; }
-.zn-item .zn-nm { grid-area: nm; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--text); }
-.zn-item .zn-ct { grid-area: ct; color: var(--muted); font-size: var(--fs-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.zn-item .zn-nm { grid-area: nm; min-width: 0; overflow: hidden; font-weight: 500; color: var(--text); overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.35; }
+.zn-item .zn-ct { grid-area: ct; color: var(--muted); font-size: var(--fs-xs); min-width: 0; overflow: hidden; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.35; }
 /* version rows: no provider badge -> the name on top, the date under it, a "this rec" badge on the right */
 .zn-tpls .zn-item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "nm pv" "ct pv"; }
 .zn-tpls .zn-item > .badge { justify-self: end; }
-.zn-tpls .zn-item .zn-nm { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.35; }
+.zn-tpls .zn-item .zn-nm { white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.35; }
 .zn-tpls .zn-item:not(:has(.zn-ct)) { grid-template-areas: "nm pv"; }
 .zn-list .empty { padding: 24px 12px; }
 .prov.p-obs { background: var(--accent-bg); color: var(--accent-2); }
@@ -45,10 +47,10 @@
 .zn-l1 h2 { margin: 0; font-size: var(--fs-l); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .zn-src { color: var(--muted); font-size: var(--fs-xs); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .zn-src:empty { display: none; }
-.zn-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.zn-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; min-width: 0; }
 .zn-acts .btn svg.i { width: 14px; height: 14px; }
 
-/* labelled fields: a quiet label in front of the control */
+/* labeled fields: a quiet label in front of the control */
 .zn-f { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: var(--fs-s); white-space: nowrap; min-width: 0; }
 .zn-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; flex: none; padding: 8px 12px; background: var(--surface);
            border: 1px solid var(--line); border-radius: var(--r); }

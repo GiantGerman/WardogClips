@@ -1,4 +1,5 @@
-"""Frame readers over ffmpeg (NVDEC when available), read-only on the footage.
+"""Frame readers over ffmpeg (GPU decoding when a card may be used: NVDEC on NVIDIA, D3D11VA on AMD / Intel --
+utils/gpus.py picks the card), read-only on the footage.
 
 - `keyframe_pass`: every keyframe (OBS: one per 2 s) -> the HUD crops stacked into one
   raw frame on a pipe, timestamps from `showinfo` on stderr. 300 frames for a 10-minute
@@ -16,7 +17,8 @@ import time
 
 import numpy as np
 
-from utils import paths
+from core import workmode
+from utils import gpus, paths
 from vision.hud import Roi
 
 logger = logging.getLogger("wclips.frames")
@@ -82,8 +84,9 @@ def keyframe_pass(path: str, width: int, height: int, rois: dict[str, Roi], smal
              f"[c]scale={w}:{small_h}[c2];"
              f"[a2][b2][c2]vstack=inputs=3,showinfo[o]")
     pre = ["-v", "info", "-nostdin", "-nostats"]
-    if hwaccel:
-        pre += ["-hwaccel", "cuda"]
+    hw_args = gpus.decode_args() if hwaccel else []
+    hwaccel = bool(hw_args)                  # no usable card: straight to the CPU
+    pre += hw_args
     if keyframes_only:
         pre += ["-skip_frame", "nokey"]
     inp = (["-ss", str(start_s)] if start_s else []) + ["-i", path]
@@ -94,8 +97,8 @@ def keyframe_pass(path: str, width: int, height: int, rois: dict[str, Roi], smal
     frame_h = tk.h + fd.h + small_h
     nbytes = w * frame_h * 3
     t0 = time.monotonic()
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False, creationflags=_NO_WINDOW,
-                            bufsize=nbytes * 4)
+    proc = workmode.track(subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False,
+                                           creationflags=workmode.child_flags(_NO_WINDOW), bufsize=nbytes * 4))
     pts: list[float] = []
     tail: list[str] = []
     done = threading.Event()
@@ -133,7 +136,8 @@ def keyframe_pass(path: str, width: int, height: int, rois: dict[str, Roi], smal
         th.join(timeout=5)
     if rc not in (0, None) and n == 0:
         if hwaccel:
-            logger.warning("[Frames] NVDEC pass failed (%s) -- retrying on the CPU", (tail[-1] if tail else rc))
+            logger.warning("[Frames] %s pass failed (%s) -- retrying on the CPU", gpus.decode_label(hw_args),
+                           (tail[-1] if tail else rc))
             yield from keyframe_pass(path, width, height, rois, small_w, hwaccel=False, keyframes_only=keyframes_only, fps=fps,
                                      start_s=start_s, skip_upto=skip_upto)
             return
@@ -141,13 +145,14 @@ def keyframe_pass(path: str, width: int, height: int, rois: dict[str, Roi], smal
     if rc not in (0, None):
         # died part-way: ending quietly here would make detect take a cut pass for the whole file
         if hwaccel and last_t is not None:
-            logger.warning("[Frames] NVDEC pass died at %.1fs (%s) -- the rest on the CPU", last_t, (tail[-1] if tail else rc))
+            logger.warning("[Frames] %s pass died at %.1fs (%s) -- the rest on the CPU", gpus.decode_label(hw_args), last_t,
+                           (tail[-1] if tail else rc))
             yield from keyframe_pass(path, width, height, rois, small_w, hwaccel=False, keyframes_only=keyframes_only, fps=fps,
                                      start_s=int(last_t), skip_upto=last_t)
             return
         raise FrameError(f"ffmpeg died after {n} frames (rc={rc}): " + " | ".join(tail[-3:]))
     logger.info("[Frames] %s frames=%d %.1fs (%s)", "keyframes" if keyframes_only else f"{fps} fps", n,
-                time.monotonic() - t0, "nvdec" if hwaccel else "cpu")
+                time.monotonic() - t0, gpus.decode_label(hw_args))
 
 
 class _Text:
@@ -170,14 +175,15 @@ def window_pass(path: str, t_start: float, duration: float, roi: Roi, gray: bool
         vf += f",fps={fps}"
     vf += ",showinfo"
     pre = ["-v", "info", "-nostdin", "-nostats"]
-    if hwaccel:
-        pre += ["-hwaccel", "cuda"]
+    hw_args = gpus.decode_args() if hwaccel else []
+    hwaccel = bool(hw_args)
+    pre += hw_args
     pix = "gray" if gray else "bgr24"
     cmd = [_ffmpeg(), *pre, "-ss", f"{t_start:.3f}", "-t", f"{duration:.3f}", "-i", path, "-vf", vf, "-an",
            "-fps_mode", "passthrough", "-f", "rawvideo", "-pix_fmt", pix, "pipe:1"]
     nbytes = roi.w * roi.h * (1 if gray else 3)
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False, creationflags=_NO_WINDOW,
-                            bufsize=nbytes * 8)
+    proc = workmode.track(subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False,
+                                           creationflags=workmode.child_flags(_NO_WINDOW), bufsize=nbytes * 8))
     pts: list[float] = []
     tail: list[str] = []
     done = threading.Event()
@@ -217,7 +223,7 @@ def grab_frame(path: str, t: float, max_w: int = 1280, quality: int = 4, timeout
            "-vf", f"scale='min({max_w},iw)':-2", "-pix_fmt", "yuvj420p", "-strict", "unofficial",
            "-f", "image2", "-c:v", "mjpeg", "-q:v", str(quality), "pipe:1"]
     try:
-        r = subprocess.run(cmd, capture_output=True, timeout=timeout, creationflags=_NO_WINDOW)
+        r = subprocess.run(cmd, capture_output=True, timeout=timeout, creationflags=workmode.child_flags(_NO_WINDOW))
     except subprocess.TimeoutExpired:
         raise FrameError("ffmpeg timed out grabbing a frame")
     if r.returncode != 0 or not r.stdout:
@@ -231,7 +237,7 @@ def grab_crops(path: str, t: float, rois: dict[str, Roi], timeout: float = 60.0)
     cmd = [_ffmpeg(), "-v", "error", "-nostdin", "-ss", f"{max(0.0, t):.3f}", "-i", path, "-frames:v", "1",
            "-f", "image2", "-c:v", "png", "pipe:1"]
     try:
-        r = subprocess.run(cmd, capture_output=True, timeout=timeout, creationflags=_NO_WINDOW)
+        r = subprocess.run(cmd, capture_output=True, timeout=timeout, creationflags=workmode.child_flags(_NO_WINDOW))
     except subprocess.TimeoutExpired:
         raise FrameError("ffmpeg timed out grabbing crops")
     if r.returncode != 0 or not r.stdout:

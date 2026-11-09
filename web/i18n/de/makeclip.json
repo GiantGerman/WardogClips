@@ -1,0 +1,12 @@
+{
+  "pick_first": "Wähle zuerst ein Ereignis oder spiel eine Aufnahme ab.",
+  "already": "Dieser Clip wird bereits erstellt.",
+  "making_exact": "Clip wird framegenau erstellt. Das dauert etwas länger, weil das Bild neu kodiert wird.",
+  "making_copy": "Clip wird erstellt. Er beginnt am nächsten Keyframe vor deinem In-Punkt.",
+  "open_folder": "Ordner öffnen",
+  "saved": "Clip gespeichert: {name}",
+  "saved_early": "Clip gespeichert: {name}\nEr beginnt {seconds} vor deinem In-Punkt (nächster Keyframe).",
+  "check_mismatch": "Der Clip stimmt nicht ganz mit der Aufnahme überein. Prüf ihn, bevor du ihn verwendest.",
+  "failed": "Der Clip konnte nicht erstellt werden: {error}",
+  "unknown_error": "unbekannter Fehler"
+}

@@ -1,0 +1,99 @@
+{
+  "title.none": "geen clip",
+  "title.rendering": "{kind} op {time} · {height}p renderen",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · hele opname",
+  "title.no_proxy": "Nog geen proxy",
+  "tip.event": "{kind} op {time}: {render}",
+  "tip.around": "rond {time}: {render}",
+  "tip.cached": "{height}p uit de clipcache",
+  "tip.rendered": "{height}p gerenderd in {seconds} s",
+  "tip.rendered_enc": "{height}p gerenderd in {seconds} s ({encoder})",
+  "tip.proxy": "{name}: de proxy van de hele opname",
+  "tip.no_proxy": "{name}: nog geen proxy van de hele opname",
+  "busy.clip": "clip renderen ({height}p)...",
+  "busy.at": "{time} renderen ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Deze clip kon niet worden gerenderd",
+  "err.at": "{time} kon niet worden gerenderd",
+  "err.retry": "Opnieuw proberen",
+  "err.encoding": "Coderingsinstellingen",
+  "err.play_clip": "Deze clip kon niet worden afgespeeld.",
+  "err.play_proxy": "De proxy kon niet worden afgespeeld.",
+  "pick.title": "Kies een event",
+  "pick.text": "Kies er een in Events (of druk op N): de clip speelt hier af vanaf de aanloop.",
+  "pick.more": "Of klik op de tijdlijn hieronder om elk moment van deze opname te bekijken.",
+  "pick.short": "Kies er een in Events (of druk op N), of klik op de tijdlijn hieronder.",
+  "proxy.card_title": "Nog geen proxy voor deze opname",
+  "proxy.card_text": "Een proxy van {height}p is een kopie van het hele bestand van {duration}, om er van begin tot eind door te scrubben (hij wordt meerdere keren sneller dan realtime gemaakt).",
+  "proxy.building": "bezig",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "in wachtrij",
+  "proxy.build": "Proxy maken",
+  "proxy.all": "Proxy's voor alles met events",
+  "proxy.all_tip": "Proxy's in de wachtrij zetten voor elke opname met events",
+  "proxy.queued_toast": "proxy in wachtrij",
+  "proxy.all_toast": {
+    "one": "{count} proxy in wachtrij ({candidates} opnames met events hebben er geen)",
+    "other": "{count} proxy's in wachtrij ({candidates} opnames met events hebben er geen)"
+  },
+  "mode.full_tip": "De hele opname, afgespeeld vanaf de proxy",
+  "mode.full_noproxy_tip": "De hele opname: nog geen proxy (maak er hier een)",
+  "bound.wait": "wacht tot de clip van dit event geladen is",
+  "bound.in_before_out": "in moet vóór uit liggen",
+  "bound.out_after_in": "uit moet na in liggen",
+  "bound.reset": "clip terug naar de aanloop / uitloop",
+  "bound.in_set": "in = {time} (clip {length} s)",
+  "bound.out_set": "uit = {time} (clip {length} s)",
+  "mark.nothing": "er speelt niets",
+  "mark.done": "handmatige markering op {time}",
+  "play_aria": "Afspelen",
+  "pause_aria": "Pauzeren",
+  "time.pos": "{pos} van {total}",
+  "time.rel": "{offset} s vanaf het event",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Herhaal in → uit",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · score {score}",
+  "tl.tip_status": "{kind} · {time} · score {score} · {status}",
+  "tl.status_kept": "bewaard",
+  "tl.status_false": "vals positief",
+  "tl.whole": "Hele opname",
+  "tl.no_events": "geen events",
+  "tl.not_detected": "nog niet gedetecteerd",
+  "tl.no_proxy": "geen proxy",
+  "tl.no_proxy_tip": "De modus Hele opname heeft een proxy nodig (maak hem in de speler)",
+  "tl.kind.kill": {
+    "one": "{count} kill",
+    "other": "{count} kills"
+  },
+  "tl.kind.assist": {
+    "one": "{count} assist",
+    "other": "{count} assists"
+  },
+  "tl.kind.death": {
+    "one": "{count} death",
+    "other": "{count} deaths"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} gespot",
+    "other": "{count} gespot"
+  },
+  "tl.kind.revive": {
+    "one": "{count} revive",
+    "other": "{count} revives"
+  },
+  "tl.kind.squad": {
+    "one": "{count} squad",
+    "other": "{count} squad"
+  },
+  "tl.kind.voice": {
+    "one": "{count} stem",
+    "other": "{count} stem"
+  },
+  "tl.kind.manual": {
+    "one": "{count} handmatig",
+    "other": "{count} handmatig"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

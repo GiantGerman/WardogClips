@@ -1,0 +1,12 @@
+{
+  "pick_first": "Pirmiausia pasirinkite įvykį arba paleiskite įrašą.",
+  "already": "Šis klipas jau kuriamas.",
+  "making_exact": "Kuriamas klipas tiksliai iki kadro. Tai užtrunka šiek tiek ilgiau, nes vaizdas perkoduojamas.",
+  "making_copy": "Kuriamas klipas. Jis prasidės artimiausiame raktiniame kadre prieš jūsų pradžios tašką.",
+  "open_folder": "Atidaryti aplanką",
+  "saved": "Klipas išsaugotas: {name}",
+  "saved_early": "Klipas išsaugotas: {name}\nJis prasideda {seconds} anksčiau už jūsų pradžios tašką (artimiausias raktinis kadras).",
+  "check_mismatch": "Klipas ne visai atitinka įrašą. Patikrinkite jį prieš naudodami.",
+  "failed": "Klipo sukurti nepavyko: {error}",
+  "unknown_error": "nežinoma klaida"
+}

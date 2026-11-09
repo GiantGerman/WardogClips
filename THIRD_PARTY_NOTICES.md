@@ -1,8 +1,8 @@
 # Third-party notices
 
 WardogClips itself is MIT-licensed (see `LICENSE`). The installer bundles, or the app downloads on request, the
-components below. Each one stays under its own licence; this file names them, the exact versions the installer
-ships, and where their source and full licence texts are. The licence text of every bundled Python package is also
+components below. Each one stays under its own license; this file names them, the exact versions the installer
+ships, and where their source and full license texts are. The license text of every bundled Python package is also
 inside the install, in its `runtime\Lib\site-packages\<package>-<version>.dist-info\` folder (usually `LICENSE*`).
 
 The installer's own build appends a "Build details" section at the end of the copy in the install folder (the exact
@@ -11,15 +11,15 @@ ffmpeg build and VC++ runtime version that went into that installer).
 ## Bundled with the installer
 
 ### Python 3.13 (embeddable distribution)
-- Licence: Python Software Foundation License Version 2 (PSF-2.0); full text in `runtime\LICENSE.txt`.
+- License: Python Software Foundation License Version 2 (PSF-2.0); full text in `runtime\LICENSE.txt`.
 - Source: https://www.python.org/downloads/source/ -- the exact version is in the build details below.
 - The embeddable zip also carries OpenSSL (Apache-2.0), libffi (MIT), SQLite (public domain), bzip2, xz / liblzma,
-  zlib and expat under their own permissive licences, listed in `runtime\LICENSE.txt`.
+  zlib and expat under their own permissive licenses, listed in `runtime\LICENSE.txt`.
 
 ### FFmpeg (`vendor\ffmpeg\bin\ffmpeg.exe`, `ffprobe.exe`)
 - Build: the gyan.dev "release essentials" static Windows build, version `9.0.2-essentials_build-www.gyan.dev`
   (the build details below repeat the version and the full `configuration:` line of the exact binary shipped).
-- Licence: **GNU General Public License version 3** (the build is configured with `--enable-gpl --enable-version3`
+- License: **GNU General Public License version 3** (the build is configured with `--enable-gpl --enable-version3`
   and statically links GPL libraries such as x264 and x265). Full text: `vendor\ffmpeg\FFMPEG-LICENSE`; the build's
   own readme with its configuration and the version of every linked library: `vendor\ffmpeg\FFMPEG-README.txt`.
 - WardogClips only runs `ffmpeg.exe` / `ffprobe.exe` as separate programs; it does not link to them.
@@ -38,12 +38,12 @@ ffmpeg build and VC++ runtime version that went into that installer).
 - The x64 Visual C++ 2015-2022 runtime DLLs that onnxruntime, CTranslate2 and pyclipper need, copied next to
   `python.exe` so WardogClips also works on a Windows without the VC++ Redistributable installed. Only the DLLs the
   bundled binaries import are copied; the version is in the build details below.
-- Licence: Microsoft Visual Studio licence terms, "Distributable Code" (the Visual C++ runtime files are listed as
+- License: Microsoft Visual Studio license terms, "Distributable Code" (the Visual C++ runtime files are listed as
   redistributable in Visual Studio's REDIST list). Copyright (c) Microsoft Corporation.
 
 ### Python packages (installed into `runtime\Lib\site-packages`)
 
-| Package | Version | Licence | Source |
+| Package | Version | License | Source |
 |---|---|---|---|
 | fastapi | 0.143.3 | MIT | https://github.com/fastapi/fastapi |
 | starlette | 1.8.0 | BSD-3-Clause | https://github.com/Kludex/starlette |
@@ -90,7 +90,7 @@ ffmpeg build and VC++ runtime version that went into that installer).
 | six | 1.17.0 | MIT | https://github.com/benjaminp/six |
 | yt-dlp | 2026.10.26 | Unlicense | https://github.com/yt-dlp/yt-dlp |
 | yt-dlp-ejs | 0.8.0 | Unlicense AND MIT AND ISC | https://github.com/yt-dlp/ejs |
-| curl_cffi | 0.17.0 | MIT (bundled curl-impersonate / libcurl: MIT-style curl licence) | https://github.com/lexiforest/curl_cffi |
+| curl_cffi | 0.17.0 | MIT (bundled curl-impersonate / libcurl: MIT-style curl license) | https://github.com/lexiforest/curl_cffi |
 | cffi | 2.1.1 | MIT-0 | https://github.com/python-cffi/cffi |
 | pycparser | 3.12 | BSD-3-Clause | https://github.com/eliben/pycparser |
 | brotli | 1.2.1 | MIT | https://github.com/google/brotli |
@@ -100,7 +100,7 @@ ffmpeg build and VC++ runtime version that went into that installer).
 | pystray | 0.19.5 | LGPL-3.0 | https://github.com/moses-palmer/pystray |
 | pip | (the version in the build details) | MIT | https://github.com/pypa/pip |
 
-`onnxruntime-directml` 1.24.4 (MIT; includes Microsoft's `DirectML.dll`, redistributable under the DirectML licence
+`onnxruntime-directml` 1.24.4 (MIT; includes Microsoft's `DirectML.dll`, redistributable under the DirectML license
 shipped beside it) is installed into `runtime\ort-directml` for GPU text recognition: https://github.com/microsoft/onnxruntime
 
 pystray (LGPL-3.0) is used unmodified as a separate Python package; you may replace it with your own build in
@@ -113,19 +113,19 @@ metadata.
 - `nvidia-cublas-cu12` 12.9.2.10, `nvidia-cudnn-cu12` 9.27.0.42, `nvidia-cuda-nvrtc-cu12` 12.9.86, downloaded by you
   from NVIDIA's packages on PyPI (https://pypi.org/user/nvidia/) into your data folder. They are **not** part of the
   installer.
-- Licence: NVIDIA Software License Agreement / CUDA Toolkit EULA (https://docs.nvidia.com/cuda/eula/), accepted by you
+- License: NVIDIA Software License Agreement / CUDA Toolkit EULA (https://docs.nvidia.com/cuda/eula/), accepted by you
   when you download them. Copyright (c) NVIDIA Corporation.
 
 ### Whisper speech models
 - `Systran/faster-whisper-*` (tiny.en, small.en, medium.en, large-v3) and `mobiuslabsgmbh/faster-whisper-large-v3-turbo`,
   downloaded from the Hugging Face Hub into your Hugging Face cache. Conversions of OpenAI's Whisper models.
-- Licence: MIT (OpenAI Whisper, https://github.com/openai/whisper; the converted model repos are MIT as well).
+- License: MIT (OpenAI Whisper, https://github.com/openai/whisper; the converted model repos are MIT as well).
 
 ### Deno ("YouTube helper")
 - Deno 2.9.8 (`deno-x86_64-pc-windows-msvc.zip` from https://github.com/denoland/deno/releases), checked against a
   pinned sha256.
-- Licence: MIT. Copyright (c) the Deno authors.
+- License: MIT. Copyright (c) the Deno authors.
 
 ### yt-dlp update ("VOD downloader update")
-- The newest `yt-dlp` and `yt-dlp-ejs` wheels from PyPI at the time you install it. Licence: Unlicense (yt-dlp-ejs:
+- The newest `yt-dlp` and `yt-dlp-ejs` wheels from PyPI at the time you install it. License: Unlicense (yt-dlp-ejs:
   Unlicense AND MIT AND ISC).

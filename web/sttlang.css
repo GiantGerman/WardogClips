@@ -1,0 +1,7 @@
+/* speech languages (web/js/sttlang.js): line / hit tags, the English translation under a line, Settings pickers */
+.sl-tag { height: 16px; line-height: 16px; padding: 0 5px; margin-right: 6px; font-size: 10px; font-weight: 700;
+  letter-spacing: .4px; text-transform: uppercase; background: var(--accent-bg); color: var(--accent-2); }
+.sl-en { display: block; margin-top: 2px; color: var(--text2); font-size: var(--fs-xs); font-style: italic; }
+.sl-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 4px 12px; padding: 4px 12px 8px; }
+.sl-opt { display: flex; align-items: center; gap: 6px; font-size: var(--fs-s); cursor: pointer; }
+.sl-hint { padding: 2px 12px 8px; }

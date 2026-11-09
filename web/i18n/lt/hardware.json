@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekoduoja vaizdą, skaito HUD tekstą ir paverčia kalbą tekstu.",
+  "can.integrated": "Integruota grafika: dekoduoja vaizdą tik tada, kai jokia kita vaizdo plokštė nenustatyta kaip Naudoti WardogClips. HUD tekstas ir kalba apdorojami kita plokšte arba procesoriumi.",
+  "can.other": "Dekoduoja vaizdą ir skaito HUD tekstą. Kalba tekstu paverčiama procesoriumi, nes tam reikia NVIDIA plokštės.",
+  "none_found": "Vaizdo plokštės nerasta. WardogClips visą darbą atlieka procesoriumi.",
+  "role.use": "Naudoti WardogClips",
+  "role.leave": "Nenaudoti",
+  "all_left_alone": "Visos plokštės nustatytos kaip Nenaudoti, todėl WardogClips visą darbą atlieka procesoriumi.",
+  "shared_hint": "Plokštė, kuria veikia jūsų žaidimas, yra bendra: kol žaidžiate, WardogClips darbas joje gali atimti iš žaidimo kelis kadrus. Jei tai trukdo, nustatykite tą plokštę kaip Nenaudoti.",
+  "apply_hint": "Pakeitimas taikomas kitai užduočiai. Pridėjus plokštę, po paleidimo iš naujo vienu metu vyks daugiau vaizdo užduočių.",
+  "load_failed": "Nepavyko įkelti vaizdo plokščių sąrašo.",
+  "saved": "Išsaugota: {keys}",
+  "saved_none": "Išsaugota: nėra pakeitimų",
+  "error": "Klaida: {error}"
+}

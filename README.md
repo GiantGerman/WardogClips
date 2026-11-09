@@ -6,7 +6,7 @@ WardogClips looks through the videos OBS saves and finds your **kills, kill assi
 (the moments you and your squad got loud, or said a word you care about). It writes down what was said on your mic and
 on Discord so you can search it, plays every moment as a short clip, and hands the ones you keep to **DaVinci Resolve**
 as clip markers or a ready-made selects timeline. It can also download **stream recordings (VODs)** from YouTube,
-Twitch, Kick, TikTok and Rumble and find the moments in those.
+Twitch, Kick, TikTok and Rumble, and find the moments in those.
 
 Everything runs on your own PC.
 
@@ -87,6 +87,10 @@ Every answer can be changed later in **Settings**; **Settings > Add-ons > Run se
   transcripts.
 - Send the clips you kept to Resolve as **markers** (on the clip in the media pool) or as a **selects** timeline, or
   export a CSV / EDL.
+- **Premiere Pro / other editors (experimental):** the same panel exports a Premiere XML (File > Import in Premiere;
+  FCP 7 XML, which DaVinci Resolve and Final Cut Pro 7 tools also read) or an OpenTimelineIO `.otio` file, with
+  every audio track of the recording on its own track and a marker per event. Not yet tested in Premiere or
+  Resolve -- please report how the import goes.
 - **VODs** in the left rail: paste a stream link, or search a streamer and pick VODs to import.
 - **Ctrl+K** opens a command list with every action; **?** shows the keyboard shortcuts.
 
@@ -169,7 +173,7 @@ venv\Scripts\python.exe main.py
 
 WardogClips is released under the [MIT License](LICENSE). It ships and downloads third-party software (Python,
 FFmpeg, the Visual C++ runtime, faster-whisper, RapidOCR, yt-dlp, NVIDIA's CUDA libraries, Whisper models and more)
-under their own licenses (the bundled FFmpeg is GPL-3.0; its licence text is installed in `vendor\ffmpeg`): see
+under their own licenses (the bundled FFmpeg is GPL-3.0; its license text is installed in `vendor\ffmpeg`): see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 WardogClips is not affiliated with the makers of WARDOGS, OBS Studio or DaVinci Resolve.

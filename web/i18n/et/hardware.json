@@ -1,0 +1,16 @@
+{
+  "@": "Eesti (et). Seaded > Riistvara.",
+  "can.nvidia": "Dekodeerib videot, loeb HUD-i teksti ja muudab kõne tekstiks.",
+  "can.integrated": "Sisseehitatud graafika: dekodeerib videot ainult siis, kui ükski teine graafikakaart pole seatud valikule Kasuta WardogClipsi jaoks. HUD-i tekst ja kõne töötavad teisel kaardil või protsessoris.",
+  "can.other": "Dekodeerib videot ja loeb HUD-i teksti. Kõne muudetakse tekstiks protsessoris, sest selleks on vaja NVIDIA kaarti.",
+  "none_found": "Graafikakaarti ei leitud. WardogClips teeb kogu töö protsessoris.",
+  "role.use": "Kasuta WardogClipsi jaoks",
+  "role.leave": "Jäta rahule",
+  "all_left_alone": "Kõik kaardid on seatud valikule Jäta rahule, seega teeb WardogClips kogu töö protsessoris.",
+  "shared_hint": "Kaart, millel su mäng jookseb, on jagatud: mängu ajal võib WardogClipsi töö sellel mängult paar kaadrit võtta. Kui see häirib, sea see kaart valikule Jäta rahule.",
+  "apply_hint": "Muudatus kehtib järgmisest tööst. Kaardi lisamisel jookseb pärast taaskäivitust korraga rohkem videotöid.",
+  "load_failed": "Graafikakaartide loendit ei saanud laadida.",
+  "saved": "Salvestatud: {keys}",
+  "saved_none": "Salvestatud: muudatusi pole",
+  "error": "Viga: {error}"
+}

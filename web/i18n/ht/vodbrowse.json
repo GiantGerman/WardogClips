@@ -1,0 +1,146 @@
+{
+  "title": "VOD stream",
+  "paste": "Kole lyen",
+  "paste_tip": "Enpòte yon VOD apati lyen li (li tcheke l anvan)",
+  "close_tip": "Fèmen (Esc)",
+  "search.box_ph": "Non streamer oswa yon lyen VOD / pwofil",
+  "search.go": "Chèche",
+  "search.go_tip": "Chèche pa non, oswa louvri streamer yon lyen ou kole (Enter)",
+  "search.need_input": "tape non yon streamer oswa kole yon lyen VOD / pwofil",
+  "search.need_name": "tape non yon streamer",
+  "search.busy": "N ap mande {sites} pou \"{name}\" -- tout sit yo an menm tan, kèk segonn",
+  "search.found": {
+    "other": "{count} streamer jwenn"
+  },
+  "search.none": "pa gen streamer ki rele \"{name}\" sou {sites}",
+  "sites.one_on": "omwen yon sit dwe rete limen",
+  "link.busy": "N ap li lyen an -- pou yon lyen VOD, nou mande sit la pou ki moun VOD la ye, anviwon 3 s",
+  "link.unsupported": "Sa a pa yon lyen yon sit nou sipòte. Lyen {sites} mache (yon VOD oswa paj streamer la).",
+  "favs.title": "Favori",
+  "favs.check": "Tcheke sa k nouvo",
+  "favs.check_tip": "Lis chak favori ankò epi konte VOD ki parèt depi dènye tchek la",
+  "favs.checking": "N ap tcheke...",
+  "favs.none_yet": "poko gen favori: louvri yon streamer epi klike sou zetwal la",
+  "favs.checking_note": {
+    "other": "n ap tcheke {count} favori pou nouvo VOD ..."
+  },
+  "favs.result_new": {
+    "other": "{count} nouvo VOD nan favori ou yo"
+  },
+  "favs.result_nothing": "anyen nouvo depi dènye tchek la",
+  "favs.result_failed": {
+    "other": "{result} ({count} favori pa t ka tcheke)"
+  },
+  "favs.removed": "{name} retire nan favori",
+  "favs.added": "{name} ajoute nan favori",
+  "favs.empty_title": "Poko gen favori",
+  "favs.empty_text": "Louvri yon streamer epi klike sou zetwal la pou kenbe l la a.",
+  "favs.new_badge": {
+    "other": "{count} nouvo"
+  },
+  "favs.new_badge_title": "VOD ki parèt depi tchek anvan an",
+  "favs.remove_title": "Retire nan favori",
+  "favs.remove_aria": "Retire {name} nan favori",
+  "favs.add_title": "Ajoute nan favori",
+  "favs.checked": "tcheke {ago}",
+  "pre.error_extra": "{error} -- li parèt anlè lis la, nou pa ka enpòte l kounye a",
+  "pre.in_library": "VOD sa a deja nan bibliyotèk la",
+  "pre.older": "VOD sa a pi ansyen pase lis resan an: li parèt anlè",
+  "import.label": "Enpòte",
+  "import.label_n": {
+    "other": "Enpòte {count}"
+  },
+  "import.busy": "N ap enpòte...",
+  "import.queue_title": {
+    "other": "mete {count} telechajman nan fil datant"
+  },
+  "import.select_title": "chwazi VOD pou enpòte yo",
+  "import.queuing": {
+    "other": "n ap mete {count} VOD nan fil datant -- chak lyen tcheke ak sit la anvan ..."
+  },
+  "import.no_answer": "pa gen repons pou lyen sa a",
+  "import.sum_queued": {
+    "other": "{count} nan fil datant"
+  },
+  "import.sum_already": {
+    "other": "{count} deja la"
+  },
+  "import.sum_failed": {
+    "other": "{count} echwe (pase sourit sou etikèt wouj la)"
+  },
+  "import.sum_jobs": "{summary} -- Travay montre telechajman yo",
+  "import.toast": "VOD: {summary}",
+  "row.in_library": "nan bibliyotèk",
+  "row.imported_before": "enpòte deja",
+  "row.already_queued": "deja nan fil datant",
+  "row.queued": "nan fil datant",
+  "row.failed": "echwe",
+  "row.job": "travay {id}",
+  "row.download_job": "travay telechajman {id}",
+  "row.your_link": "lyen ou",
+  "row.your_link_title": "lyen ou te kole a",
+  "row.open_rec_title": "louvri anrejistreman an",
+  "row.live": "an dirèk kounye a",
+  "row.upcoming": "ap vini",
+  "row.live_title": "ka enpòte lè stream nan fini",
+  "row.unavailable": "pa disponib",
+  "row.not_ready": "poko pare",
+  "row.not_ready_title": "poko ka enpòte",
+  "row.processing_title": "stream nan fèk fini epi sit la toujou ap trete l",
+  "row.new": "nouvo",
+  "row.new_title": "parèt depi tchek anvan dènye a",
+  "row.older": "pi ansyen pase lis la",
+  "row.open_on": "louvri sou {site}",
+  "ch.back_results": "Retounen nan rezilta yo",
+  "ch.back_favs": "Retounen nan favori",
+  "ch.back_aria": "Retounen",
+  "ch.star_wait": "tann lis la (li bay kle pwòp streamer la)",
+  "ch.listing_title": "N ap fè lis...",
+  "ch.refresh_title": "Fè lis la ankò apati sit la (lis la kenbe nan kach pou 5 minit)",
+  "ch.refresh_aria": "Rafrechi",
+  "ch.page_title": "paj yo: {url}",
+  "ch.page_aria": "paj yo",
+  "ch.listing": "n ap fè lis ...",
+  "ch.count_listed": {
+    "other": "{count} nan lis"
+  },
+  "ch.count_new": {
+    "other": "{count} nouvo"
+  },
+  "ch.count_lib": {
+    "other": "{count} nan bibliyotèk"
+  },
+  "ch.select_new": "Chwazi nouvo yo",
+  "ch.select_new_title": "chwazi chak VOD ki poko nan bibliyotèk la oswa nan fil datant",
+  "ch.none": "Okenn",
+  "ch.none_title": "efase seleksyon an",
+  "ch.listing_busy": "N ap fè lis VOD {name} sou {site} ...",
+  "ch.relisting": "n ap fè lis ankò ...",
+  "ch.empty_title": "Pa gen VOD nan lis",
+  "ch.empty_text": "Streamer la ka pa kenbe ansyen difizyon, oswa yo se pou abòne sèlman.",
+  "ch.load_older": "Chaje pi ansyen ({count})",
+  "ch.max_listed": "Se sèlman {count} pi nouvo yo ki nan lis -- kole lyen yon VOD pi ansyen pou enpòte l.",
+  "home.short": "Tape yon non epi peze Enter, oswa kole yon lyen VOD / pwofil.",
+  "home.find_html": "<b>Jwenn yon streamer</b> -- tape non li epi peze Enter; tout sit ki limen yo resevwa demann nan an menm tan.",
+  "home.paste_html": "<b>Oswa kole yon lyen</b> -- paj yon streamer bay lis VOD resan li yo; yon lyen VOD louvri streamer li ak VOD sa a chwazi.",
+  "home.import_html": "Chwazi VOD yo epi klike sou <b>Enpòte</b>: yo telechaje youn apre lòt (Travay), apre sa yo transkri epi eskane tankou yon anrejistreman.",
+  "res.head": "Rezilta pou \"{query}\"",
+  "res.clear": "Efase rezilta yo",
+  "res.empty_title": "Nou pa jwenn anyen",
+  "res.empty_text": "Tcheke òtograf la, limen plis sit, oswa kole lyen paj yo a.",
+  "res.no_hits": "Pa gen streamer ak non sa a sou sit ki limen yo.",
+  "res.not_found": "pa jwenn",
+  "res.fav_title": "yon favori",
+  "res.recent": {
+    "other": "{count} resan"
+  },
+  "res.recent_more": "{count}+ resan",
+  "res.no_recent": "pa gen VOD resan nan lis",
+  "single.title": "Yon VOD",
+  "single.clear": "Efase",
+  "single.site": "Sit",
+  "single.link": "Lyen",
+  "single.recheck": "Enpòte tcheke lyen an ak sit la ankò.",
+  "single.no_channel": "Sit la pa t di pou ki moun VOD sa a ye, kidonk pa gen streamer pou fè lis. Ou ka toujou enpòte VOD sa a.",
+  "single.import": "Enpòte VOD sa a"
+}

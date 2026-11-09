@@ -39,7 +39,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
+from core.messages import MsgError, annotate, text_i18n
 from utils import paths
+from utils.i18n import msg
 
 logger = logging.getLogger("wclips.packs")
 
@@ -70,31 +72,51 @@ HF_RESOLVE = "https://huggingface.co/{repo}/resolve/{rev}/{file}"
 
 # the files faster-whisper's own download_model() fetches (no README / .gitattributes / onnx extras)
 MODEL_ALLOW = ["config.json", "preprocessor_config.json", "model.bin", "tokenizer.json", "vocabulary.*"]
-MODEL_SIZES_MB = {"tiny.en": 75, "small.en": 480, "medium.en": 1500, "large-v3": 3100, "large-v3-turbo": 1600}
+MODEL_SIZES_MB = {"tiny.en": 75, "tiny": 75, "small.en": 480, "small": 480, "medium.en": 1500, "medium": 1500,
+                  "large-v3": 3100, "large-v3-turbo": 1600}
 MODEL_REPOS_FALLBACK = {"large-v3-turbo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo"}
 
 # Plain-language copy: the title is what a stranger reads in Settings > Add-ons, the wizard's
 # progress list and the status bar; desc = one plain sentence, then the technical one (Settings only shows desc).
+# English text from msg(): the catalog keys are server.pack.<id>.title / .desc (status() adds <field>_i18n).
 PACK_INFO = {
-    "cuda": {"title": "Speech engine for your graphics card", "size_mb": 1310.0,
-             "desc": "Turns speech into text on an NVIDIA graphics card, many times faster than on the processor. "
-                     "NVIDIA CUDA libraries (cuBLAS, cuDNN) from NVIDIA's own PyPI packages."},
-    "deno": {"title": "YouTube helper", "size_mb": 41.0,
-             "desc": "Lets WardogClips read YouTube pages when it downloads stream recordings. "
-                     "The Deno JavaScript runtime for yt-dlp; not needed when Node.js is installed."},
-    "ytdlp": {"title": "VOD downloader update", "size_mb": 3.0,
-              "desc": "A newer version of the part that downloads stream recordings, for when a site changes and "
-                      "downloads stop working. The latest yt-dlp from PyPI, used instead of the built-in one."},
+    "cuda": {"title": msg("server.pack.cuda.title", "Speech engine for your graphics card")["message"],
+             "size_mb": 1310.0,
+             "desc": msg("server.pack.cuda.desc",
+                         "Turns speech into text on an NVIDIA graphics card, many times faster than on the processor. "
+                         "NVIDIA CUDA libraries (cuBLAS, cuDNN) from NVIDIA's own PyPI packages.")["message"]},
+    "deno": {"title": msg("server.pack.deno.title", "YouTube helper")["message"], "size_mb": 41.0,
+             "desc": msg("server.pack.deno.desc",
+                         "Lets WardogClips read YouTube pages when it downloads stream recordings. "
+                         "The Deno JavaScript runtime for yt-dlp; not needed when Node.js is installed.")["message"]},
+    "ytdlp": {"title": msg("server.pack.ytdlp.title", "VOD downloader update")["message"], "size_mb": 3.0,
+              "desc": msg("server.pack.ytdlp.desc",
+                          "A newer version of the part that downloads stream recordings, for when a site changes and "
+                          "downloads stop working. The latest yt-dlp from PyPI, used instead of the built-in "
+                          "one.")["message"]},
 }
 
-# speech models: plain title + one plain sentence, then the technical one
+# speech models: (title, plain sentence) as msg() objects; the description adds the technical sentence
+# (server.pack.model_desc). Keys: server.pack.model.<name with . and - as _>.title / .plain
 MODEL_INFO = {
-    "tiny.en": ("Light speech model", "Fastest and smallest, makes more mistakes. English."),
-    "small.en": ("Standard speech model", "Good accuracy, quick enough on the processor. English."),
-    "medium.en": ("Accurate speech model", "Best for English; meant for an NVIDIA graphics card."),
-    "large-v3": ("Multilingual speech model", "Most accurate and understands many languages; slow without an NVIDIA "
-                                              "graphics card."),
-    "large-v3-turbo": ("Fast multilingual speech model", "Nearly as accurate as the multilingual model, faster."),
+    "tiny.en": (msg("server.pack.model.tiny_en.title", "Light speech model"),
+                msg("server.pack.model.tiny_en.plain", "Fastest and smallest, makes more mistakes. English.")),
+    "small.en": (msg("server.pack.model.small_en.title", "Standard speech model"),
+                 msg("server.pack.model.small_en.plain", "Good accuracy, quick enough on the processor. English.")),
+    "medium.en": (msg("server.pack.model.medium_en.title", "Accurate speech model"),
+                  msg("server.pack.model.medium_en.plain", "Best for English; meant for an NVIDIA graphics card.")),
+    "tiny": (msg("server.pack.model.tiny.title", "Light speech model, many languages"),
+             msg("server.pack.model.tiny.plain", "Fastest and smallest, makes more mistakes. Many languages.")),
+    "small": (msg("server.pack.model.small.title", "Standard speech model, many languages"),
+              msg("server.pack.model.small.plain", "Good accuracy, quick enough on the processor. Many languages.")),
+    "medium": (msg("server.pack.model.medium.title", "Accurate speech model, many languages"),
+               msg("server.pack.model.medium.plain", "Accurate in many languages; meant for an NVIDIA graphics card.")),
+    "large-v3": (msg("server.pack.model.large_v3.title", "Multilingual speech model"),
+                 msg("server.pack.model.large_v3.plain",
+                     "Most accurate and understands many languages; slow without an NVIDIA graphics card.")),
+    "large-v3-turbo": (msg("server.pack.model.large_v3_turbo.title", "Fast multilingual speech model"),
+                       msg("server.pack.model.large_v3_turbo.plain",
+                           "Nearly as accurate as the multilingual model, faster.")),
 }
 
 CHUNK = 1 << 20
@@ -102,7 +124,7 @@ CONNECT_TIMEOUT = 15
 READ_TIMEOUT = 30            # per chunk read
 PUBLISH_EVERY_S = 0.25       # <= 4 bus events per second per pack
 GPU_CACHE_S = 60.0
-DL_MAX_AGE_S = 7 * 86400     # packs/.dl leftovers (cancelled / failed downloads) older than this go at startup
+DL_MAX_AGE_S = 7 * 86400     # packs/.dl leftovers (canceled / failed downloads) older than this go at startup
 MODEL_REQUIRED = ("model.bin", "config.json")   # without these faster-whisper cannot load a snapshot at all
 
 
@@ -355,11 +377,11 @@ def activate() -> str:
     sw = sweep_leftovers()
     n = wire_dlls()
     have = [p for p in PACK_IDS if installed(p)]
-    msg = f"packs={','.join(have) or 'none'} cuda_dirs={n}"
+    line = f"packs={','.join(have) or 'none'} cuda_dirs={n}"
     if sw["skipped"]:
-        msg += f" busy_skipped={sw['skipped']}"
-    logger.info("[Packs] activate %s", msg)
-    return msg
+        line += f" busy_skipped={sw['skipped']}"
+    logger.info("[Packs] activate %s", line)
+    return line
 
 
 # -- GPU ------------------------------------------------------------------------------------------------------------
@@ -376,13 +398,29 @@ def _nvidia_smi() -> str | None:
     return str(cand) if cand.exists() else None
 
 
+def _fake_gpu_info() -> dict | None:
+    """gpu_info() from a forced card list (utils/gpus.py FAKE_ENV: try the AMD / Intel / no-card paths); None = real."""
+    try:
+        from utils import gpus
+        if gpus.source() != "fake":
+            return None
+        nv = next((a for a in gpus.hardware() if a["vendor"] == "nvidia"), None)
+        return {"nvidia": nv is not None, "name": nv["name"] if nv else "", "vram_mb": nv["vram_mb"] if nv else 0,
+                "driver": ""}
+    except Exception:            # noqa: BLE001
+        return None
+
+
 def gpu_info(max_age: float = GPU_CACHE_S) -> dict:
     """{"nvidia", "name", "vram_mb", "driver"} from nvidia-smi's GPU query (GPU-level, never a process list)."""
     with _gpu_lock:
         if _gpu_cache["info"] is not None and time.monotonic() - _gpu_cache["t"] < max_age:
             return dict(_gpu_cache["info"])
         info = {"nvidia": False, "name": "", "vram_mb": 0, "driver": ""}
-        exe = _nvidia_smi()
+        fake = _fake_gpu_info()                # a forced card list (utils/gpus.py FAKE_ENV) wins over nvidia-smi
+        exe = _nvidia_smi() if fake is None else None
+        if fake is not None:
+            info = fake
         if exe:
             try:
                 p = subprocess.run([exe, "--query-gpu=name,memory.total,driver_version", "--format=csv,noheader,nounits"],
@@ -622,7 +660,7 @@ def start(pack_id: str, bus=None, force: bool = False) -> dict:
     unknown id; everything else ends up in the returned / published state. While a remove of the same id runs,
     nothing starts (the returned status says so)."""
     if not _valid_id(pack_id):
-        raise ValueError(f"unknown pack {pack_id!r}")
+        raise MsgError(msg("server.packs.unknown", "Unknown add-on: {id}", id=pack_id))
     bus = bus if bus is not None else _default_bus()
     with _jobs_lock:
         cur = _jobs.get(pack_id)
@@ -630,7 +668,8 @@ def start(pack_id: str, bus=None, force: bool = False) -> dict:
             return _status_one(pack_id)
         if pack_id in _removing:
             out = _status_one(pack_id)
-            out["note"] = "It is being removed right now -- try again in a moment."
+            out["note"] = msg("server.pack.being_removed", "It is being removed right now. Try again in a moment.")["message"]
+            annotate(out, "note")
             return out
         _notes.pop(pack_id, None)
         job = _Job(pack_id, bus)
@@ -648,7 +687,7 @@ def cancel(pack_id: str) -> bool:
     if not j or not j.thread or not j.thread.is_alive():
         return False
     j.cancel.set()
-    j.reason = "cancelling..."
+    j.reason = CANCELING
     j.publish(force=True)
     logger.info("[Packs] cancel requested pack=%s", pack_id)
     return True
@@ -663,14 +702,26 @@ def wait(pack_id: str, timeout: float = 60.0) -> dict:
     return _status_one(pack_id)
 
 
-MSG_INSTALLING = "It is installing right now. Cancel the install first."
-MSG_INSTALLING_ELSEWHERE = "Another WardogClips window is installing it right now. Try again when that is done."
-MSG_TRANSCRIBING = ("A transcription is using the speech model right now. Remove it when the transcription is "
-                    "done, or stop that job in Jobs.")
-MSG_CONFIGURED = ("WardogClips is set to use this speech model. Choose another one in Settings > Speech-to-text "
-                  "first, then remove this one.")
-MSG_LOCKED_FILES = ("Some of its files are still in use, so they could not all be deleted. Restart WardogClips and "
-                    "remove it again.")
+MSG_INSTALLING = msg("server.packs.installing", "It is installing right now. Cancel the install first.")["message"]
+MSG_INSTALLING_ELSEWHERE = msg("server.pack.installing_elsewhere",
+                               "Another WardogClips window is installing it right now. Try again when that is "
+                               "done.")["message"]
+MSG_TRANSCRIBING = msg("server.pack.transcribing",
+                       "A transcription is using the speech model right now. Remove it when the transcription is "
+                       "done, or stop that job in Jobs.")["message"]
+MSG_CONFIGURED = msg("server.pack.configured",
+                     "WardogClips is set to use this speech model. Choose another one in Settings > Speech-to-text "
+                     "first, then remove this one.")["message"]
+MSG_LOCKED_FILES = msg("server.pack.locked_files",
+                       "Some of its files are still in use, so they could not all be deleted. Restart WardogClips and "
+                       "remove it again.")["message"]
+CANCELING = msg("server.pack.canceling", "Canceling...")["message"]
+
+
+def reason_error(res: dict) -> MsgError:
+    """A refused remove_ex() result as a translatable error (its reason is one of the texts above)."""
+    meta = text_i18n(res.get("reason") or "") or {"code": "", "params": {}}
+    return MsgError({"message": res.get("reason") or "", **meta})
 
 
 def _configured_model(cfg) -> str:
@@ -681,7 +732,9 @@ def _configured_model(cfg) -> str:
         except Exception:        # noqa: BLE001 -- no settings: nothing configured to protect
             return ""
     try:
-        return str(cfg.stt.model or "")
+        from core import speechlang
+        # the model really loaded: an English-only choice runs as its multilingual twin when other languages are on
+        return speechlang.effective_model(str(cfg.stt.model or ""), getattr(cfg.stt, "language", "en"))
     except AttributeError:
         return ""
 
@@ -698,7 +751,7 @@ def remove_ex(pack_id: str, cfg=None) -> dict:
     load that one). The slow delete runs outside _jobs_lock (status() / busy() never stall); start() of the same id
     is refused meanwhile, and only the finished job seen at the start is dropped -- never a live one."""
     if not _valid_id(pack_id):
-        return _result(False, "unknown", "Unknown add-on.")
+        return _result(False, "unknown", msg("server.pack.unknown_one", "Unknown add-on.")["message"])
     with _jobs_lock:
         if busy(pack_id) or pack_id in _removing:
             return _refuse(pack_id, _result(False, "installing", MSG_INSTALLING))
@@ -736,7 +789,7 @@ def _refuse(pack_id: str, res: dict) -> dict:
 
 def _remove_pack(pack_id: str) -> dict:
     d = pack_dir(pack_id)
-    n_dl = _clear_dl(pack_id)                 # cancelled / failed downloads of this pack go with it
+    n_dl = _clear_dl(pack_id)                 # canceled / failed downloads of this pack go with it
     if not d.exists():
         return _result(False, "missing")
     # PACK.json first: from here on the pack is not installed even when a DLL still loaded by this process keeps its
@@ -798,8 +851,10 @@ def _worker(job: _Job, force: bool) -> None:
     t0 = time.monotonic()
     lk = _PackLock(pid)
     if not lk.acquire():
-        msg = "Another WardogClips window is installing this add-on right now. Try again when that is done."
-        job.set(force=True, state="failed", error=msg, reason="")
+        text = msg("server.pack.locked_elsewhere",
+                   "Another WardogClips window is installing this add-on right now. Try again when that is "
+                   "done.")["message"]
+        job.set(force=True, state="failed", error=text, reason="")
         logger.warning("[Packs] install refused pack=%s err=locked by another process", pid)
         return
     try:
@@ -812,15 +867,15 @@ def _worker(job: _Job, force: bool) -> None:
         else:
             _install_model(job, pid[len(MODEL_PREFIX):])
         job.set(force=True, state="done", progress=1.0, error="",
-                reason=job.reason if job.reason != "cancelling..." else "")
+                reason=job.reason if job.reason != CANCELING else "")
         logger.info("[Packs] install done pack=%s version=%s secs=%.1f", pid, job.version or "-", time.monotonic() - t0)
     except _Cancelled:
         job.set(force=True, state="cancelled", reason="")
-        logger.info("[Packs] install cancelled pack=%s bytes=%d", pid, job.bytes)
+        logger.info("[Packs] install canceled pack=%s bytes=%d", pid, job.bytes)
     except Exception as e:       # noqa: BLE001 -- never out of the thread
-        msg = _ascii(e) or e.__class__.__name__
-        job.set(force=True, state="failed", error=msg, reason="")
-        logger.warning("[Packs] install failed pack=%s err=%s", pid, msg, exc_info=not isinstance(e, PackError))
+        err = _ascii(e) or e.__class__.__name__
+        job.set(force=True, state="failed", error=err, reason="")
+        logger.warning("[Packs] install failed pack=%s err=%s", pid, err, exc_info=not isinstance(e, PackError))
     finally:
         try:
             tmp = _packs_dir() / f"{pid}.tmp"
@@ -845,7 +900,8 @@ def _host_ok(host: str) -> bool:
 def _check_host(url: str) -> None:
     host = (urlparse(url).hostname or "").lower()
     if urlparse(url).scheme != "https" or not _host_ok(host):
-        raise PackError(f"refused download host {host or url!r} (not one of the fixed pack hosts)")
+        raise PackError(msg("server.pack.err.host", "WardogClips refused download host {host}: it is not one of the "
+                            "fixed add-on hosts.", host=repr(host or url))["message"])
 
 
 def _get(sess, url: str, headers: dict | None = None, stream: bool = False):
@@ -859,13 +915,14 @@ def _get(sess, url: str, headers: dict | None = None, stream: bool = False):
             r.close()
             continue
         return r
-    raise PackError("too many redirects")
+    raise PackError(msg("server.pack.err.redirects", "The download was redirected too many times.")["message"])
 
 
 def _get_json(sess, url: str) -> dict:
     r = _get(sess, url)
     if r.status_code != 200:
-        raise PackError(f"{urlparse(url).hostname} answered HTTP {r.status_code} for {urlparse(url).path}")
+        raise PackError(msg("server.pack.err.http", "{host} answered HTTP {status} for {file}.",
+                            host=urlparse(url).hostname, status=r.status_code, file=urlparse(url).path)["message"])
     return r.json()
 
 
@@ -878,11 +935,13 @@ def _pypi_file(sess, name: str, ver: str | None, want: str) -> dict:
         if fn.endswith(".whl") and want in fn:
             sha = (u.get("digests") or {}).get("sha256", "")
             if not sha:
-                raise PackError(f"PyPI gave no sha256 for {fn}")
+                raise PackError(msg("server.pack.err.no_sha", "PyPI gave no checksum (sha256) for {file}.",
+                                    file=fn)["message"])
             return {"url": u["url"], "filename": fn, "size": int(u.get("size") or 0), "sha256": sha,
                     "version": (j.get("info") or {}).get("version", ver or ""),
                     "requires": (j.get("info") or {}).get("requires_dist") or []}
-    raise PackError(f"no {want} wheel of {name} {ver or 'latest'} on PyPI")
+    raise PackError(msg("server.pack.err.no_wheel", "PyPI has no {kind} package of {name} {version}.", kind=want,
+                        name=name, version=ver or "latest")["message"])
 
 
 def _hash_file(path: Path, h, job: _Job | None = None):
@@ -929,7 +988,8 @@ def _stream(job: _Job, sess, url: str, part: Path, size: int, new_hash, base: in
             elif r.status_code == 416 and have:
                 mode = None                                # nothing left to fetch
             else:
-                raise PackError(f"{urlparse(r.url or url).hostname} answered HTTP {r.status_code} for {label}")
+                raise PackError(msg("server.pack.err.http", "{host} answered HTTP {status} for {file}.",
+                                    host=urlparse(r.url or url).hostname, status=r.status_code, file=label)["message"])
             if mode:
                 job.set(bytes=base + have)
                 with open(part, mode) as f:
@@ -945,7 +1005,8 @@ def _stream(job: _Job, sess, url: str, part: Path, size: int, new_hash, base: in
         finally:
             r.close()
     if size and have != size:
-        raise PackError(f"download of {label} ended at {have} of {size} bytes (try again to resume)")
+        raise PackError(msg("server.pack.err.short", "The download of {file} stopped at {have} of {size} bytes. Try "
+                            "again to resume it.", file=label, have=have, size=size)["message"])
     return h.hexdigest()
 
 
@@ -965,7 +1026,8 @@ def _fetch(job: _Job, sess, url: str, filename: str, size: int, sha256: str, bas
     digest = _stream(job, sess, url, part, size, hashlib.sha256, base, filename)
     if digest != sha256:
         part.unlink(missing_ok=True)      # a corrupt part must not be resumed
-        raise PackError(f"sha256 mismatch for {filename} -- the download was damaged, try again")
+        raise PackError(msg("server.pack.err.sha256", "{file} failed its check (sha256 mismatch), so the download was "
+                            "damaged. Try again.", file=filename)["message"])
     os.replace(part, final)
     return final
 
@@ -973,7 +1035,8 @@ def _fetch(job: _Job, sess, url: str, filename: str, size: int, sha256: str, bas
 def _safe_target(root: Path, member: str) -> Path:
     t = (root / member).resolve()
     if not str(t).lower().startswith(str(root.resolve()).lower() + os.sep.lower()) and t != root.resolve():
-        raise PackError(f"refused archive member outside the pack: {member!r}")
+        raise PackError(msg("server.pack.err.member", "The archive held a file outside the add-on folder ({file}), so "
+                            "it was refused.", file=repr(member))["message"])
     return t
 
 
@@ -1005,7 +1068,8 @@ def _commit(job: _Job, pack_id: str, tmp: Path, version: str, files: int, nbytes
         try:
             os.replace(final, old)
         except OSError as e:
-            raise PackError(f"the installed {pack_id} pack is in use ({_ascii(e)}) -- restart WardogClips and try again")
+            raise PackError(msg("server.pack.err.in_use", "The installed add-on {id} is in use ({error}). Restart "
+                                "WardogClips and try again.", id=pack_id, error=_ascii(e))["message"])
         shutil.rmtree(old, ignore_errors=True)
     os.replace(tmp, final)
     man = {"id": pack_id, "version": version, "installed": _now_iso(), "files": files, "bytes": nbytes}
@@ -1023,7 +1087,8 @@ def _fresh_tmp(pack_id: str) -> Path:
 # -- the packs ------------------------------------------------------------------------------------------------------
 def _install_cuda(job: _Job) -> None:
     if not gpu_info().get("nvidia"):
-        raise PackError("no NVIDIA graphics card found (nvidia-smi) -- the CUDA pack would not be used")
+        raise PackError(msg("server.pack.err.no_nvidia", "No NVIDIA graphics card was found, so the speech engine for "
+                            "the graphics card would not be used.")["message"])
     sess = _session()
     wheels = [_pypi_file(sess, n, v, "win_amd64") for n, v in CUDA_WHEELS]
     job.set(total=sum(w["size"] for w in wheels), bytes=0)
@@ -1035,7 +1100,7 @@ def _install_cuda(job: _Job) -> None:
     tmp = _fresh_tmp("cuda")
     n = b = 0
 
-    # only the DLLs (+ the licence files) -- the wheels' include/ and lib/ are for compiling against CUDA
+    # only the DLLs (+ the license files) -- the wheels' include/ and lib/ are for compiling against CUDA
     def keep(name: str) -> bool:
         low = name.lower()
         return low.startswith("nvidia/") and ("/bin/" in low or low.endswith("license.txt"))
@@ -1043,14 +1108,16 @@ def _install_cuda(job: _Job) -> None:
         dn, db = _extract(job, f, tmp, keep)
         n, b = n + dn, b + db
     if not any(tmp.glob("nvidia/cublas/bin/cublas64_*.dll")) or not any(tmp.glob("nvidia/cudnn/bin/cudnn64_*.dll")):
-        raise PackError("the CUDA wheels did not contain cublas64 / cudnn64 DLLs")
+        raise PackError(msg("server.pack.err.cuda_dlls", "The CUDA packages did not contain the cublas64 / cudnn64 "
+                            "DLLs.")["message"])
     _commit(job, "cuda", tmp, " / ".join(f"{nm.split('-')[1]} {v}" for nm, v in CUDA_WHEELS), n, b)
     for f in files:
         f.unlink(missing_ok=True)       # 1.3 GB of wheels are not needed once extracted
     wire_dlls()                         # NOT activate(): its sweep is for startup only
     later = _reload_engine()
-    job.reason = ("Ready: used from the next transcription (after the one running now)." if later
-                  else "Ready: used from the next transcription.")
+    job.reason = (msg("server.pack.ready_later", "Ready: used from the next transcription (after the one running "
+                      "now).")["message"] if later
+                  else msg("server.pack.ready", "Ready: used from the next transcription.")["message"])
 
 
 def _reload_engine() -> bool:
@@ -1097,7 +1164,7 @@ def _install_deno(job: _Job) -> None:
     n, b = _extract(job, z, tmp, lambda name: name.lower().rsplit("/", 1)[-1] == "deno.exe",
                     rename=lambda name: "deno.exe")
     if not (tmp / "deno.exe").is_file():
-        raise PackError("the deno zip held no deno.exe")
+        raise PackError(msg("server.pack.err.no_deno", "The Deno download held no deno.exe.")["message"])
     _commit(job, "deno", tmp, DENO_VERSION, n, b)
     z.unlink(missing_ok=True)
 
@@ -1109,7 +1176,8 @@ def _install_ytdlp(job: _Job, force: bool) -> None:
     have = (_manifest("ytdlp") or {}).get("version", "")
     if not force and _vtuple(main["version"]) <= max(_vtuple(bundled), _vtuple(have)):
         job.version = have or bundled
-        job.reason = f"Already up to date: you have the newest downloader (yt-dlp {have or bundled})."
+        job.reason = msg("server.pack.ytdlp_current", "Already up to date: you have the newest downloader (yt-dlp "
+                         "{version}).", version=have or bundled)["message"]
         return
     # yt-dlp[default] pins the yt-dlp-ejs it was released with: take that version, else the latest
     ejs_ver = None
@@ -1135,14 +1203,16 @@ def _install_ytdlp(job: _Job, force: bool) -> None:
         dn, db = _extract(job, f, tmp, lambda name: True)
         n, b = n + dn, b + db
     if not (tmp / "yt_dlp" / "__init__.py").is_file():
-        raise PackError("the yt-dlp wheel held no yt_dlp package")
+        raise PackError(msg("server.pack.err.no_ytdlp", "The yt-dlp package held no yt_dlp folder.")["message"])
     on_disk = sum(1 for f in tmp.rglob("*") if f.is_file())
     if on_disk != n:
-        raise PackError(f"the yt-dlp update was not extracted completely ({on_disk} of {n} files) -- try again")
+        raise PackError(msg("server.pack.err.extract", "The yt-dlp update was not extracted completely ({done} of "
+                            "{total} files). Try again.", done=on_disk, total=n)["message"])
     _commit(job, "ytdlp", tmp, main["version"], n, b)
     for f in files:
         f.unlink(missing_ok=True)
-    job.reason = f"Updated to yt-dlp {main['version']} (built-in {bundled or '-'})."
+    job.reason = msg("server.pack.ytdlp_updated", "Updated to yt-dlp {version} (built-in {bundled}).",
+                     version=main["version"], bundled=bundled or "-")["message"]
 
 
 def _hf_listing(sess, repo: str) -> tuple[str, list[dict]]:
@@ -1151,7 +1221,8 @@ def _hf_listing(sess, repo: str) -> tuple[str, list[dict]]:
     j = _get_json(sess, HF_API_REV.format(repo=repo))
     commit = str(j.get("sha") or "")
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
-        raise PackError(f"the model listing of {repo} gave no revision")
+        raise PackError(msg("server.pack.err.no_revision", "The model listing of {repo} gave no revision.",
+                            repo=repo)["message"])
     files = []
     for sib in j.get("siblings") or []:
         fn = str(sib.get("rfilename") or "")
@@ -1164,11 +1235,13 @@ def _hf_listing(sess, repo: str) -> tuple[str, list[dict]]:
         elif sib.get("blobId"):
             files.append({"name": fn, "size": size, "digest": str(sib["blobId"]).lower(), "algo": "git-sha1"})
         else:
-            raise PackError(f"the model listing of {repo} gave no checksum for {fn}")
+            raise PackError(msg("server.pack.err.no_checksum", "The model listing of {repo} gave no checksum for "
+                                "{file}.", repo=repo, file=fn)["message"])
     names = {f["name"] for f in files}
     missing = [f for f in MODEL_REQUIRED if f not in names]
     if missing:
-        raise PackError(f"the model repo {repo} has no {', '.join(missing)}")
+        raise PackError(msg("server.pack.err.model_files", "The model {repo} has no {files}.", repo=repo,
+                            files=", ".join(missing))["message"])
     return commit, files
 
 
@@ -1185,10 +1258,11 @@ def _install_model(job: _Job, name: str) -> None:
     packs/models.json are written last."""
     repo = model_repo(name)
     if not repo:
-        raise PackError(f"no download source known for model {name}")
+        raise PackError(msg("server.pack.err.no_source", "No download source is known for the model {name}.",
+                            name=name)["message"])
     job.version = repo
     if model_cached(name):
-        job.reason = "Already downloaded."
+        job.reason = msg("server.pack.already_downloaded", "Already downloaded.")["message"]
         return
     sess = _session()
     commit, files = _hf_listing(sess, repo)
@@ -1197,7 +1271,7 @@ def _install_model(job: _Job, name: str) -> None:
     snap = root / "snapshots" / commit
     blobs = root / "blobs"
     # the listing goes into packs/models.json BEFORE the first byte: from now on snapshot_complete judges this
-    # snapshot against every listed file, so a failed / cancelled run (model.bin there, vocabulary missing) is
+    # snapshot against every listed file, so a failed / canceled run (model.bin there, vocabulary missing) is
     # never taken as installed
     entry = {"commit": commit, "files": {f["name"]: f["size"] for f in files}, "dir": str(root),
              "complete": False}
@@ -1216,7 +1290,8 @@ def _install_model(job: _Job, name: str) -> None:
         digest = _stream(job, sess, url, part, size, new_hash, base, f["name"])
         if digest != f["digest"]:
             part.unlink(missing_ok=True)
-            raise PackError(f"checksum mismatch for {f['name']} of {repo} -- the download was damaged, try again")
+            raise PackError(msg("server.pack.err.checksum", "{file} of {repo} failed its check (checksum mismatch), "
+                                "so the download was damaged. Try again.", file=f["name"], repo=repo)["message"])
         target.parent.mkdir(parents=True, exist_ok=True)
         if target.is_symlink() or target.exists():
             target.unlink()                          # a dangling link / short file of an older attempt
@@ -1231,8 +1306,9 @@ def _install_model(job: _Job, name: str) -> None:
     entry.update(complete=True, installed=_now_iso())
     _write_models(lambda repos: repos.__setitem__(repo, entry))
     if not model_cached(name):
-        raise PackError("the model download finished but the model is not complete in the cache")
-    job.reason = "Downloaded."
+        raise PackError(msg("server.pack.err.incomplete", "The model download finished, but the model is not "
+                            "complete in the cache.")["message"])
+    job.reason = msg("server.pack.downloaded", "Downloaded.")["message"]
 
 
 # -- status ---------------------------------------------------------------------------------------------------------
@@ -1253,6 +1329,9 @@ def _status_one(pack_id: str, gpu: dict | None = None) -> dict:
     return _pack_status(pack_id, gpu)
 
 
+_TEXT_FIELDS = ("title", "desc", "reason", "note", "error")
+
+
 def _pack_status(pack_id: str, gpu: dict | None = None) -> dict:
     info = PACK_INFO[pack_id]
     man = _manifest(pack_id)
@@ -1268,9 +1347,10 @@ def _pack_status(pack_id: str, gpu: dict | None = None) -> dict:
         # cuda_ready: speech already runs on the graphics card (this pack, or the libraries some other way)
         out["cuda_ready"] = bool(out["available"] and (inst or elsewhere))
         if not out["available"]:
-            out["reason"] = "Not needed: this PC has no NVIDIA graphics card."
+            out["reason"] = msg("server.pack.cuda.no_nvidia", "Not needed: this PC has no NVIDIA graphics card.")["message"]
         elif elsewhere:
-            out["reason"] = "Not needed: this PC already has it (the CUDA libraries are in the Python environment)."
+            out["reason"] = msg("server.pack.cuda.elsewhere", "Not needed: this PC already has it (the CUDA libraries "
+                                "are in the Python environment).")["message"]
         else:
             out["recommended"] = not inst
     elif pack_id == "deno":
@@ -1279,29 +1359,36 @@ def _pack_status(pack_id: str, gpu: dict | None = None) -> dict:
         # needed: YouTube downloads would not work without it (no Node.js, no deno anywhere)
         out["needed"] = bool(not inst and not node and not on_path)
         if node:
-            out["reason"] = "Not needed: Node.js on this PC already does this job."
+            out["reason"] = msg("server.pack.deno.node", "Not needed: Node.js on this PC already does this job.")["message"]
         elif on_path and not inst:
-            out["reason"] = "Not needed: Deno is already installed on this PC."
+            out["reason"] = msg("server.pack.deno.on_path", "Not needed: Deno is already installed on this PC.")["message"]
         else:
             out["recommended"] = not inst
     elif pack_id == "ytdlp":
         out["bundled"] = bundled_ytdlp_version()
         out["active"] = ytdlp_path() is not None
         if inst and not out["active"]:
-            out["reason"] = "The built-in downloader is just as new, so this update is not used."
+            out["reason"] = msg("server.pack.ytdlp.unused", "The built-in downloader is just as new, so this update is "
+                                "not used.")["message"]
+    annotate(out, *_TEXT_FIELDS)
     return out
 
 
 def _model_status(name: str, gpu: dict | None = None) -> dict:
     cached = model_cached(name)
     rec = recommended_model(gpu)
-    title, plain = MODEL_INFO.get(name, (f"Speech model {name}", "A speech-to-text model."))
-    out = {"id": MODEL_PREFIX + name, "name": name, "title": title,
-           "desc": f"{plain} Whisper {name} (faster-whisper, {model_repo(name)}).",
+    title, plain = MODEL_INFO.get(name, (msg("server.pack.model.other.title", "Speech model {name}", name=name),
+                                         msg("server.pack.model.other.plain", "A speech-to-text model.")))
+    desc = msg("server.pack.model_desc", "{plain} Whisper {name} (faster-whisper, {repo}).", plain=plain["message"],
+               name=name, repo=model_repo(name))
+    out = {"id": MODEL_PREFIX + name, "name": name, "title": title["message"], "desc": desc["message"],
+           "title_i18n": {"code": title["code"], "params": title["params"]},
+           "plain_i18n": {"code": plain["code"], "params": plain["params"]},
            "installed": cached, "cached": cached, "version": model_repo(name) or "",
            "size_mb": float(MODEL_SIZES_MB.get(name, 0)), "recommended": name == rec, "available": True,
            "reason": ""}
     out.update(_job_fields(MODEL_PREFIX + name, cached))
+    annotate(out, "reason", "note", "error")
     return out
 
 
@@ -1314,7 +1401,8 @@ def status(cfg=None) -> dict:
            "packs_dir": str(_packs_dir())}
     if cfg is not None:
         try:
-            out["current_model"] = cfg.stt.model
+            out["current_model"] = _configured_model(cfg)
+            out["chosen_model"] = cfg.stt.model
         except AttributeError:
             pass
     return out

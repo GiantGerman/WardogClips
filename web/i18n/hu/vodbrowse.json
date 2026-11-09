@@ -1,0 +1,161 @@
+{
+  "title": "Stream VOD-ok",
+  "paste": "Link beillesztése",
+  "paste_tip": "Egy VOD importálása a linkje alapján (előbb lekérdezi)",
+  "close_tip": "Bezárás (Esc)",
+  "search.box_ph": "Streamer neve vagy VOD- / profillink",
+  "search.go": "Keresés",
+  "search.go_tip": "Keresés név szerint, vagy a beillesztett link streamerének megnyitása (Enter)",
+  "search.need_input": "írd be egy streamer nevét, vagy illessz be egy VOD- / profillinket",
+  "search.need_name": "írd be egy streamer nevét",
+  "search.busy": "Lekérdezés: „{name}” itt: {sites} -- minden oldal egyszerre, pár másodperc",
+  "search.found": {
+    "one": "{count} streamer található",
+    "other": "{count} streamer található"
+  },
+  "search.none": "nincs „{name}” nevű streamer itt: {sites}",
+  "sites.one_on": "legalább egy oldalnak bekapcsolva kell maradnia",
+  "link.busy": "A link olvasása -- VOD-linknél az oldal megmondja, kié a VOD, kb. 3 mp",
+  "link.unsupported": "Ez nem támogatott oldal linkje. Ezek linkjei működnek: {sites} (VOD vagy a streamer oldala).",
+  "favs.title": "Kedvencek",
+  "favs.check": "Újak keresése",
+  "favs.check_tip": "Minden kedvenc újralistázása, és a legutóbbi ellenőrzés óta megjelent VOD-ok megszámolása",
+  "favs.checking": "Ellenőrzés...",
+  "favs.none_yet": "még nincs kedvenc: nyiss meg egy streamert, és kattints a csillagra",
+  "favs.checking_note": {
+    "one": "{count} kedvenc ellenőrzése új VOD-okért ...",
+    "other": "{count} kedvenc ellenőrzése új VOD-okért ..."
+  },
+  "favs.result_new": {
+    "one": "{count} új VOD a kedvenceidnél",
+    "other": "{count} új VOD a kedvenceidnél"
+  },
+  "favs.result_nothing": "nincs újdonság a legutóbbi ellenőrzés óta",
+  "favs.result_failed": {
+    "one": "{result} ({count} kedvencet nem sikerült ellenőrizni)",
+    "other": "{result} ({count} kedvencet nem sikerült ellenőrizni)"
+  },
+  "favs.removed": "{name} eltávolítva a kedvencek közül",
+  "favs.added": "{name} hozzáadva a kedvencekhez",
+  "favs.empty_title": "Még nincs kedvenc",
+  "favs.empty_text": "Nyiss meg egy streamert, és kattints a csillagra, hogy itt maradjon.",
+  "favs.new_badge": {
+    "one": "{count} új",
+    "other": "{count} új"
+  },
+  "favs.new_badge_title": "Az előző ellenőrzés óta megjelent VOD-ok",
+  "favs.remove_title": "Eltávolítás a kedvencek közül",
+  "favs.remove_aria": "{name} eltávolítása a kedvencek közül",
+  "favs.add_title": "Hozzáadás a kedvencekhez",
+  "favs.checked": "ellenőrizve: {ago}",
+  "pre.error_extra": "{error} -- a lista tetején látható, most nem importálható",
+  "pre.in_library": "ez a VOD már a könyvtárban van",
+  "pre.older": "ez a VOD régebbi a friss listánál: a lista tetején látható",
+  "import.label": "Importálás",
+  "import.label_n": {
+    "one": "Importálás ({count})",
+    "other": "Importálás ({count})"
+  },
+  "import.busy": "Importálás...",
+  "import.queue_title": {
+    "one": "{count} letöltés sorba állítása",
+    "other": "{count} letöltés sorba állítása"
+  },
+  "import.select_title": "válaszd ki az importálandó VOD-okat",
+  "import.queuing": {
+    "one": "{count} VOD sorba állítása -- minden linket előbb ellenőriz az oldalon ...",
+    "other": "{count} VOD sorba állítása -- minden linket előbb ellenőriz az oldalon ..."
+  },
+  "import.no_answer": "erre a linkre nem jött válasz",
+  "import.sum_queued": {
+    "one": "{count} sorban",
+    "other": "{count} sorban"
+  },
+  "import.sum_already": {
+    "one": "{count} már megvan",
+    "other": "{count} már megvan"
+  },
+  "import.sum_failed": {
+    "one": "{count} sikertelen (vidd az egeret a piros címke fölé)",
+    "other": "{count} sikertelen (vidd az egeret a piros címke fölé)"
+  },
+  "import.sum_jobs": "{summary} -- a letöltések a Feladatok alatt láthatók",
+  "import.toast": "VOD-ok: {summary}",
+  "row.in_library": "a könyvtárban",
+  "row.imported_before": "korábban importálva",
+  "row.already_queued": "már sorban",
+  "row.queued": "sorban",
+  "row.failed": "sikertelen",
+  "row.job": "{id}. feladat",
+  "row.download_job": "{id}. letöltési feladat",
+  "row.your_link": "a linked",
+  "row.your_link_title": "a beillesztett link",
+  "row.open_rec_title": "a felvétel megnyitása",
+  "row.live": "élő most",
+  "row.upcoming": "hamarosan",
+  "row.live_title": "a stream vége után importálható",
+  "row.unavailable": "nem elérhető",
+  "row.not_ready": "nem kész",
+  "row.not_ready_title": "még nem importálható",
+  "row.processing_title": "a stream épp véget ért, és az oldal még feldolgozza",
+  "row.new": "új",
+  "row.new_title": "az utolsó előtti ellenőrzés óta jelent meg",
+  "row.older": "régebbi a listánál",
+  "row.open_on": "megnyitás itt: {site}",
+  "ch.back_results": "Vissza a találatokhoz",
+  "ch.back_favs": "Vissza a kedvencekhez",
+  "ch.back_aria": "Vissza",
+  "ch.star_wait": "várd meg a listázást (az adja meg a streamer saját kulcsát)",
+  "ch.listing_title": "Listázás...",
+  "ch.refresh_title": "Újralistázás az oldalról (a lista 5 percig gyorsítótárban van)",
+  "ch.refresh_aria": "Frissítés",
+  "ch.page_title": "az oldala: {url}",
+  "ch.page_aria": "az oldala",
+  "ch.listing": "listázás ...",
+  "ch.count_listed": {
+    "one": "{count} listázva",
+    "other": "{count} listázva"
+  },
+  "ch.count_new": {
+    "one": "{count} új",
+    "other": "{count} új"
+  },
+  "ch.count_lib": {
+    "one": "{count} a könyvtárban",
+    "other": "{count} a könyvtárban"
+  },
+  "ch.select_new": "Újak kijelölése",
+  "ch.select_new_title": "minden olyan VOD kijelölése, amely még nincs a könyvtárban vagy a sorban",
+  "ch.none": "Egyik sem",
+  "ch.none_title": "a kijelölés törlése",
+  "ch.listing_busy": "{name} VOD-jainak listázása itt: {site} ...",
+  "ch.relisting": "újralistázás ...",
+  "ch.empty_title": "Nincs listázott VOD",
+  "ch.empty_text": "Lehet, hogy a streamer nem őrzi meg a korábbi adásait, vagy azok csak feliratkozóknak érhetők el.",
+  "ch.load_older": "Régebbiek betöltése ({count})",
+  "ch.max_listed": "Csak a legújabb {count} látható -- régebbi VOD importálásához illeszd be a linkjét.",
+  "home.short": "Írj be egy nevet, és nyomj Entert, vagy illessz be egy VOD- / profillinket.",
+  "home.find_html": "<b>Streamer keresése</b> -- írd be a nevét, és nyomj Entert; minden bekapcsolt oldal egyszerre kap kérdést.",
+  "home.paste_html": "<b>Vagy illessz be egy linket</b> -- a streamer oldala a friss VOD-jait listázza; egy VOD-link a streamerét nyitja meg, kijelölve azt a VOD-ot.",
+  "home.import_html": "Jelöld ki a VOD-okat, és kattints az <b>Importálás</b> gombra: egymás után töltődnek le (Feladatok), majd egy felvételhez hasonlóan átírja és átvizsgálja őket.",
+  "res.head": "Találatok: „{query}”",
+  "res.clear": "Találatok törlése",
+  "res.empty_title": "Nincs találat",
+  "res.empty_text": "Ellenőrizd a helyesírást, kapcsolj be több oldalt, vagy illeszd be az oldaluk linkjét.",
+  "res.no_hits": "Ilyen nevű streamer nincs a bekapcsolt oldalakon.",
+  "res.not_found": "nem található",
+  "res.fav_title": "kedvenc",
+  "res.recent": {
+    "one": "{count} friss",
+    "other": "{count} friss"
+  },
+  "res.recent_more": "{count}+ friss",
+  "res.no_recent": "nincs listázott friss VOD",
+  "single.title": "Egy VOD",
+  "single.clear": "Törlés",
+  "single.site": "Oldal",
+  "single.link": "Link",
+  "single.recheck": "Az importálás újra ellenőrzi a linket az oldalon.",
+  "single.no_channel": "Az oldal nem mondta meg, kié ez a VOD, így nincs listázható streamer. Ez az egy VOD azért importálható.",
+  "single.import": "VOD importálása"
+}

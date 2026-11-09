@@ -1,0 +1,19 @@
+{
+  "tray.open": "Отвори WardogClips",
+  "tray.update": "Има обновление...",
+  "tray.pause": "Пауза, докато играя",
+  "tray.speed": "Скорост",
+  "tray.mode_full": "Пълна скорост",
+  "tray.mode_balanced": "Балансиран",
+  "tray.mode_background": "Фонов",
+  "tray.open_data": "Отвори папката с данни",
+  "tray.open_log": "Отвори лога",
+  "tray.quit": "Изход",
+  "tray.balloon": "WardogClips работи. Десен клик върху иконата в трея, за да излезеш.",
+  "tray.update_notify": "Налична е WardogClips {version}. Избери „Има обновление...“ в менюто в трея, за да я видиш.",
+  "launcher.could_not_start": "WardogClips не можа да стартира:\n\n{error}",
+  "launcher.scan_running": "Сканиране на WardogClips (scan.bat / --scan) ползва тази папка с данни:\n\n{dir}\n\nИзчакай да приключи (или го спри в прозореца му) и стартирай WardogClips пак.",
+  "launcher.not_answering": "WardogClips вече работи, но не отговаря.\n\nИзлез от него чрез иконата в трея (или изчакай минута) и опитай пак.\n\nЛог: {log}",
+  "launcher.damaged": "WardogClips е повреден (липсва средата за изпълнение или файловете на приложението).\n\nМоля, инсталирай го наново.\n\nТърсено:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips спря веднага след старта (код на изход {code}).\n\nЛогът може да казва защо:\n{log}"
+}

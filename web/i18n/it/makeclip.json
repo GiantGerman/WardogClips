@@ -1,0 +1,12 @@
+{
+  "pick_first": "Prima scegli un evento o riproduci una registrazione.",
+  "already": "Questa clip è già in creazione.",
+  "making_exact": "Creo la clip, precisa al fotogramma. Ci vuole un po' di più perché l'immagine viene ricodificata.",
+  "making_copy": "Creo la clip. Partirà dal keyframe più vicino prima del tuo punto in.",
+  "open_folder": "Apri cartella",
+  "saved": "Clip salvata: {name}",
+  "saved_early": "Clip salvata: {name}\nParte {seconds} prima del tuo punto in (keyframe più vicino).",
+  "check_mismatch": "La clip non corrisponde del tutto alla registrazione. Controllala prima di usarla.",
+  "failed": "Impossibile creare la clip: {error}",
+  "unknown_error": "errore sconosciuto"
+}

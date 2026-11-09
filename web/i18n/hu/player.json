@@ -1,0 +1,99 @@
+{
+  "title.none": "nincs klip",
+  "title.rendering": "{kind} – {time} · renderelés {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · teljes felvétel",
+  "title.no_proxy": "Még nincs proxy",
+  "tip.event": "{kind} – {time}: {render}",
+  "tip.around": "{time} körül: {render}",
+  "tip.cached": "{height}p a klipgyorsítótárból",
+  "tip.rendered": "{height}p renderelve {seconds} mp alatt",
+  "tip.rendered_enc": "{height}p renderelve {seconds} mp alatt ({encoder})",
+  "tip.proxy": "{name}: a teljes felvétel proxyja",
+  "tip.no_proxy": "{name}: még nincs proxy a teljes felvételhez",
+  "busy.clip": "a klip renderelése ({height}p)...",
+  "busy.at": "{time} renderelése ({height}p)...",
+  "busy.seconds": "{seconds} mp",
+  "err.clip": "Ezt a klipet nem sikerült renderelni",
+  "err.at": "{time} renderelése nem sikerült",
+  "err.retry": "Újra",
+  "err.encoding": "Kódolási beállítások",
+  "err.play_clip": "Ezt a klipet nem sikerült lejátszani.",
+  "err.play_proxy": "A proxyt nem sikerült lejátszani.",
+  "pick.title": "Válassz egy eseményt",
+  "pick.text": "Válassz egyet az Eseményekben (vagy nyomd meg az N-t): a klipje itt indul a ráhagyástól.",
+  "pick.more": "Vagy kattints az alábbi idővonalra, és nézd meg a felvétel bármely pillanatát.",
+  "pick.short": "Válassz egyet az Eseményekben (vagy nyomd meg az N-t), vagy kattints az alábbi idővonalra.",
+  "proxy.card_title": "Ehhez a felvételhez még nincs proxy",
+  "proxy.card_text": "A {height}p-s proxy a teljes, {duration} hosszú fájl másolata, amelyben elejétől végéig tekerhetsz (a valós időnél többszörösen gyorsabban készül).",
+  "proxy.building": "készül",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "sorban",
+  "proxy.build": "Proxy készítése",
+  "proxy.all": "Proxy minden eseményes felvételhez",
+  "proxy.all_tip": "Proxy sorba állítása minden eseményes felvételhez",
+  "proxy.queued_toast": "proxy sorba állítva",
+  "proxy.all_toast": {
+    "one": "{count} proxy sorba állítva ({candidates} eseményes felvételnek nincs)",
+    "other": "{count} proxy sorba állítva ({candidates} eseményes felvételnek nincs)"
+  },
+  "mode.full_tip": "A teljes felvétel a proxyjából lejátszva",
+  "mode.full_noproxy_tip": "A teljes felvétel: még nincs proxy (innen elkészíthető)",
+  "bound.wait": "várd meg, amíg az esemény klipje betöltődik",
+  "bound.in_before_out": "a kezdőpontnak a végpont előtt kell lennie",
+  "bound.out_after_in": "a végpontnak a kezdőpont után kell lennie",
+  "bound.reset": "klip vissza az elő- / utóráhagyásra",
+  "bound.in_set": "be = {time} (klip {length} mp)",
+  "bound.out_set": "ki = {time} (klip {length} mp)",
+  "mark.nothing": "nincs lejátszás",
+  "mark.done": "kézi jelölés: {time}",
+  "play_aria": "Lejátszás",
+  "pause_aria": "Szünet",
+  "time.pos": "{pos} / {total}",
+  "time.rel": "{offset} mp az eseménytől",
+  "time.clip": "klip {in} – {out} = {length} mp",
+  "pip.loop": "Ismétlés be → ki",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · pontszám {score}",
+  "tl.tip_status": "{kind} · {time} · pontszám {score} · {status}",
+  "tl.status_kept": "megtartva",
+  "tl.status_false": "téves találat",
+  "tl.whole": "Teljes felvétel",
+  "tl.no_events": "nincs esemény",
+  "tl.not_detected": "még nincs észlelve",
+  "tl.no_proxy": "nincs proxy",
+  "tl.no_proxy_tip": "A teljes felvétel módhoz proxy kell (a lejátszóból elkészíthető)",
+  "tl.kind.kill": {
+    "one": "{count} ölés",
+    "other": "{count} ölés"
+  },
+  "tl.kind.assist": {
+    "one": "{count} segítés",
+    "other": "{count} segítés"
+  },
+  "tl.kind.death": {
+    "one": "{count} halál",
+    "other": "{count} halál"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} észlelés",
+    "other": "{count} észlelés"
+  },
+  "tl.kind.revive": {
+    "one": "{count} újraélesztés",
+    "other": "{count} újraélesztés"
+  },
+  "tl.kind.squad": {
+    "one": "{count} osztag",
+    "other": "{count} osztag"
+  },
+  "tl.kind.voice": {
+    "one": "{count} hang",
+    "other": "{count} hang"
+  },
+  "tl.kind.manual": {
+    "one": "{count} kézi",
+    "other": "{count} kézi"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

@@ -1,0 +1,90 @@
+{
+  "title.none": "mana clip",
+  "title.rendering": "{kind} {time}-pi · {height}p ruwakuchkan",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · llapan grabación",
+  "title.no_proxy": "Manaraq proxy kanchu",
+  "tip.event": "{kind} {time}-pi: {render}",
+  "tip.around": "{time} kaqpi: {render}",
+  "tip.cached": "{height}p clip cachémanta",
+  "tip.rendered": "{height}p {seconds} s-pi ruwasqa",
+  "tip.rendered_enc": "{height}p {seconds} s-pi ruwasqa ({encoder})",
+  "tip.proxy": "{name}: llapan grabacionpa proxy-n",
+  "tip.no_proxy": "{name}: manaraq llapan grabacionpa proxy-n kanchu",
+  "busy.clip": "clip ruwakuchkan ({height}p)...",
+  "busy.at": "{time} ruwakuchkan ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Kay clipta mana ruwayta atikunchu",
+  "err.at": "{time}-ta mana ruwayta atikunchu",
+  "err.retry": "Wakmanta",
+  "err.encoding": "Codificación allichana",
+  "err.play_clip": "Kay clipta mana purichiyta atikunchu.",
+  "err.play_proxy": "Proxy-ta mana purichiyta atikunchu.",
+  "pick.title": "Huk evento akllay",
+  "pick.text": "Eventokunapi hukta akllay (utaq N ñit'iy): clippa pre-roll-manta kaypi purinqa.",
+  "pick.more": "Utaq uraypi pacha siqipi clic ruway kay grabacionpa mayqin pachantapas qhawanaykipaq.",
+  "pick.short": "Eventokunapi hukta akllay (utaq N ñit'iy), utaq uraypi pacha siqipi clic ruway.",
+  "proxy.card_title": "Kay grabacionpaq manaraq proxy kanchu",
+  "proxy.card_text": "{height}p proxy-qa llapan {duration} archivopa copianmi, qallariymanta tukukuykama purinapaq (chiqap pachamanta achka kuti utqaylla ruwakun).",
+  "proxy.building": "ruwakuchkan",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "siqipi",
+  "proxy.build": "Proxy ruray",
+  "proxy.all": "Eventoyuqkunapaq proxykuna",
+  "proxy.all_tip": "Eventoyuq llapan grabacionkunapaq proxykunata siqiman churay",
+  "proxy.queued_toast": "proxy siqipi",
+  "proxy.all_toast": {
+    "other": "{count} proxy siqipi ({candidates} eventoyuq grabacionkuna mana proxy-yuqchu)"
+  },
+  "mode.full_tip": "Llapan grabación, proxy-nmanta purichisqa",
+  "mode.full_noproxy_tip": "Llapan grabación: manaraq proxy kanchu (kaymanta hukta ruray)",
+  "bound.wait": "kay eventopa clip-nin cargakunankama suyay",
+  "bound.in_before_out": "in-qa out-manta ñawpaqta kanan",
+  "bound.out_after_in": "out-qa in-manta qhipata kanan",
+  "bound.reset": "clip pre-roll / post-roll-man kutirqan",
+  "bound.in_set": "in = {time} (clip {length} s)",
+  "bound.out_set": "out = {time} (clip {length} s)",
+  "mark.nothing": "mana ima purichkanchu",
+  "mark.done": "makiwan marca {time}-pi",
+  "play_aria": "Purichiy",
+  "pause_aria": "Sayachiy",
+  "time.pos": "{pos} / {total}",
+  "time.rel": "eventomanta {offset} s",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Muyuchiy in → out",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · puntaje {score}",
+  "tl.tip_status": "{kind} · {time} · puntaje {score} · {status}",
+  "tl.status_kept": "waqaychasqa",
+  "tl.status_false": "mana chiqap",
+  "tl.whole": "Llapan grabación",
+  "tl.no_events": "mana eventokuna",
+  "tl.not_detected": "manaraq tarisqachu",
+  "tl.no_proxy": "mana proxy",
+  "tl.no_proxy_tip": "Llapan grabación modoqa proxy-ta necesitan (reproductormanta ruray)",
+  "tl.kind.kill": {
+    "other": "{count} wañuchiy"
+  },
+  "tl.kind.assist": {
+    "other": "{count} yanapay"
+  },
+  "tl.kind.death": {
+    "other": "{count} wañuy"
+  },
+  "tl.kind.spotted": {
+    "other": "{count} rikusqa"
+  },
+  "tl.kind.revive": {
+    "other": "{count} kawsarichiy"
+  },
+  "tl.kind.squad": {
+    "other": "{count} huñu"
+  },
+  "tl.kind.voice": {
+    "other": "{count} kunka"
+  },
+  "tl.kind.manual": {
+    "other": "{count} makiwan"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

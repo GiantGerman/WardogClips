@@ -1,0 +1,19 @@
+{
+  "tray.open": "Abrir o WardogClips",
+  "tray.update": "Atualização disponível...",
+  "tray.pause": "Pausar enquanto eu jogo",
+  "tray.speed": "Velocidade",
+  "tray.mode_full": "Velocidade máxima",
+  "tray.mode_balanced": "Equilibrado",
+  "tray.mode_background": "Segundo plano",
+  "tray.open_data": "Abrir pasta de dados",
+  "tray.open_log": "Abrir log",
+  "tray.quit": "Sair",
+  "tray.balloon": "O WardogClips está rodando. Clique com o botão direito no ícone da bandeja para sair.",
+  "tray.update_notify": "O WardogClips {version} está disponível. Escolha Atualização disponível... no menu da bandeja para vê-lo.",
+  "launcher.could_not_start": "O WardogClips não pôde iniciar:\n\n{error}",
+  "launcher.scan_running": "Uma varredura do WardogClips (scan.bat / --scan) está usando esta pasta de dados:\n\n{dir}\n\nEspere ela terminar (ou pare-a na janela dela) e inicie o WardogClips de novo.",
+  "launcher.not_answering": "O WardogClips já está rodando, mas não responde.\n\nSaia pelo ícone da bandeja (ou espere um minuto) e tente de novo.\n\nLog: {log}",
+  "launcher.damaged": "O WardogClips está danificado (faltam o runtime ou os arquivos do app).\n\nReinstale-o.\n\nProcurado em:\n{python}\n{main}",
+  "launcher.stopped": "O WardogClips parou logo depois de iniciar (código de saída {code}).\n\nO log pode dizer o motivo:\n{log}"
+}

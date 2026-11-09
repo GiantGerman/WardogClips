@@ -1,0 +1,161 @@
+{
+  "title": "VOD από stream",
+  "paste": "Επικόλληση",
+  "paste_tip": "Εισαγωγή ενός VOD από τον σύνδεσμό του (πρώτα γίνεται αναζήτηση)",
+  "close_tip": "Κλείσιμο (Esc)",
+  "search.box_ph": "Όνομα streamer ή σύνδεσμος VOD / προφίλ",
+  "search.go": "Αναζήτηση",
+  "search.go_tip": "Αναζήτηση κατά όνομα ή άνοιγμα του streamer ενός συνδέσμου (Enter)",
+  "search.need_input": "πληκτρολογήστε όνομα streamer ή επικολλήστε σύνδεσμο VOD / προφίλ",
+  "search.need_name": "πληκτρολογήστε όνομα streamer",
+  "search.busy": "Ερώτηση στα {sites} για «{name}» -- όλοι οι ιστότοποι μαζί, λίγα δευτερόλεπτα",
+  "search.found": {
+    "one": "Βρέθηκε {count} streamer",
+    "other": "Βρέθηκαν {count} streamer"
+  },
+  "search.none": "κανένας streamer με όνομα «{name}» στο {sites}",
+  "sites.one_on": "τουλάχιστον ένας ιστότοπος μένει ενεργός",
+  "link.busy": "Ανάγνωση συνδέσμου -- για σύνδεσμο VOD ο ιστότοπος ερωτάται σε ποιον ανήκει, περίπου 3 δ",
+  "link.unsupported": "Αυτός δεν είναι σύνδεσμος υποστηριζόμενου ιστότοπου. Λειτουργούν σύνδεσμοι από {sites} (ένα VOD ή η σελίδα του streamer).",
+  "favs.title": "Αγαπημένα",
+  "favs.check": "Έλεγχος για νέα",
+  "favs.check_tip": "Νέα λίστα για κάθε αγαπημένο και μέτρηση των VOD που εμφανίστηκαν από τον τελευταίο έλεγχο",
+  "favs.checking": "Έλεγχος...",
+  "favs.none_yet": "δεν υπάρχουν ακόμη αγαπημένα: ανοίξτε έναν streamer και κάντε κλικ στο αστέρι",
+  "favs.checking_note": {
+    "one": "έλεγχος {count} αγαπημένου για νέα VOD ...",
+    "other": "έλεγχος {count} αγαπημένων για νέα VOD ..."
+  },
+  "favs.result_new": {
+    "one": "{count} νέο VOD στα αγαπημένα σας",
+    "other": "{count} νέα VOD στα αγαπημένα σας"
+  },
+  "favs.result_nothing": "τίποτα νέο από τον τελευταίο έλεγχο",
+  "favs.result_failed": {
+    "one": "{result} ({count} αγαπημένο δεν ελέγχθηκε)",
+    "other": "{result} ({count} αγαπημένα δεν ελέγχθηκαν)"
+  },
+  "favs.removed": "Το {name} αφαιρέθηκε από τα αγαπημένα",
+  "favs.added": "Το {name} προστέθηκε στα αγαπημένα",
+  "favs.empty_title": "Δεν υπάρχουν ακόμη αγαπημένα",
+  "favs.empty_text": "Ανοίξτε έναν streamer και κάντε κλικ στο αστέρι για να τον κρατήσετε εδώ.",
+  "favs.new_badge": {
+    "one": "{count} νέο",
+    "other": "{count} νέα"
+  },
+  "favs.new_badge_title": "VOD που εμφανίστηκαν από τον προηγούμενο έλεγχο",
+  "favs.remove_title": "Αφαίρεση από τα αγαπημένα",
+  "favs.remove_aria": "Αφαίρεση του {name} από τα αγαπημένα",
+  "favs.add_title": "Προσθήκη στα αγαπημένα",
+  "favs.checked": "έλεγχος {ago}",
+  "pre.error_extra": "{error} -- εμφανίζεται στην κορυφή της λίστας, δεν μπορεί να εισαχθεί τώρα",
+  "pre.in_library": "αυτό το VOD είναι ήδη στη βιβλιοθήκη",
+  "pre.older": "αυτό το VOD είναι παλαιότερο από την πρόσφατη λίστα: εμφανίζεται στην κορυφή",
+  "import.label": "Εισαγωγή",
+  "import.label_n": {
+    "one": "Εισαγωγή {count}",
+    "other": "Εισαγωγή {count}"
+  },
+  "import.busy": "Εισαγωγή...",
+  "import.queue_title": {
+    "one": "{count} λήψη στην ουρά",
+    "other": "{count} λήψεις στην ουρά"
+  },
+  "import.select_title": "επιλέξτε τα VOD για εισαγωγή",
+  "import.queuing": {
+    "one": "{count} VOD μπαίνει στην ουρά -- κάθε σύνδεσμος ελέγχεται πρώτα με τον ιστότοπο ...",
+    "other": "{count} VOD μπαίνουν στην ουρά -- κάθε σύνδεσμος ελέγχεται πρώτα με τον ιστότοπο ..."
+  },
+  "import.no_answer": "καμία απάντηση για αυτόν τον σύνδεσμο",
+  "import.sum_queued": {
+    "one": "{count} στην ουρά",
+    "other": "{count} στην ουρά"
+  },
+  "import.sum_already": {
+    "one": "{count} υπάρχει ήδη",
+    "other": "{count} υπάρχουν ήδη"
+  },
+  "import.sum_failed": {
+    "one": "{count} απέτυχε (περάστε το ποντίκι πάνω από την κόκκινη ετικέτα)",
+    "other": "{count} απέτυχαν (περάστε το ποντίκι πάνω από την κόκκινη ετικέτα)"
+  },
+  "import.sum_jobs": "{summary} -- οι Εργασίες δείχνουν τις λήψεις",
+  "import.toast": "VOD: {summary}",
+  "row.in_library": "στη βιβλιοθήκη",
+  "row.imported_before": "εισήχθη παλαιότερα",
+  "row.already_queued": "ήδη στην ουρά",
+  "row.queued": "στην ουρά",
+  "row.failed": "απέτυχε",
+  "row.job": "εργασία {id}",
+  "row.download_job": "εργασία λήψης {id}",
+  "row.your_link": "ο σύνδεσμός σας",
+  "row.your_link_title": "ο σύνδεσμος που επικολλήσατε",
+  "row.open_rec_title": "άνοιγμα της εγγραφής",
+  "row.live": "ζωντανά τώρα",
+  "row.upcoming": "προσεχώς",
+  "row.live_title": "μπορεί να εισαχθεί μόλις τελειώσει το stream",
+  "row.unavailable": "μη διαθέσιμο",
+  "row.not_ready": "δεν είναι έτοιμο",
+  "row.not_ready_title": "δεν μπορεί να εισαχθεί ακόμη",
+  "row.processing_title": "το stream μόλις τελείωσε και ο ιστότοπος το επεξεργάζεται ακόμη",
+  "row.new": "νέο",
+  "row.new_title": "εμφανίστηκε μετά τον προτελευταίο έλεγχο",
+  "row.older": "παλαιότερο από τη λίστα",
+  "row.open_on": "άνοιγμα στο {site}",
+  "ch.back_results": "Πίσω στα αποτελέσματα",
+  "ch.back_favs": "Πίσω στα αγαπημένα",
+  "ch.back_aria": "Πίσω",
+  "ch.star_wait": "περιμένετε τη λίστα (δίνει το κλειδί του streamer)",
+  "ch.listing_title": "Λίστα...",
+  "ch.refresh_title": "Νέα λίστα από τον ιστότοπο (η λίστα κρατιέται για 5 λεπτά)",
+  "ch.refresh_aria": "Ανανέωση",
+  "ch.page_title": "η σελίδα του: {url}",
+  "ch.page_aria": "η σελίδα του",
+  "ch.listing": "λίστα ...",
+  "ch.count_listed": {
+    "one": "{count} στη λίστα",
+    "other": "{count} στη λίστα"
+  },
+  "ch.count_new": {
+    "one": "{count} νέο",
+    "other": "{count} νέα"
+  },
+  "ch.count_lib": {
+    "one": "{count} στη βιβλιοθήκη",
+    "other": "{count} στη βιβλιοθήκη"
+  },
+  "ch.select_new": "Επιλογή νέων",
+  "ch.select_new_title": "επιλογή κάθε VOD που δεν είναι στη βιβλιοθήκη ή στην ουρά",
+  "ch.none": "Κανένα",
+  "ch.none_title": "καθαρισμός της επιλογής",
+  "ch.listing_busy": "Λίστα των VOD του {name} στο {site} ...",
+  "ch.relisting": "νέα λίστα ...",
+  "ch.empty_title": "Δεν υπάρχουν VOD στη λίστα",
+  "ch.empty_text": "Ο streamer ίσως δεν κρατά παλιές μεταδόσεις, ή είναι μόνο για συνδρομητές.",
+  "ch.load_older": "Φόρτωση παλαιότερων ({count})",
+  "ch.max_listed": "Εμφανίζονται μόνο τα {count} νεότερα -- επικολλήστε τον σύνδεσμο ενός παλαιότερου VOD για να το εισαγάγετε.",
+  "home.short": "Πληκτρολογήστε ένα όνομα και πατήστε Enter, ή επικολλήστε σύνδεσμο VOD / προφίλ.",
+  "home.find_html": "<b>Βρείτε έναν streamer</b> -- πληκτρολογήστε το όνομά του και πατήστε Enter· ερωτώνται μαζί όλοι οι ενεργοί ιστότοποι.",
+  "home.paste_html": "<b>Ή επικολλήστε σύνδεσμο</b> -- η σελίδα ενός streamer δείχνει τα πρόσφατα VOD του· ένας σύνδεσμος VOD ανοίγει τον streamer του με αυτό το VOD επιλεγμένο.",
+  "home.import_html": "Επιλέξτε VOD και κάντε κλικ στο <b>Εισαγωγή</b>: λαμβάνονται το ένα μετά το άλλο (Εργασίες), μετά απομαγνητοφωνούνται και σαρώνονται όπως μια εγγραφή.",
+  "res.head": "Αποτελέσματα για «{query}»",
+  "res.clear": "Καθαρισμός αποτελεσμάτων",
+  "res.empty_title": "Δεν βρέθηκε τίποτα",
+  "res.empty_text": "Ελέγξτε την ορθογραφία, ενεργοποιήστε περισσότερους ιστότοπους ή επικολλήστε τον σύνδεσμο της σελίδας του.",
+  "res.no_hits": "Κανένας streamer με αυτό το όνομα στους ενεργούς ιστότοπους.",
+  "res.not_found": "δεν βρέθηκε",
+  "res.fav_title": "αγαπημένο",
+  "res.recent": {
+    "one": "{count} πρόσφατο",
+    "other": "{count} πρόσφατα"
+  },
+  "res.recent_more": "{count}+ πρόσφατα",
+  "res.no_recent": "δεν υπάρχουν πρόσφατα VOD στη λίστα",
+  "single.title": "Ένα VOD",
+  "single.clear": "Καθαρισμός",
+  "single.site": "Ιστότοπος",
+  "single.link": "Σύνδεσμος",
+  "single.recheck": "Η εισαγωγή ελέγχει ξανά τον σύνδεσμο με τον ιστότοπο.",
+  "single.no_channel": "Ο ιστότοπος δεν είπε σε ποιον ανήκει αυτό το VOD, οπότε δεν υπάρχει streamer για λίστα. Αυτό το ένα VOD μπορεί ακόμη να εισαχθεί.",
+  "single.import": "Εισαγωγή αυτού του VOD"
+}

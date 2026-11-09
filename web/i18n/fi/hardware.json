@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Purkaa videon, lukee HUD-tekstin ja muuttaa puheen tekstiksi.",
+  "can.integrated": "Integroitu näytönohjain: purkaa videota vain, jos mitään muuta näytönohjainta ei ole asetettu tilaan Käytä WardogClipsille. HUD-teksti ja puhe käsitellään toisella kortilla tai suorittimella.",
+  "can.other": "Purkaa videon ja lukee HUD-tekstin. Puhe muutetaan tekstiksi suorittimella, koska se vaatii NVIDIA-kortin.",
+  "none_found": "Näytönohjainta ei löytynyt. WardogClips tekee kaiken työn suorittimella.",
+  "role.use": "Käytä WardogClipsille",
+  "role.leave": "Älä käytä",
+  "all_left_alone": "Kaikki kortit on asetettu tilaan Älä käytä, joten WardogClips tekee kaiken työn suorittimella.",
+  "shared_hint": "Peliäsi pyörittävä kortti on jaettu: pelatessasi WardogClipsin työ sillä voi viedä pelistä muutaman ruudun. Aseta kortti tilaan Älä käytä, jos se häiritsee.",
+  "apply_hint": "Muutos koskee seuraavaa työtä. Kun lisäät kortin, useampi videotyö ajetaan kerralla uudelleenkäynnistyksen jälkeen.",
+  "load_failed": "Näytönohjainten luetteloa ei voitu ladata.",
+  "saved": "Tallennettu: {keys}",
+  "saved_none": "Tallennettu: ei muutoksia",
+  "error": "Virhe: {error}"
+}

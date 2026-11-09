@@ -24,12 +24,16 @@ class Ctx:
             from resolve.link import ResolveLink
             resolve_link = ResolveLink(cfg, bus)
         self.resolve_link = resolve_link
+        from core.workmode import WorkMode
+        self.workmode = WorkMode(cfg, bus)     # work modes: Full speed / Balanced / Background (core/workmode.py)
         self.started_utc = time.time()
         # main.py registers how this process shuts down (tray Quit, POST /api/system/quit); None = no hook
         # (tests, --scan). run_mode = "console" | "tray" for /api/status.
         self.request_quit = None
         self.run_mode = "console"
         self.port = None
+        from core.updates import Updater
+        self.updater = Updater(self)           # the automatic check starts only in main.py (server runs)
 
     @classmethod
     def build(cls, cfg) -> "Ctx":
@@ -61,6 +65,7 @@ class Ctx:
             checkpoints.sweep(keep=waiting)    # resume points nobody came back to in 14 days (+ their wavs)
         except Exception:                      # noqa: BLE001
             logger.exception("[Checkpoint] sweep failed")
+        self._start_workmode()
         self.jobs.start()
         self.library.start_watch()
         try:
@@ -69,9 +74,22 @@ class Ctx:
             logger.exception("[Resolve] startup hand-shake failed")
 
     def stop(self) -> None:
+        self.updater.stop()
         self.resolve_link.stop()
         self.library.stop_watch()
         self.jobs.stop()
+        self.workmode.stop()
+
+    def _start_workmode(self) -> None:
+        """A mode / busy change wakes the lanes (a claim that waited may go now) and re-sizes the OCR pools."""
+        def on_change(_state):
+            self.jobs._size_ocr_pool()
+            self.jobs._wake.set()
+        self.workmode.listeners.append(on_change)
+        try:
+            self.workmode.start()
+        except Exception:                      # noqa: BLE001 -- never stop WardogClips from starting
+            logger.exception("[WorkMode] monitor did not start")
 
 
 # ---- request guard (CSRF + DNS rebinding) ------------------------------------------------------------------------------
@@ -173,7 +191,10 @@ def request_refusal(request: Request, ctx) -> tuple[int, str] | None:
 
 def create_app(ctx: Ctx) -> FastAPI:
     from server.routes import (detect, drives, events, jobs, learning, library, player, resolve, settings, setup,
-                               system, transcript, vodbrowse, vods, zones)
+                               system, transcript, updates, vodbrowse, vods, zones)
+    from server.routes import i18n as i18n_routes
+    from server.routes import makeclip as makeclip_routes
+    from utils.i18n import AppError
 
     app = FastAPI(title="WardogClips", version=paths.APP_VERSION)
 
@@ -207,10 +228,17 @@ def create_app(ctx: Ctx) -> FastAPI:
             resp.headers["Cache-Control"] = "no-cache"
         return resp
 
+    # translatable errors (utils/i18n.py AppError): "detail" stays the English text, "code" + "params" let the page
+    # show the catalog text instead
+    @app.exception_handler(AppError)
+    async def _app_error(_request: Request, exc: AppError):
+        return JSONResponse({"detail": exc.detail, "code": exc.code, "params": exc.params},
+                            status_code=exc.status_code, headers=getattr(exc, "headers", None))
+
     # two routers must never claim the same method + path (the later one would silently shadow the earlier)
     seen: dict[tuple, str] = {}
     for mod in (system, settings, library, jobs, transcript, detect, player, resolve, learning, drives, events, vods,
-                vodbrowse, zones, setup):
+                vodbrowse, zones, setup, makeclip_routes, updates, i18n_routes):
         router = mod.build(ctx)
         for route in router.routes:
             for m in getattr(route, "methods", None) or ():

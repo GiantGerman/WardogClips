@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Díchódaíonn sé físeán, léann sé téacs an HUD agus iompaíonn sé urlabhra ina téacs.",
+  "can.integrated": "Grafaic ionsuite: ní dhíchódaíonn sé físeán ach nuair nach bhfuil aon chárta grafaicí eile socraithe ar Úsáid do WardogClips. Ritheann téacs an HUD agus an urlabhra ar chárta eile nó ar an bpróiseálaí.",
+  "can.other": "Díchódaíonn sé físeán agus léann sé téacs an HUD. Iompaítear urlabhra ina téacs ar an bpróiseálaí, mar go dteastaíonn cárta NVIDIA chuige sin.",
+  "none_found": "Níor aimsíodh aon chárta grafaicí. Déanann WardogClips a chuid oibre ar fad ar an bpróiseálaí.",
+  "role.use": "Úsáid do WardogClips",
+  "role.leave": "Fág é",
+  "all_left_alone": "Tá gach cárta socraithe ar Fág é, mar sin déanann WardogClips a chuid oibre ar fad ar an bpróiseálaí.",
+  "shared_hint": "Tá an cárta a ritheann do chluiche comhroinnte: fad is a imríonn tú, d'fhéadfadh obair WardogClips air cúpla fráma a bhaint den chluiche. Socraigh an cárta sin ar Fág é má chuireann sé isteach ort.",
+  "apply_hint": "Bíonn feidhm ag athrú ón gcéad jab eile. Nuair a chuireann tú cárta leis, ritheann níos mó jabanna físe le chéile tar éis atosú.",
+  "load_failed": "Níorbh fhéidir liosta na gcártaí grafaicí a lódáil.",
+  "saved": "Sábháilte: {keys}",
+  "saved_none": "Sábháilte: gan athrú",
+  "error": "Earráid: {error}"
+}

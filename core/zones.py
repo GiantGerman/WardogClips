@@ -32,6 +32,7 @@ import math
 import time
 from pathlib import Path
 
+from core.messages import MsgError, msg
 from utils import paths
 from vision import hud
 
@@ -64,7 +65,7 @@ def zones_dir() -> Path:
 
 
 def canon_provider(p: str) -> str:
-    """'twitch' -> 'Twitch' (file names and the vods module use the capitalised site name)."""
+    """'twitch' -> 'Twitch' (file names and the vods module use the capitalized site name)."""
     from media.vods import PROVIDER_NAMES
     s = str(p or "").strip()
     for name in (*PROVIDER_NAMES, OBS):
@@ -85,7 +86,7 @@ def _norm(roi: hud.Roi, width: int, height: int) -> list[float]:
 
 
 def _center_box(width: int, height: int) -> list[float]:
-    """The 1400x440-at-1440p respawn box scaled with the height, centred, normalized."""
+    """The 1400x440-at-1440p respawn box scaled with the height, centered, normalized."""
     cw0, ch0 = hud.CENTER_BASE
     s = height / hud.BASE_H
     cw, ch = min(width, cw0 * s), min(height, ch0 * s)
@@ -110,21 +111,21 @@ def _num(v, what: str) -> float:
         try:
             v = float(v)
         except (TypeError, ValueError):
-            raise ValueError(f"{what}: not a number")
+            raise MsgError(msg("server.zones.not_number", "{field}: not a number.", field=what))
     v = float(v)
     if not math.isfinite(v):
-        raise ValueError(f"{what}: not a number")
+        raise MsgError(msg("server.zones.not_number", "{field}: not a number.", field=what))
     return v
 
 
 def _box(v, name: str) -> list[float]:
     if not isinstance(v, (list, tuple)) or len(v) != 4:
-        raise ValueError(f"{name}: expected [x, y, w, h]")
+        raise MsgError(msg("server.zones.bad_box", "{zone}: expected a box [x, y, w, h].", zone=name))
     x, y, w, h = (_num(c, name) for c in v)
     if w <= MIN_SIDE or h <= MIN_SIDE:
-        raise ValueError(f"{name}: too small (w and h must be > {MIN_SIDE} of the frame)")
+        raise MsgError(msg("server.zones.too_small", "{zone} is too small: its width and height must be more than {min} of the frame.", zone=name, min=MIN_SIDE))
     if x < -EPS or y < -EPS or x + w > 1 + EPS or y + h > 1 + EPS:
-        raise ValueError(f"{name}: outside the frame (boxes are 0..1 of the frame)")
+        raise MsgError(msg("server.zones.outside", "{zone} lies outside the frame.", zone=name))
     x, y = max(0.0, x), max(0.0, y)
     w, h = min(w, 1.0 - x), min(h, 1.0 - y)
     return [round(x, 6), round(y, 6), round(w, 6), round(h, 6)]
@@ -136,29 +137,29 @@ def validate(zones) -> dict:
         try:
             zones = json.loads(zones)
         except ValueError:
-            raise ValueError("zones: not JSON")
+            raise MsgError(msg("server.zones.not_json", "The zones are not valid JSON."))
     if not isinstance(zones, dict):
-        raise ValueError("zones: expected an object")
+        raise MsgError(msg("server.zones.not_object", "The zones must be an object."))
     out: dict = {}
     for name in BOX_KEYS:
         v = zones.get(name)
         if v is None:
             if name in REQUIRED:
-                raise ValueError(f"{name}: required")
+                raise MsgError(msg("server.zones.required", "The {zone} zone is required.", zone=name))
             out[name] = None
         else:
             out[name] = _box(v, name)
     m, t = out["money"], out["ticker"]
     if m is not None and (m[0] < t[0] - EPS or m[1] < t[1] - EPS or m[0] + m[2] > t[0] + t[2] + EPS
                           or m[1] + m[3] > t[1] + t[3] + EPS):
-        raise ValueError("money: must lie inside the ticker box")
+        raise MsgError(msg("server.zones.money_inside", "The money zone must lie inside the ticker zone."))
     rh = zones.get("feed_row_h")
     if rh is None:
         out["feed_row_h"] = None
     else:
         rh = _num(rh, "feed_row_h")
         if rh <= 0 or rh > out["feed"][3] + EPS:
-            raise ValueError("feed_row_h: must be > 0 and no taller than the feed box")
+            raise MsgError(msg("server.zones.row_height", "The kill feed row height must be more than 0 and no taller than the kill feed zone."))
         out["feed_row_h"] = round(rh, 6)
     return out
 
@@ -245,11 +246,11 @@ def create(db, provider: str, channel_key: str, zones, channel_name: str = "", n
            sample_rec_id: int | None = None, sample_t: float | None = None, sample_jpg: str | None = None) -> dict:
     provider, channel_key = canon_provider(provider), canon_key(channel_key)
     if not provider or not channel_key:
-        raise ValueError("provider and channel_key are required")
+        raise MsgError(msg("server.zones.streamer_required", "Pick a site and a streamer."))
     z = validate(zones)
     eff = _num(effective_from or 0, "effective_from")
     if _identity_taken(db, provider, channel_key, eff):
-        raise ValueError("this streamer already has a version from that date -- edit it or pick another date")
+        raise MsgError(msg("server.zones.date_taken_edit", "This streamer already has a version from that date. Edit it or pick another date."))
     now = time.time()
     tid = db.execute(
         "INSERT INTO zone_templates (provider, channel_key, channel_name, name, effective_from, zones, sample_w, sample_h,"
@@ -276,7 +277,7 @@ def update(db, tpl_id: int, **fields) -> dict:
     """Partial update of the editable fields (others are ignored)."""
     cur = get(db, tpl_id)
     if cur is None:
-        raise NotFound("no such template")
+        raise NotFound(msg("server.zones.no_template", "That zone template does not exist anymore.")["message"])
     sets, params = [], []
     for k in _EDITABLE:
         if k not in fields:
@@ -287,7 +288,7 @@ def update(db, tpl_id: int, **fields) -> dict:
         elif k == "effective_from":
             v = _num(v or 0, "effective_from")
             if _identity_taken(db, cur["provider"], cur["channel_key"], v, not_id=cur["id"]):
-                raise ValueError("this streamer already has a version from that date")
+                raise MsgError(msg("server.zones.date_taken", "This streamer already has a version from that date."))
         elif k in ("sample_w", "sample_h", "sample_rec_id"):
             v = _int_or_none(v)
         elif k == "sample_t":
@@ -310,7 +311,7 @@ def delete(db, tpl_id: int) -> int:
     """Delete a template, unpin recordings pinned to it, remove its sample frame. -> recordings unpinned."""
     cur = get(db, tpl_id)
     if cur is None:
-        raise NotFound("no such template")
+        raise NotFound(msg("server.zones.no_template", "That zone template does not exist anymore.")["message"])
     n = db.execute("UPDATE recordings SET zone_template_id=NULL WHERE zone_template_id=?", (cur["id"],))
     db.execute("DELETE FROM zone_templates WHERE id=?", (cur["id"],))
     if cur.get("sample_jpg"):
@@ -326,7 +327,7 @@ def new_version(db, tpl_id: int, effective_from: float, sample_jpg: str | None =
     (its own file) unless a new one is given; overrides = name / zones / note."""
     cur = get(db, tpl_id)
     if cur is None:
-        raise NotFound("no such template")
+        raise NotFound(msg("server.zones.no_template", "That zone template does not exist anymore.")["message"])
     if sample_jpg is None and cur.get("sample_jpg"):
         sample_jpg = _copy_sample(cur["sample_jpg"])
         sample_w, sample_h = cur.get("sample_w"), cur.get("sample_h")
@@ -401,9 +402,9 @@ def resolve(db, rec: dict) -> tuple[dict | None, str]:
 
 def pin(db, rec_id: int, tpl_id: int | None) -> None:
     if tpl_id is not None and get(db, tpl_id) is None:
-        raise NotFound("no such template")
+        raise NotFound(msg("server.zones.no_template", "That zone template does not exist anymore.")["message"])
     if db.one("SELECT id FROM recordings WHERE id=?", (int(rec_id),)) is None:
-        raise NotFound("no such recording")
+        raise NotFound(msg("server.no_recording", "That recording does not exist anymore.")["message"])
     db.execute("UPDATE recordings SET zone_template_id=?, updated_utc=? WHERE id=?",
                (None if tpl_id is None else int(tpl_id), time.time(), int(rec_id)))
     logger.info("[Zones] rec=%s pinned template=%s", rec_id, tpl_id)
@@ -519,13 +520,13 @@ def _sample_from_b64(s) -> bytes | None:
     if not s:
         return None
     if not isinstance(s, str) or len(s) > MAX_SAMPLE_BYTES * 4 // 3 + 8:
-        raise ValueError("sample image too large or not base64")
+        raise MsgError(msg("server.zones.sample_bad", "The sample image is too large or not valid."))
     try:
         data = base64.b64decode(s, validate=True)
     except (ValueError, TypeError):
-        raise ValueError("sample image is not valid base64")
+        raise MsgError(msg("server.zones.sample_bad", "The sample image is too large or not valid."))
     if data[:2] != b"\xff\xd8":
-        raise ValueError("sample image is not a JPEG")
+        raise MsgError(msg("server.zones.sample_not_jpeg", "The sample image is not a JPEG."))
     return data
 
 
@@ -537,22 +538,22 @@ def import_(db, data, overwrite: bool = False) -> dict:
         try:
             data = json.loads(data)
         except ValueError:
-            raise ValueError("not a JSON file")
+            raise MsgError(msg("server.zones.file_not_json", "This is not a JSON file."))
     if not isinstance(data, dict) or data.get("format") != FORMAT:
-        raise ValueError("not a WardogClips zone template file")
+        raise MsgError(msg("server.zones.file_wrong", "This is not a WardogClips zone template file."))
     if data.get("version") != VERSION:
-        raise ValueError(f"unsupported template file version {data.get('version')!r} (this app reads {VERSION})")
+        raise MsgError(msg("server.zones.file_version", "This template file has version {version}; this version of WardogClips reads version {supported}.", version=str(data.get("version")), supported=VERSION))
     items = data.get("templates")
     if not isinstance(items, list):
-        raise ValueError("the file has no template list")
+        raise MsgError(msg("server.zones.file_empty", "The file has no list of templates."))
     res = {"added": 0, "updated": 0, "skipped": 0, "errors": 0, "messages": []}
     for i, it in enumerate(items):
         try:
             if not isinstance(it, dict):
-                raise ValueError("not an object")
+                raise MsgError(msg("server.zones.item_not_object", "This entry is not a template."))
             provider, key = canon_provider(it.get("provider")), canon_key(it.get("channel_key"))
             if not provider or not key:
-                raise ValueError("provider and channel_key are required")
+                raise MsgError(msg("server.zones.streamer_required", "Pick a site and a streamer."))
             zones = validate(it.get("zones"))
             eff = _num(it.get("effective_from") or 0, "effective_from")
             jpg = _sample_from_b64(it.get("sample_jpg_b64"))
@@ -583,7 +584,10 @@ def import_(db, data, overwrite: bool = False) -> dict:
         except ValueError as e:
             res["errors"] += 1
             label = f"{(it or {}).get('provider', '?')} {(it or {}).get('channel_key', '?')}" if isinstance(it, dict) else "?"
-            res["messages"].append(f"#{i + 1} ({label}): {e}")
+            m = msg("server.zones.import_item", "Template {n} ({label}): {error}", n=i + 1, label=label, error=str(e))
+            res["messages"].append(m["message"])
+            res.setdefault("messages_i18n", []).append({"code": m["code"], "params": m["params"],
+                                                        "error_i18n": getattr(e, "i18n", None)})
     logger.info("[Zones] import added=%d updated=%d skipped=%d errors=%d overwrite=%s", res["added"], res["updated"],
                 res["skipped"], res["errors"], overwrite)
     return res

@@ -1,0 +1,20 @@
+{
+  "@": "Français (Canada) : menu de l'icône de la zone de notification et boîtes de message du lanceur.",
+  "tray.open": "Ouvrir WardogClips",
+  "tray.update": "Mise à jour disponible...",
+  "tray.pause": "Pause pendant que je joue",
+  "tray.speed": "Vitesse",
+  "tray.mode_full": "Pleine vitesse",
+  "tray.mode_balanced": "Équilibré",
+  "tray.mode_background": "Arrière-plan",
+  "tray.open_data": "Ouvrir le dossier des données",
+  "tray.open_log": "Ouvrir le journal",
+  "tray.quit": "Quitter",
+  "tray.balloon": "WardogClips est ouvert. Cliquez avec le bouton droit sur l'icône de la zone de notification pour quitter.",
+  "tray.update_notify": "WardogClips {version} est disponible. Choisissez Mise à jour disponible... dans le menu de la zone de notification pour le voir.",
+  "launcher.could_not_start": "WardogClips n'a pas pu démarrer :\n\n{error}",
+  "launcher.scan_running": "Une analyse WardogClips (scan.bat / --scan) utilise ce dossier de données :\n\n{dir}\n\nAttendez qu'elle se termine (ou arrêtez-la dans sa fenêtre), puis relancez WardogClips.",
+  "launcher.not_answering": "WardogClips est déjà ouvert, mais ne répond pas.\n\nQuittez-le à partir de son icône dans la zone de notification (ou attendez une minute) et réessayez.\n\nJournal : {log}",
+  "launcher.damaged": "WardogClips est endommagé (l'environnement d'exécution ou les fichiers de l'application sont manquants).\n\nVeuillez le réinstaller.\n\nFichiers cherchés :\n{python}\n{main}",
+  "launcher.stopped": "WardogClips s'est arrêté juste après son démarrage (code de sortie {code}).\n\nLe journal peut en donner la raison :\n{log}"
+}

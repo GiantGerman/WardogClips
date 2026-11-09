@@ -1,0 +1,20 @@
+{
+  "@": "Quechua (Runasimi), machine-translated beta.",
+  "tray.open": "WardogClips-ta kichay",
+  "tray.update": "Musuqchay kan...",
+  "tray.pause": "Pukllachkaptiy sayachiy",
+  "tray.speed": "Utqay",
+  "tray.mode_full": "Llapan kallpawan",
+  "tray.mode_balanced": "Chawpi",
+  "tray.mode_background": "Qhipapi",
+  "tray.open_data": "Data carpetata kichay",
+  "tray.open_log": "Logta kichay",
+  "tray.quit": "Lluqsiy",
+  "tray.balloon": "WardogClips purichkan. Bandejapi iconopi paña clic ruway lluqsinaykipaq.",
+  "tray.update_notify": "WardogClips {version} kan. Bandeja menúpi \"Musuqchay kan...\"-ta akllay rikunaykipaq.",
+  "launcher.could_not_start": "WardogClips mana qallariyta atinchu:\n\n{error}",
+  "launcher.scan_running": "Huk WardogClips qhaway (scan.bat / --scan) kay data carpetata llamkachichkan:\n\n{dir}\n\nTukunankama suyay (utaq ventananpi sayachiy), chaymanta WardogClips-ta wakmanta qallariy.",
+  "launcher.not_answering": "WardogClips ña purichkan, ichaqa mana kutichinchu.\n\nBandeja iconomanta lluqsiy (utaq huk minuto suyay), wakmantataq ruray.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips waqllisqa (runtime utaq app archivokuna chinkasqa).\n\nWakmanta instalay.\n\nKaykunata maskarqan:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips qallarisqan qhipallanpi sayarqan (lluqsiy código {code}).\n\nLogchá imarayku kasqanta ninqa:\n{log}"
+}

@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Videota decodifican, HUD qillqata ñawinchan, rimaytataq qillqaman tikran.",
+  "can.integrated": "Ukhupi tarjeta gráfica: videotaqa decodificallanmi mana huk tarjeta \"WardogClips-paq llamkachiy\" nisqapi kaptinqa. HUD qillqa, rimaypas huk tarjetapi utaq procesadorpi purinku.",
+  "can.other": "Videota decodifican, HUD qillqatapas ñawinchan. Rimayqa procesadorpi qillqaman tikrakun, NVIDIA tarjeta necesitakusqanrayku.",
+  "none_found": "Mana ima tarjeta gráficapas tarikunchu. WardogClips llapan llamkayninta procesadorpi ruran.",
+  "role.use": "WardogClips-paq llamkachiy",
+  "role.leave": "Ama llamkachiychu",
+  "all_left_alone": "Llapan tarjetakuna \"Ama llamkachiychu\" nisqapi kanku, chayrayku WardogClips llapan llamkayninta procesadorpi ruran.",
+  "shared_hint": "Pukllayniyki purichiq tarjetaqa rakinakusqam: pukllachkaptiyki, WardogClips chaypi llamkaspa pukllaymanta wakin frame-kunata qichunman. Mana munaspaqa chay tarjetata \"Ama llamkachiychu\" nisqaman churay.",
+  "apply_hint": "Huk tikrayqa qatiq llamkaypim yaykun. Tarjetata yapaspaqa, wakmanta qallarichispa aswan achka video llamkaykuna kuska purinqaku.",
+  "load_failed": "Tarjeta gráfica listata mana cargayta atikunchu.",
+  "saved": "Waqaychasqa: {keys}",
+  "saved_none": "Waqaychasqa: mana ima tikraypas",
+  "error": "Pantay: {error}"
+}

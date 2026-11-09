@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Descodifica vídeo, lee el texto del HUD y pasa la voz a texto.",
+  "can.integrated": "Gráfica integrada: solo descodifica vídeo cuando ninguna otra tarjeta gráfica está en Usar para WardogClips. El texto del HUD y la voz van en otra tarjeta o en el procesador.",
+  "can.other": "Descodifica vídeo y lee el texto del HUD. La voz se pasa a texto en el procesador, porque eso requiere una tarjeta NVIDIA.",
+  "none_found": "No se ha encontrado ninguna tarjeta gráfica. WardogClips hace todo el trabajo en el procesador.",
+  "role.use": "Usar para WardogClips",
+  "role.leave": "No usar",
+  "all_left_alone": "Todas las tarjetas están en No usar, así que WardogClips hace todo el trabajo en el procesador.",
+  "shared_hint": "La tarjeta que mueve tu juego es compartida: mientras juegas, el trabajo de WardogClips en ella puede costarle algunos fotogramas al juego. Ponla en No usar si te molesta.",
+  "apply_hint": "Un cambio se aplica a la siguiente tarea. Si añades una tarjeta, se ejecutarán más tareas de vídeo a la vez tras reiniciar.",
+  "load_failed": "No se ha podido cargar la lista de tarjetas gráficas.",
+  "saved": "Guardado: {keys}",
+  "saved_none": "Guardado: sin cambios",
+  "error": "Error: {error}"
+}

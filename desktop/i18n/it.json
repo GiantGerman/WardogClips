@@ -1,0 +1,19 @@
+{
+  "tray.open": "Apri WardogClips",
+  "tray.update": "Aggiornamento disponibile...",
+  "tray.pause": "Pausa mentre gioco",
+  "tray.speed": "Velocità",
+  "tray.mode_full": "Massima velocità",
+  "tray.mode_balanced": "Bilanciata",
+  "tray.mode_background": "In background",
+  "tray.open_data": "Apri cartella dati",
+  "tray.open_log": "Apri log",
+  "tray.quit": "Esci",
+  "tray.balloon": "WardogClips è in esecuzione. Fai clic destro sull'icona nell'area di notifica per uscire.",
+  "tray.update_notify": "È disponibile WardogClips {version}. Scegli Aggiornamento disponibile... nel menu dell'icona per vederlo.",
+  "launcher.could_not_start": "Impossibile avviare WardogClips:\n\n{error}",
+  "launcher.scan_running": "Una scansione di WardogClips (scan.bat / --scan) sta usando questa cartella dati:\n\n{dir}\n\nAttendi che finisca (o fermala nella sua finestra), poi avvia di nuovo WardogClips.",
+  "launcher.not_answering": "WardogClips è già in esecuzione ma non risponde.\n\nChiudilo dalla sua icona nell'area di notifica (o attendi un minuto) e riprova.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips è danneggiato (mancano il runtime o i file dell'app).\n\nReinstallalo.\n\nPercorsi cercati:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips si è chiuso subito dopo l'avvio (codice di uscita {code}).\n\nIl log potrebbe spiegare perché:\n{log}"
+}

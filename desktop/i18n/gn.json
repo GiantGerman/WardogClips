@@ -1,0 +1,20 @@
+{
+  "@": "Guarani (gn): tray menu and launcher message boxes.",
+  "tray.open": "Embojuruja WardogClips",
+  "tray.update": "Ñembohekopyahu oĩma...",
+  "tray.pause": "Mombyta rembosarái aja",
+  "tray.speed": "Pya'ekue",
+  "tray.mode_full": "Pya'eterei",
+  "tray.mode_balanced": "Joja",
+  "tray.mode_background": "Tapykuépe",
+  "tray.open_data": "Embojuruja data ñongatuha",
+  "tray.open_log": "Embojuruja log",
+  "tray.quit": "Ñesẽ",
+  "tray.balloon": "WardogClips omba'apohína. Ejapo clic akatúa tray ícono-re resẽ hag̃ua.",
+  "tray.update_notify": "WardogClips {version} oĩma. Eiporavo Ñembohekopyahu oĩma... tray menú-pe rehecha hag̃ua.",
+  "launcher.could_not_start": "WardogClips ndaikatúi oñepyrũ:\n\n{error}",
+  "launcher.scan_running": "Peteĩ WardogClips escaneo (scan.bat / --scan) oipuruhína ko data ñongatuha:\n\n{dir}\n\nEha'arõ opa peve (térã ejoko iovetãme), upéi eñepyrũjey WardogClips.",
+  "launcher.not_answering": "WardogClips omba'apóma ha nombohováiri.\n\nEsẽ chugui tray ícono-gui (térã eha'arõ peteĩ aravo'i) ha eha'ãjey.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips oñembyai (runtime térã app marandurenda ofalta).\n\nEmohendajey.\n\nOjeheka:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips opyta oñepyrũ rire pya'e (exit code {code}).\n\nLog ikatu he'i mba'ére:\n{log}"
+}

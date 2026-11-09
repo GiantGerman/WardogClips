@@ -1,0 +1,108 @@
+{
+  "title.none": "aucun clip",
+  "title.rendering": "{kind} à {time} · rendu {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · enregistrement complet",
+  "title.no_proxy": "Pas encore de proxy",
+  "tip.event": "{kind} à {time} : {render}",
+  "tip.around": "vers {time} : {render}",
+  "tip.cached": "{height}p depuis la cache des clips",
+  "tip.rendered": "{height}p rendu en {seconds} s",
+  "tip.rendered_enc": "{height}p rendu en {seconds} s ({encoder})",
+  "tip.proxy": "{name} : le proxy de l'enregistrement complet",
+  "tip.no_proxy": "{name} : pas encore de proxy de l'enregistrement complet",
+  "busy.clip": "rendu du clip ({height}p)...",
+  "busy.at": "rendu de {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Impossible de rendre ce clip",
+  "err.at": "Impossible de rendre {time}",
+  "err.retry": "Réessayer",
+  "err.encoding": "Paramètres d'encodage",
+  "err.play_clip": "Impossible de lire ce clip.",
+  "err.play_proxy": "Impossible de lire le proxy.",
+  "pick.title": "Choisissez un événement",
+  "pick.text": "Choisissez-en un dans Événements (ou appuyez sur N) : son clip joue ici à partir du pré-roll.",
+  "pick.more": "Ou cliquez sur la timeline ci-dessous pour voir n'importe quel moment de cet enregistrement.",
+  "pick.short": "Choisissez-en un dans Événements (ou appuyez sur N), ou cliquez sur la timeline ci-dessous.",
+  "proxy.card_title": "Pas encore de proxy pour cet enregistrement",
+  "proxy.card_text": "Un proxy {height}p est une copie du fichier complet de {duration} pour le parcourir d'un bout à l'autre (il se crée plusieurs fois plus vite que le temps réel).",
+  "proxy.building": "création",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "en file",
+  "proxy.build": "Créer le proxy",
+  "proxy.all": "Proxys pour tous ceux avec événements",
+  "proxy.all_tip": "Mettre en file des proxys pour chaque enregistrement avec des événements",
+  "proxy.queued_toast": "proxy mis en file",
+  "proxy.all_toast": {
+    "one": "{count} proxy mis en file ({candidates} enregistrements avec événements n'en ont pas)",
+    "many": "{count} proxys mis en file ({candidates} enregistrements avec événements n'en ont pas)",
+    "other": "{count} proxys mis en file ({candidates} enregistrements avec événements n'en ont pas)"
+  },
+  "mode.full_tip": "L'enregistrement complet, lu à partir de son proxy",
+  "mode.full_noproxy_tip": "L'enregistrement complet : pas encore de proxy (créez-en un d'ici)",
+  "bound.wait": "attendez que le clip de cet événement soit chargé",
+  "bound.in_before_out": "l'entrée doit être avant la sortie",
+  "bound.out_after_in": "la sortie doit être après l'entrée",
+  "bound.reset": "clip ramené au pré-roll / post-roll",
+  "bound.in_set": "entrée = {time} (clip de {length} s)",
+  "bound.out_set": "sortie = {time} (clip de {length} s)",
+  "mark.nothing": "rien en lecture",
+  "mark.done": "marque manuelle à {time}",
+  "play_aria": "Lecture",
+  "pause_aria": "Pause",
+  "time.pos": "{pos} sur {total}",
+  "time.rel": "{offset} s de l'événement",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Boucle entrée → sortie",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · score {score}",
+  "tl.tip_status": "{kind} · {time} · score {score} · {status}",
+  "tl.status_kept": "gardé",
+  "tl.status_false": "faux positif",
+  "tl.whole": "Enregistrement complet",
+  "tl.no_events": "aucun événement",
+  "tl.not_detected": "pas encore détecté",
+  "tl.no_proxy": "pas de proxy",
+  "tl.no_proxy_tip": "Le mode Enregistrement complet a besoin d'un proxy (créez-le à partir du lecteur)",
+  "tl.kind.kill": {
+    "one": "{count} élimination",
+    "many": "{count} éliminations",
+    "other": "{count} éliminations"
+  },
+  "tl.kind.assist": {
+    "one": "{count} assistance",
+    "many": "{count} assistances",
+    "other": "{count} assistances"
+  },
+  "tl.kind.death": {
+    "one": "{count} mort",
+    "many": "{count} morts",
+    "other": "{count} morts"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} repéré",
+    "many": "{count} repérés",
+    "other": "{count} repérés"
+  },
+  "tl.kind.revive": {
+    "one": "{count} réanimation",
+    "many": "{count} réanimations",
+    "other": "{count} réanimations"
+  },
+  "tl.kind.squad": {
+    "one": "{count} escouade",
+    "many": "{count} escouade",
+    "other": "{count} escouade"
+  },
+  "tl.kind.voice": {
+    "one": "{count} voix",
+    "many": "{count} voix",
+    "other": "{count} voix"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manuel",
+    "many": "{count} manuels",
+    "other": "{count} manuels"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

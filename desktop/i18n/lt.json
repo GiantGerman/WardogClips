@@ -1,0 +1,19 @@
+{
+  "tray.open": "Atidaryti WardogClips",
+  "tray.update": "Yra naujinys...",
+  "tray.pause": "Pristabdyti, kol žaidžiu",
+  "tray.speed": "Greitis",
+  "tray.mode_full": "Visu greičiu",
+  "tray.mode_balanced": "Subalansuotas",
+  "tray.mode_background": "Fone",
+  "tray.open_data": "Atidaryti duomenų aplanką",
+  "tray.open_log": "Atidaryti žurnalą",
+  "tray.quit": "Išeiti",
+  "tray.balloon": "WardogClips veikia. Norėdami išeiti, dešiniuoju pelės mygtuku spustelėkite dėklo piktogramą.",
+  "tray.update_notify": "Galima WardogClips {version}. Dėklo meniu pasirinkite Yra naujinys..., kad jį pamatytumėte.",
+  "launcher.could_not_start": "WardogClips nepavyko paleisti:\n\n{error}",
+  "launcher.scan_running": "WardogClips skenavimas (scan.bat / --scan) naudoja šį duomenų aplanką:\n\n{dir}\n\nPalaukite, kol jis baigsis (arba sustabdykite jį jo lange), tada vėl paleiskite WardogClips.",
+  "launcher.not_answering": "WardogClips jau veikia, bet neatsako.\n\nIšeikite per dėklo piktogramą (arba palaukite minutę) ir bandykite dar kartą.\n\nŽurnalas: {log}",
+  "launcher.damaged": "WardogClips pažeistas (trūksta vykdymo aplinkos arba programos failų).\n\nĮdiekite jį iš naujo.\n\nIeškota:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips sustojo iškart po paleidimo (išėjimo kodas {code}).\n\nŽurnale gali būti nurodyta priežastis:\n{log}"
+}

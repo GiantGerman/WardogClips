@@ -1,0 +1,99 @@
+{
+  "title.none": "intet klip",
+  "title.rendering": "{kind} ved {time} · renderer {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · hele optagelsen",
+  "title.no_proxy": "Ingen proxy endnu",
+  "tip.event": "{kind} ved {time}: {render}",
+  "tip.around": "omkring {time}: {render}",
+  "tip.cached": "{height}p fra klipcachen",
+  "tip.rendered": "{height}p renderet på {seconds} s",
+  "tip.rendered_enc": "{height}p renderet på {seconds} s ({encoder})",
+  "tip.proxy": "{name}: proxy for hele optagelsen",
+  "tip.no_proxy": "{name}: endnu ingen proxy for hele optagelsen",
+  "busy.clip": "renderer klippet ({height}p)...",
+  "busy.at": "renderer {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Klippet kunne ikke renderes",
+  "err.at": "{time} kunne ikke renderes",
+  "err.retry": "Prøv igen",
+  "err.encoding": "Kodningsindstillinger",
+  "err.play_clip": "Klippet kunne ikke afspilles.",
+  "err.play_proxy": "Proxyen kunne ikke afspilles.",
+  "pick.title": "Vælg en hændelse",
+  "pick.text": "Vælg en under Hændelser (eller tryk N): klippet afspilles her fra pre-roll.",
+  "pick.more": "Eller klik på tidslinjen nedenfor for at se et hvilket som helst øjeblik i optagelsen.",
+  "pick.short": "Vælg en under Hændelser (eller tryk N), eller klik på tidslinjen nedenfor.",
+  "proxy.card_title": "Ingen proxy for denne optagelse endnu",
+  "proxy.card_text": "En {height}p-proxy er en kopi af hele filen på {duration}, så du kan spole i den fra start til slut (den laves flere gange hurtigere end realtid).",
+  "proxy.building": "bygger",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "i kø",
+  "proxy.build": "Byg proxy",
+  "proxy.all": "Proxyer til alle med hændelser",
+  "proxy.all_tip": "Sæt proxyer i kø for alle optagelser med hændelser",
+  "proxy.queued_toast": "proxy sat i kø",
+  "proxy.all_toast": {
+    "one": "{count} proxy sat i kø ({candidates} optagelser med hændelser mangler en)",
+    "other": "{count} proxyer sat i kø ({candidates} optagelser med hændelser mangler en)"
+  },
+  "mode.full_tip": "Hele optagelsen, afspillet fra dens proxy",
+  "mode.full_noproxy_tip": "Hele optagelsen: ingen proxy endnu (byg en herfra)",
+  "bound.wait": "vent, til hændelsens klip er indlæst",
+  "bound.in_before_out": "ind skal ligge før ud",
+  "bound.out_after_in": "ud skal ligge efter ind",
+  "bound.reset": "klip tilbage til pre-roll / post-roll",
+  "bound.in_set": "ind = {time} (klip {length} s)",
+  "bound.out_set": "ud = {time} (klip {length} s)",
+  "mark.nothing": "intet afspilles",
+  "mark.done": "manuel markering ved {time}",
+  "play_aria": "Afspil",
+  "pause_aria": "Pause",
+  "time.pos": "{pos} af {total}",
+  "time.rel": "{offset} s fra hændelsen",
+  "time.clip": "klip {in} – {out} = {length} s",
+  "pip.loop": "Loop ind → ud",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · score {score}",
+  "tl.tip_status": "{kind} · {time} · score {score} · {status}",
+  "tl.status_kept": "beholdt",
+  "tl.status_false": "falsk positiv",
+  "tl.whole": "Hele optagelsen",
+  "tl.no_events": "ingen hændelser",
+  "tl.not_detected": "ikke registreret endnu",
+  "tl.no_proxy": "ingen proxy",
+  "tl.no_proxy_tip": "Hele optagelsen kræver en proxy (byg den fra afspilleren)",
+  "tl.kind.kill": {
+    "one": "{count} kill",
+    "other": "{count} kills"
+  },
+  "tl.kind.assist": {
+    "one": "{count} assist",
+    "other": "{count} assists"
+  },
+  "tl.kind.death": {
+    "one": "{count} død",
+    "other": "{count} dødsfald"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} spottet",
+    "other": "{count} spottet"
+  },
+  "tl.kind.revive": {
+    "one": "{count} genoplivning",
+    "other": "{count} genoplivninger"
+  },
+  "tl.kind.squad": {
+    "one": "{count} squad",
+    "other": "{count} squad"
+  },
+  "tl.kind.voice": {
+    "one": "{count} stemme",
+    "other": "{count} stemme"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manuel",
+    "other": "{count} manuelle"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

@@ -1,5 +1,5 @@
 /* WardogClips -- shell, design tokens and shared components. Module styles live beside it: player.css (player + timeline),
-   mixer.css (audio track lanes), zones.css, vodbrowse.css. Every colour comes from the tokens below; the old names
+   mixer.css (audio track lanes), zones.css, vodbrowse.css. Every color comes from the tokens below; the old names
    (--panel, --dim, --acc, --kill ...) are kept as aliases so module CSS written against them keeps working. */
 
 :root {
@@ -10,7 +10,7 @@
   --ok: #5fbf8a; --warn: #d9a24f; --bad: #e0675a;
   --ok-bg: rgba(95,191,138,.14); --warn-bg: rgba(217,162,79,.14); --bad-bg: rgba(224,103,90,.14);
   --ok-text: #86d5a8; --warn-text: #e9bd77; --bad-text: #f09a8f;
-  /* event kinds: hues spread round the wheel; the kind's name is always printed next to the colour */
+  /* event kinds: hues spread round the wheel; the kind's name is always printed next to the color */
   --k-kill: #e8735f; --k-assist: #e2b84e; --k-death: #a88ad9; --k-spotted: #4fb1bc; --k-revive: #69bd85;
   --k-squad: #6f9be0; --k-voice: #d488b6; --k-manual: #c9ced8;
   --r-s: 6px; --r: 8px; --r-l: 12px;
@@ -110,7 +110,7 @@ button.kbd { cursor: pointer; }
 .p-twitch { background: rgba(145,70,255,.18); color: #b79bff; } .p-youtube { background: rgba(255,60,60,.15); color: #ff8a8a; }
 .p-kick { background: rgba(83,252,24,.12); color: #8ff06b; } .p-tiktok { background: rgba(37,244,238,.12); color: #7ff0ec; }
 .p-rumble { background: rgba(133,199,66,.14); color: #a9d97a; }
-/* a kind badge: the kind's colour + its name */
+/* a kind badge: the kind's color + its name */
 .kb { display: inline-flex; align-items: center; gap: 8px; height: 22px; padding: 0 8px; border-radius: 5px; font-size: var(--fs-xs); font-weight: 600; letter-spacing: .2px; color: var(--kc); background: color-mix(in srgb, var(--kc) 14%, transparent); white-space: nowrap; }
 .kb::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--kc); }
 .k-kill { --kc: var(--k-kill); } .k-assist { --kc: var(--k-assist); } .k-death { --kc: var(--k-death); } .k-spotted { --kc: var(--k-spotted); }
@@ -181,7 +181,7 @@ details.disc-d .kv { padding: 4px 12px 12px; }
 #rail { grid-row: 2 / 3; grid-column: 1; background: var(--bg2); border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 4px; min-height: 0; overflow: hidden auto; }
 .rb { position: relative; width: 64px; height: 56px; border-radius: var(--r); border: 0; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: color .12s, background .12s; flex: none; padding: 0; }
 .rb svg.i { width: 20px; height: 20px; }
-.rb .rl { font-size: var(--fs-xs); line-height: 1; white-space: nowrap; }
+.rb .rl { font-size: var(--fs-xs); line-height: 1.15; white-space: nowrap; max-width: 64px; overflow: hidden; text-overflow: ellipsis; }
 .rb:hover { color: var(--text); background: var(--raised); }
 .rb.on { color: var(--text); background: var(--surface); }
 .rb.on::before { content: ""; position: absolute; left: -6px; top: 12px; bottom: 12px; width: 3px; border-radius: 3px; background: var(--accent); }
@@ -200,6 +200,10 @@ details.disc-d .kv { padding: 4px 12px 12px; }
 .pv { display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .pv-fill { display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .phd { display: flex; align-items: center; gap: 8px; padding: 12px 12px 8px 16px; flex: none; min-width: 0; }
+/* long (translated) button texts: the header's buttons wrap onto a second row, kept at the right */
+.phd { flex-wrap: wrap; row-gap: 6px; justify-content: flex-end; }
+.phd h2 { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.phd > .btn, .phd > .ib { flex-shrink: 0; }
 .phd h2 { margin: 0; font-size: var(--fs-l); font-weight: 600; letter-spacing: .1px; white-space: nowrap; }
 .phd .cnt { color: var(--muted); font-size: var(--fs-s); }
 .phd select.inp { max-width: 120px; }
@@ -224,6 +228,14 @@ details.disc-d .kv { padding: 4px 12px 12px; }
 .sb.paused { color: var(--warn-text); }
 #status:empty { display: none; }
 .sb-sep { width: 1px; height: 14px; background: var(--line2); margin: 0 4px; flex: none; }
+/* long (translated) texts: the info items give way first, then the chips' texts ellipsize; controls never squeeze */
+#statusbar > .sb.static { flex-shrink: 20; }
+#statusbar > #pill-jobs, #statusbar > #btn-pause, #statusbar > #sb-dl, #statusbar > #sb-update, #statusbar > #sb-enc { flex-shrink: 0; }
+#statusbar > #sb-work, #statusbar > #pill-resolve { overflow: hidden; flex-shrink: 0; max-width: 34vw; }
+#sb-work > span:not(.sd), #pill-resolve > span:not(.sd), #pill-jobs > span:not(.sd) { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#pill-resolve > .start { flex: none; }
+#statusbar > #sb-update { max-width: 260px; overflow: hidden; text-overflow: ellipsis; display: inline-block; line-height: 22px; }
+#statusbar > #sb-update[hidden] { display: none; }
 
 /* ============================== list rows (side panel) ============================== */
 .day { display: flex; align-items: baseline; gap: 8px; padding: 16px 8px 8px; position: sticky; top: 0; background: var(--bg2); z-index: 1; }
@@ -334,8 +346,9 @@ details.disc-d .kv { padding: 4px 12px 12px; }
 .jrow:hover { background: var(--surface); }
 .jrow .grip { color: var(--faint); cursor: grab; visibility: hidden; display: inline-flex; }
 .jrow.jq .grip { visibility: visible; }
-.jrow .jl1 { display: flex; gap: 8px; align-items: center; min-width: 0; }
-.jrow .jl1 b { font-weight: 600; text-transform: capitalize; }
+.jrow .jl1 { display: flex; gap: 8px; align-items: center; min-width: 0; flex-wrap: wrap; row-gap: 2px; }
+.jrow .jl1 b { font-weight: 600; text-transform: capitalize; min-width: 0; overflow-wrap: anywhere; }
+.jrow .jl1 .badge { white-space: nowrap; }
 .jrow .jl1 .age { margin-left: auto; color: var(--faint); font-size: var(--fs-xs); white-space: nowrap; }
 .jrow .what { font-size: var(--fs-s); color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jrow .msg { font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

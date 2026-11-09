@@ -50,7 +50,7 @@ p.hint.vbhow { font-size: var(--fs-xs); margin: 0; padding: 4px 8px 8px; }
 .vbfavmark svg.i { width: 14px; height: 14px; fill: currentColor; }
 
 /* the streamer face */
-.vbchh { padding-left: 8px; }
+.vbchh { padding-left: 8px; flex-wrap: nowrap; }
 .vbback svg.i { transform: rotate(180deg); }
 .vbname { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .phd h2.vbname { white-space: nowrap; }

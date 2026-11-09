@@ -22,9 +22,15 @@ import sys
 import threading
 import time
 
+from core.messages import annotate
 from resolve import client as rc
+from utils.i18n import msg
 
 logger = logging.getLogger("wclips.resolve")
+
+
+def _starting() -> str:
+    return msg("server.resolve.launching", "Resolve is starting...")["message"]
 
 DEFAULT_EXE = r"C:\Program Files\Blackmagic Design\DaVinci Resolve\Resolve.exe"
 UNTITLED = ("", "untitled project")
@@ -69,19 +75,22 @@ def launch(exe: str) -> None:
     hold = not rc.session_log_present()
     if hold:
         rc.hold_probes(time.time())
+    from core.workmode import normal_priority     # Resolve never inherits the work mode's low priority
     try:
         ex = _explorer() if sys.platform == "win32" and "," not in exe else None
         if ex:
             # explorer.exe hands the start to the running shell and exits at once (exit code 1 even on success)
-            subprocess.Popen([ex, exe], close_fds=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL)
+            with normal_priority():
+                subprocess.Popen([ex, exe], close_fds=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL)
             logger.info("[Resolve] started via explorer exe=%s", exe)
             return
         flags = 0
         if sys.platform == "win32":
             flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-        subprocess.Popen([exe], cwd=os.path.dirname(exe), creationflags=flags, close_fds=True,
-                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        with normal_priority():
+            subprocess.Popen([exe], cwd=os.path.dirname(exe), creationflags=flags, close_fds=True,
+                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         logger.info("[Resolve] started exe=%s", exe)
     except BaseException:
         if hold:
@@ -131,14 +140,14 @@ class ResolveLink:
     # ---- public ---------------------------------------------------------------------------------
     def snapshot(self) -> dict:
         with self._lock:
-            return {"state": self.state, "project": self.project, "error": self.error, "since": self.since,
+            return annotate({"state": self.state, "project": self.project, "error": self.error, "since": self.since,
                     "last_ready": list(self.last_ready) if self.last_ready else None,
                     "launched": self.launched_at is not None, "watching": bool(self._thread and self._thread.is_alive()),
                     "waiting": [self._op_view(o) for o in self.ops],
                     "recent": [self._op_view(o) for o in self.done[-5:]],
                     "launch_on_start": bool(self.cfg.resolve.launch_on_start),
                     "launch_on_send": bool(self.cfg.resolve.launch_on_send),
-                    "exe": resolve_exe(self.cfg), "auto_project": self.cfg.resolve.project or ""}
+                    "exe": resolve_exe(self.cfg), "auto_project": self.cfg.resolve.project or ""}, "error")
 
     def startup(self) -> None:
         """WardogClips start: get Resolve up with a project (Settings > Resolve > launch_on_start)."""
@@ -150,7 +159,7 @@ class ResolveLink:
     def start_now(self) -> dict:
         """The page asked: start Resolve (if needed) and wait for a project."""
         if not self.cfg.resolve.enabled:
-            raise rc.ResolveError("the Resolve hand-off is disabled in Settings > Resolve")
+            raise rc.ResolveError(msg("server.resolve.handoff_off", "the Resolve hand-off is disabled in Settings > Resolve")["message"])
         self.watch_until = time.monotonic() + 60.0 * self.cfg.resolve.wait_min
         with self._lock:
             if self.state in ("failed", "idle", "down"):
@@ -236,8 +245,7 @@ class ResolveLink:
             self._down_streak = 0
             if self.state == "starting" and started is not None and not cancelled:
                 # the watch window ran out while Resolve was still not answering
-                self._set("failed", None, f"Resolve did not answer within {self.cfg.resolve.wait_min} min -- "
-                                          + rc.SCRIPTING_HINT)
+                self._set("failed", None, self._wait_text())
             elif self.state in ("starting", "no_project", "down", "ready"):
                 self._set("idle", None)            # a later Resolve session starts from scratch
             # accepted_project stays: it ends when Resolve is seen gone (seen_status / _down) or after it was used
@@ -256,7 +264,7 @@ class ResolveLink:
         try:
             while not self._stop.is_set():
                 if not self.cfg.resolve.enabled:       # switched off in Settings while something waited
-                    self._fail("the Resolve hand-off is disabled in Settings > Resolve")
+                    self._fail(msg("server.resolve.handoff_off", "the Resolve hand-off is disabled in Settings > Resolve")["message"])
                     self._set("off", None)
                     with self._lock:
                         if self._thread is threading.current_thread():
@@ -324,18 +332,18 @@ class ResolveLink:
                 with self._lock:
                     self.launched_at, self.assumed_start = time.monotonic(), True
                     self._launch_wall = time.time()
-                self._set("starting", None, "Resolve is starting...")
+                self._set("starting", None, _starting())
                 return
             try:
                 (self._launcher or launch)(resolve_exe(self.cfg))
             except Exception as e:                     # noqa: BLE001 -- shown on the page
                 logger.warning("[Resolve] could not start Resolve: %s", e)
-                self._fail(f"could not start Resolve: {e}")
+                self._fail(msg("server.resolve.start_failed", "could not start Resolve: {error}", error=str(e))["message"])
                 return
             with self._lock:
                 self.launched_at, self.assumed_start, self.launched_once = time.monotonic(), False, True
                 self._launch_wall = time.time()
-            self._set("starting", None, "Resolve is starting...")
+            self._set("starting", None, _starting())
             return
         if launched is not None:
             if err == rc.SCRIPT_SERVER_DEAD and self._launch_wall and self._debug_log_since(self._launch_wall):
@@ -343,9 +351,9 @@ class ResolveLink:
                 self._fail(err)
                 return
             if time.monotonic() - launched > 60.0 * self.cfg.resolve.wait_min:
-                self._fail(f"Resolve did not answer within {self.cfg.resolve.wait_min} min -- " + rc.SCRIPTING_HINT)
+                self._fail(self._wait_text())
             else:
-                self._set("starting", None, "Resolve is starting...")
+                self._set("starting", None, _starting())
             return
         self._set("down", None, err or rc.NOT_RUNNING)
 
@@ -361,7 +369,7 @@ class ResolveLink:
         want = (self.cfg.resolve.project or "").strip()
         if want and self.tried_project != want and self._load_tries < 3:
             self._load_tries += 1
-            self._set("no_project", name, f"opening project '{want}'...")
+            self._set("no_project", name, msg("server.resolve.opening", "opening project '{project}'...", project=want)["message"])
             try:
                 if self._load(want):
                     self.tried_project = want
@@ -369,14 +377,16 @@ class ResolveLink:
                     rc.invalidate_probe()
                     return
                 self.tried_project = want             # definitely not there: ask once per Resolve session
-                msg = f"Resolve has no project named '{want}' -- open one yourself (or fix Settings > Resolve > project)"
+                note = msg("server.resolve.no_such_project", "Resolve has no project named '{project}' -- open one yourself "
+                           "(or fix Settings > Resolve > project)", project=want)["message"]
             except Exception as e:                     # noqa: BLE001 -- transient (busy / pending): up to 3 tries
-                msg = f"could not open project '{want}': {e}"
-            logger.warning("[Resolve] %s", msg)
-            self._set("no_project", name, msg)
+                note = msg("server.resolve.open_failed", "could not open project '{project}': {error}",
+                           project=want, error=str(e))["message"]
+            logger.warning("[Resolve] %s", note)
+            self._set("no_project", name, note)
             return
         if self.state != "no_project" or self.error is None:
-            self._set("no_project", name, "open a project in Resolve (the Project Manager)")
+            self._set("no_project", name, msg("server.resolve.open_pm", "open a project in Resolve (the Project Manager)")["message"])
 
     def _load_project(self, name: str) -> bool:
         r = rc.connect()
@@ -405,7 +415,8 @@ class ResolveLink:
                 # within its deadline -- the route queues on exactly this error expecting a retry. The reason
                 # stays on the op, so the page (and a timeout) says why it is still waiting
                 with self._lock:
-                    op["state"], op["note"] = "waiting", f"Resolve did not answer the hand-off: {e}"
+                    op["state"], op["note"] = "waiting", msg("server.resolve.handoff_no_answer",
+                                                             "Resolve did not answer the hand-off: {error}", error=str(e))["message"]
                 rc.invalidate_probe()
                 logger.info("[Resolve] hand-off op=%d waits again: %s", op["id"], e)
                 self._publish("state")
@@ -428,13 +439,19 @@ class ResolveLink:
             gone = [o for o in self.ops if o["state"] == "waiting" and now > o["deadline"]]
             for o in gone:
                 o["state"] = "failed"
-                o["error"] = (f"gave up after {self.cfg.resolve.wait_min} min waiting for Resolve "
-                              f"({o.get('note') or (self.state.replace('_', ' ') + ': ' + (self.error or ''))})")
+                why = o.get('note') or (self.state.replace('_', ' ') + ': ' + (self.error or ''))
+                o["error"] = msg("server.resolve.gave_up", "gave up after {minutes} min waiting for Resolve ({why})",
+                                 minutes=self.cfg.resolve.wait_min, why=why)["message"]
                 self.ops.remove(o)
                 self.done.append(o)
         for o in gone:
             logger.warning("[Resolve] hand-off timed out op=%d kind=%s", o["id"], o["kind"])
             self._publish("failed", op=self._op_view(o))
+
+    def _wait_text(self) -> str:
+        return msg("server.resolve.wait_timeout", "Resolve did not answer within {minutes} min -- start DaVinci Resolve, "
+                   "open the project, and check Preferences > System > General > External scripting using = Local",
+                   minutes=self.cfg.resolve.wait_min)["message"]
 
     def _fail(self, msg: str) -> None:
         with self._lock:
@@ -479,7 +496,8 @@ class ResolveLink:
             r = o["result"]
             v["result"] = {k: r.get(k) for k in ("project", "sent", "timeline", "clips", "events", "failed", "imported",
                                                  "note", "bins") if k in r}
-        return v
+            annotate(v["result"], "note")
+        return annotate(v, "label", "note", "error")         # <field>_i18n: the page shows them translated
 
     def _publish(self, action: str, **extra) -> None:
         try:

@@ -7,12 +7,14 @@ Resolve errors -> 503 with the reason; a bad / empty selection -> 400.
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse, JSONResponse
 
 from resolve import client as rc
 from resolve import export
+from core.messages import annotate, annotate_all, msg
+from utils.i18n import app_error, with_msg
 
 logger = logging.getLogger("wclips.resolve")
 
@@ -24,20 +26,26 @@ def build(ctx) -> APIRouter:
         try:
             events = export.select(ctx.db, ctx.cfg, body or {})
         except export.SelectionError as e:
-            raise HTTPException(400, str(e))
+            raise app_error(400, "server.resolve.bad_selection", "The selection is not valid: {error}", error=str(e))
         if not events:
-            raise HTTPException(400, "no events match the selection (status false is never sent; default status is kept)")
+            raise app_error(400, "server.resolve.nothing_selected", "No events match the selection. Events marked false are never sent; by default only kept events are.")
         return events
 
     def _enabled() -> None:
         if not ctx.cfg.resolve.enabled:
-            raise HTTPException(409, "the Resolve hand-off is disabled in Settings > Resolve")
+            raise app_error(409, "server.resolve.off", "Sending to DaVinci Resolve is turned off (Settings > Resolve).")
 
     def _touched(events: list[dict]) -> None:
         for rec_id in sorted({e["rec_id"] for e in events}):
             ctx.bus.publish("events", action="updated", rec_id=rec_id)
 
     link = ctx.resolve_link
+
+    def _snap(snap: dict) -> dict:
+        """The link snapshot with label_i18n / note_i18n beside each hand-off's English label and note."""
+        for key in ("waiting", "recent"):
+            annotate_all(snap.get(key), "label", "note", "error")
+        return annotate(snap, "error")
 
     @r.get("/api/resolve/status")
     async def resolve_status(fresh: int = 0):
@@ -46,24 +54,25 @@ def build(ctx) -> APIRouter:
         link.seen_status(s)
         s["enabled"] = bool(ctx.cfg.resolve.enabled)
         s["bin"] = ctx.cfg.resolve.bin
-        s["link"] = link.snapshot()
+        s["link"] = _snap(link.snapshot())
         s["has_project"] = bool(s.get("connected")) and link.accepts(s.get("project"))
-        return s
+        return annotate(s, "error")
 
     @r.post("/api/resolve/start")
     def resolve_start():
         """Start Resolve (unless it is up) and wait for a project; the page follows the SSE 'resolve' event."""
         _enabled()
         try:
-            return {"ok": True, "link": link.start_now()}
+            return {"ok": True, "link": _snap(link.start_now())}
         except rc.ResolveError as e:
-            raise HTTPException(409, str(e))
+            raise app_error(409, "server.resolve.error", "DaVinci Resolve: {error}", error=str(e))
 
     @r.post("/api/resolve/cancel")
     def resolve_cancel(body: dict | None = None):
         """Drop waiting hand-offs: {id} one, {} all (and stop waiting for Resolve)."""
         op_id = (body or {}).get("id")
-        return {"ok": True, "cancelled": link.cancel(int(op_id) if op_id is not None else None), "link": link.snapshot()}
+        return {"ok": True, "cancelled": link.cancel(int(op_id) if op_id is not None else None),
+                "link": _snap(link.snapshot())}
 
     @r.post("/api/resolve/use-open-project")
     async def resolve_use_open():
@@ -71,7 +80,7 @@ def build(ctx) -> APIRouter:
         hand-offs ran or Resolve closes)."""
         st = await run_in_threadpool(rc.status, True)
         if not st.get("connected") or not st.get("project"):
-            raise HTTPException(409, "Resolve has no project open")
+            raise app_error(409, "server.resolve.no_project", "DaVinci Resolve has no project open.")
         return {"ok": True, "link": link.use_open_project(st.get("project"))}
 
     async def _handoff(kind: str, label: str, fn):
@@ -81,7 +90,7 @@ def build(ctx) -> APIRouter:
         try:
             await run_in_threadpool(rc.load_module)
         except rc.ResolveUnavailable as e:
-            raise HTTPException(503, str(e))
+            raise app_error(503, "server.resolve.error", "DaVinci Resolve: {error}", error=str(e))
         snap = link.snapshot()
         wait = ctx.cfg.resolve.launch_on_send
         # the link's state only means something while its watcher runs (an idle link's last state is history)
@@ -96,27 +105,29 @@ def build(ctx) -> APIRouter:
                     return _queued(kind, label, fn)
                 st = await run_in_threadpool(rc.status, True)     # don't trust a cached "down" (45 s)
         except Exception as e:                       # noqa: BLE001
-            raise HTTPException(503, str(e))
+            raise app_error(503, "server.resolve.error", "DaVinci Resolve: {error}", error=str(e))
         if not st.get("available"):
-            raise HTTPException(503, st.get("error") or rc.NOT_RUNNING)
+            raise app_error(503, "server.resolve.error", "DaVinci Resolve: {error}", error=st.get("error") or rc.NOT_RUNNING)
         ok_project = link.accepts(st.get("project"))
         if st.get("connected") and ok_project:
             try:
                 return await run_in_threadpool(fn)
             except rc.ResolveNotRunning as e:
                 if not wait:
-                    raise HTTPException(503, str(e))
+                    raise app_error(503, "server.resolve.error", "DaVinci Resolve: {error}", error=str(e))
             except rc.ResolveError as e:
                 logger.warning("[Resolve] %s failed error=%s", kind, e)
-                raise HTTPException(503, str(e))
+                raise app_error(503, "server.resolve.error", "DaVinci Resolve: {error}", error=str(e))
         elif not wait:
-            raise HTTPException(503, (st.get("error") or rc.NOT_RUNNING) if not st.get("connected")
-                                else "no project open in Resolve -- open the project you are cutting first")
+            if not st.get("connected"):
+                raise app_error(503, "server.resolve.error", "DaVinci Resolve: {error}", error=st.get("error") or rc.NOT_RUNNING)
+            raise app_error(503, "server.resolve.open_project", "No project is open in DaVinci Resolve. Open the project you are editing first.")
         return _queued(kind, label, fn)
 
     def _queued(kind, label, fn):
         op = link.submit(kind, label, fn)
-        return JSONResponse(status_code=202, content={"queued": True, "op": op, "link": link.snapshot()})
+        return JSONResponse(status_code=202, content={"queued": True, "op": annotate(op, "label", "note"),
+                                                          "link": _snap(link.snapshot())})
 
     @r.post("/api/resolve/preview")
     def preview(body: dict | None = None):
@@ -124,7 +135,7 @@ def build(ctx) -> APIRouter:
         try:
             events = export.select(ctx.db, ctx.cfg, body or {})
         except export.SelectionError as e:
-            raise HTTPException(400, str(e))
+            raise app_error(400, "server.resolve.bad_selection", "The selection is not valid: {error}", error=str(e))
         order = str((body or {}).get("order") or "score").lower()
         clips = export.merge_clips(events, order)
         return {"events": len(events), "clips": len(clips), "recordings": len({e["rec_id"] for e in events}),
@@ -150,12 +161,14 @@ def build(ctx) -> APIRouter:
         def run():
             evs = _fresh(body)
             if not evs:
-                return {"ok": True, "project": None, "sent": 0, "markers": [], "failed": [], "imported": [],
-                        "note": "nothing left to send (the events changed while waiting)"}
+                return with_msg({"ok": True, "project": None, "sent": 0, "markers": [], "failed": [], "imported": []},
+                                "note", "server.resolve.nothing_left",
+                                "There was nothing left to send: the events changed while waiting.")
             res = rc.send_markers(ctx.db, ctx.cfg, evs)
             _touched(evs)
             return res
-        return await _handoff("markers", f"{len(events)} marker{'s' if len(events) != 1 else ''}", run)
+        return await _handoff("markers", msg("server.resolve.op_markers", "Markers to add: {count}",
+                                             count=len(events))["message"], run)
 
     @r.post("/api/resolve/selects")
     async def selects(body: dict | None = None):
@@ -168,10 +181,12 @@ def build(ctx) -> APIRouter:
         def run():
             evs = _fresh(body)
             if not evs:
-                return {"ok": True, "project": None, "timeline": None, "clips": 0, "events": 0, "placed": [],
-                        "failed": [], "imported": [], "note": "nothing left to send (the events changed while waiting)"}
+                return with_msg({"ok": True, "project": None, "timeline": None, "clips": 0, "events": 0, "placed": [],
+                                 "failed": [], "imported": []}, "note", "server.resolve.nothing_left",
+                                "There was nothing left to send: the events changed while waiting.")
             return rc.build_selects(ctx.db, ctx.cfg, evs, order, name)
-        return await _handoff("selects", f"selects timeline from {len(events)} event{'s' if len(events) != 1 else ''}", run)
+        return await _handoff("selects", msg("server.resolve.op_selects", "Events for a selects timeline: {count}",
+                                             count=len(events))["message"], run)
 
     @r.post("/api/export")
     async def export_files(body: dict | None = None):
@@ -180,7 +195,7 @@ def build(ctx) -> APIRouter:
         try:
             res = await run_in_threadpool(export.export, ctx.db, ctx.cfg, b, fmt)
         except export.SelectionError as e:
-            raise HTTPException(400, str(e))
+            raise app_error(400, "server.resolve.bad_selection", "The selection is not valid: {error}", error=str(e))
         for f in res["files"]:
             f["url"] = f"/api/export/files/{f['name']}"
         return res
@@ -189,8 +204,9 @@ def build(ctx) -> APIRouter:
     def export_file(name: str):
         p = export.safe_out_file(name)
         if p is None:
-            raise HTTPException(404, "no such export")
-        media = "text/csv" if p.suffix.lower() == ".csv" else "text/plain"
+            raise app_error(404, "server.resolve.no_export", "That export file does not exist anymore.")
+        media = {".csv": "text/csv", ".xml": "application/xml", ".otio": "application/json"}.get(p.suffix.lower(),
+                                                                                              "text/plain")
         return FileResponse(p, media_type=media, filename=p.name)
 
     return r

@@ -23,7 +23,10 @@
    Layout: each lane = a control card (.lctl: A-number, M / S, dB, the fader across the
    bottom, the post-fader meter on its right) beside a waveform card (.wf > canvas). The in / out shading and the
    playhead over the waveforms are placed from the waveform column's measured position, so the CSS may change the
-   column widths and gaps freely. Under the lanes, a Track details disclosure lists the OBS names and roles. */
+   column widths and gaps freely. Under the lanes, a Track details disclosure lists the OBS names and roles.
+
+   Every visible text comes from the "mixer" catalog; labels and tooltips are set by labelMaster / labelLane and set
+   again when the UI language changes (relabel), without rebuilding the lanes or touching playback. */
 "use strict";
 
 const MX = (() => {
@@ -37,16 +40,16 @@ const MX = (() => {
               span: [0, 0], lastSync: 0, anySolo: false, bus: null, dimNode: null, anL: null, anR: null };
   const ROLE_COLOR = { game: "#49c463", mic: "#4ca7ef", voip: "#b48cff", voice: "#4ca7ef", desktop: "#8b98a8",
                        music: "#8b98a8", other: "#ffd54a", unknown: "#8b98a8", silent: "#3a4452", dup: "#3a4452" };
-  const ROLE_LABEL = { mic: "mic", voip: "squad", voice: "voice", game: "game", desktop: "desktop", music: "music",
-                       silent: "digital silence", dup: "duplicate of another track", other: "other", unknown: "unknown" };
+  // a track role as text (the role itself is an API value; an unknown one is shown as it is)
+  const roleLabel = (r) => I18N.has("mixer.role." + r) ? t("mixer.role." + r) : String(r ?? "");
 
   /* ---------- persisted state ---------- */
   const load = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch (e) { return {}; } };
   const save = (o) => { try { localStorage.setItem(LS_KEY, JSON.stringify(o)); } catch (e) { } };
   let saved = load();
-  function stateFor(t) {
-    const s = saved[t.idx] || {};
-    return { db: s.db != null ? s.db : 0, mute: s.mute != null ? s.mute : !t.in_mix, solo: !!s.solo };
+  function stateFor(tr) {
+    const s = saved[tr.idx] || {};
+    return { db: s.db != null ? s.db : 0, mute: s.mute != null ? s.mute : !tr.in_mix, solo: !!s.solo };
   }
   function remember(lane) { saved[lane.t.idx] = { db: lane.db, mute: lane.mute, solo: lane.solo }; save(saved); }
   function masterSaved() {
@@ -57,7 +60,7 @@ const MX = (() => {
   function rememberMaster() { saved.master = { db: M.db, mute: M.mute, dimDb: M.dimDb }; save(saved); }
 
   const dbGain = (db) => db <= FADER_MIN ? 0 : Math.pow(10, db / 20);
-  const dbText = (db) => db <= FADER_MIN ? "-\u221e" : (db > 0 ? "+" : "") + db.toFixed(1);
+  const dbText = (db) => db <= FADER_MIN ? "-\u221e" : fmtNum(db, { minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" });
   // the fader's filled part (the CSS paints its track from --p)
   const fillOf = (db) => (Math.max(0, Math.min(1, (Math.max(db, -40) + 40) / (FADER_MAX + 40))) * 100).toFixed(1) + "%";
   const setFill = (f, db) => { if (f) f.style.setProperty("--p", fillOf(db)); };
@@ -131,8 +134,8 @@ const MX = (() => {
       M.el.querySelector(".ms.m").classList.toggle("on", M.mute);
       const d = M.el.querySelector(".ms.d");
       d.classList.toggle("on", M.dim);
-      d.title = `DIM: listen ${-M.dimDb} dB quieter without changing the mix (monitoring only, like Resolve)\nright-click: change the amount (${DIM_STEPS.map(x => -x).join(" / ")} dB)`;
-      M.el.querySelector(".db").textContent = dbText(M.db) + (M.dim ? `  DIM ${M.dimDb}` : "");
+      d.title = t("mixer.master.dim_title", { db: fmtNum(-M.dimDb), steps: DIM_STEPS.map(x => fmtNum(-x)).join(" / ") });
+      M.el.querySelector(".db").textContent = M.dim ? t("mixer.master.db_dim", { db: dbText(M.db), dim: fmtNum(M.dimDb) }) : dbText(M.db);
       M.el.classList.toggle("dimmed", M.dim);
       M.el.classList.toggle("off", masterGain() === 0);
       M.el.querySelector(".fader").value = M.db;
@@ -158,27 +161,34 @@ const MX = (() => {
       f.value = x; set(x); setFill(f, x); commit();
     }, { passive: false });
   }
-  const faderHTML = (db, what) => `<input type="range" class="fader" min="${FADER_MIN}" max="${FADER_MAX}" step="0.1" value="${db}" style="--p:${fillOf(db)}"
-      aria-label="${what}" title="${what} (dB) - drag, mouse wheel 0.5 dB (shift 0.1 dB), double-click: 0 dB, bottom stop: -inf">`;
+  // what: the catalog key of the fader's name (mixer.fader.master / mixer.fader.track); labelFader sets its texts
+  const faderHTML = (db) => `<input type="range" class="fader" min="${FADER_MIN}" max="${FADER_MAX}" step="0.1" value="${db}" style="--p:${fillOf(db)}">`;
+  function labelFader(f, whatKey) {
+    if (!f) return;
+    const what = t(whatKey);
+    f.setAttribute("aria-label", what);
+    f.title = t("mixer.fader.title", { what });
+  }
 
   /* ---------- A0 Master (built once, always on top) ---------- */
   function buildMaster() {
     const el = document.createElement("div");
     el.className = "lane master";
-    el.innerHTML = `<div class="lctl"><div class="lrow"><span class="lnum">A0</span><span class="lname">Master</span>
-          <button class="sm ms m" title="mute the master">M</button><button class="sm ms d">DIM</button><span class="db"></span></div>
-        <div class="lrow fad">${faderHTML(M.db, "master level")}</div>
-        <div class="meters" title="master peak level, L / R (before DIM) - click: reset the peak hold"><span class="meter"><i></i><b></b></span><span class="meter"><i></i><b></b></span></div></div>
-      <div class="wf"><canvas class="wave" title="the mix as set above (estimated from the track peaks) - red = over 0 dBFS. click: seek"></canvas></div>`;
+    el.innerHTML = `<div class="lctl"><div class="lrow"><span class="lnum">A0</span><span class="lname"></span>
+          <button class="sm ms m"></button><button class="sm ms d"></button><span class="db"></span></div>
+        <div class="lrow fad">${faderHTML(M.db)}</div>
+        <div class="meters"><span class="meter"><i></i><b></b></span><span class="meter"><i></i><b></b></span></div></div>
+      <div class="wf"><canvas class="wave"></canvas></div>`;
     $("mx-master").appendChild(el);
     M.el = el; M.canvas = el.querySelector("canvas");
+    labelMaster();
     el.querySelector(".ms.m").onclick = () => { M.mute = !M.mute; rememberMaster(); applyMaster(); };
     const d = el.querySelector(".ms.d");
     d.onclick = () => { M.dim = !M.dim; applyMaster(); };
     d.oncontextmenu = (e) => {
       e.preventDefault(); e.stopPropagation();
       M.dimDb = DIM_STEPS[(DIM_STEPS.indexOf(M.dimDb) + 1) % DIM_STEPS.length];
-      rememberMaster(); applyMaster(); toast(`DIM amount ${M.dimDb} dB`);
+      rememberMaster(); applyMaster(); toast(t("mixer.master.dim_toast", { db: fmtNum(M.dimDb) }));
     };
     wireFader(el.querySelector(".fader"), () => M.db, (x) => { M.db = x; applyMaster(); }, rememberMaster);
     M.canvas.onclick = (e) => seekAt(M.canvas, e);
@@ -188,6 +198,16 @@ const MX = (() => {
     };
     applyMaster();
   }
+  // the master strip's texts (the DIM tooltip and the level text are set by applyMaster)
+  function labelMaster() {
+    const el = M.el; if (!el) return;
+    el.querySelector(".lname").textContent = t("mixer.master.name");
+    const m = el.querySelector(".ms.m"); m.textContent = t("mixer.master.mute_btn"); m.title = t("mixer.master.mute_title");
+    el.querySelector(".ms.d").textContent = t("mixer.master.dim_btn");
+    labelFader(el.querySelector(".fader"), "mixer.fader.master");
+    el.querySelector(".meters").title = t("mixer.master.meters_title");
+    M.canvas.title = t("mixer.master.wave_title");
+  }
 
   /* ---------- building the track lanes ---------- */
   function teardown() {
@@ -195,7 +215,7 @@ const MX = (() => {
       try { if (l.audio) { l.audio.pause(); l.audio.removeAttribute("src"); l.audio.load(); } } catch (e) { }
       try { if (l.src) l.src.disconnect(); if (l.gain) l.gain.disconnect(); if (l.an) l.an.disconnect(); } catch (e) { }
     }
-    S.lanes = []; S.ready = false; S.settled = false; S.man = null; S.key = null;
+    S.lanes = []; S.ready = false; S.settled = false; S.man = null; S.key = null; S.msgFn = null;
     $("mx-lanes").innerHTML = "";
     details(null);
     $("mx-io").hidden = true; $("mx-ph").hidden = true;     // the previous window's in / out and playhead
@@ -222,11 +242,11 @@ const MX = (() => {
   }
   function paintState() {
     if (!S.man) return;
-    if (live()) setState("tracks live", "live");
-    else if (S.settled && !S.ready) setState("no playable tracks (playing the clip's own mix)", "warn");
-    else if (S.ctx && S.ctx.state === "suspended") setState("click anywhere to enable the track mix (playing the clip's own mix)", "warn");
-    else if (!S.ready) setState("loading tracks... (playing the clip's own mix)", "");
-    else setState("playing the clip's own mix", "warn");
+    if (live()) setState(t("mixer.state.live"), "live");
+    else if (S.settled && !S.ready) setState(t("mixer.state.no_tracks"), "warn");
+    else if (S.ctx && S.ctx.state === "suspended") setState(t("mixer.state.suspended"), "warn");
+    else if (!S.ready) setState(t("mixer.state.loading_fallback"), "");
+    else setState(t("mixer.state.fallback"), "warn");
   }
 
   async function request(url, mode, isCurrent) {
@@ -236,17 +256,28 @@ const MX = (() => {
     // a clip that finishes rendering while the Calibration page is open must not show the panel there;
     // closeCalibration shows it again once tracks are loaded
     if (!(typeof ST !== "undefined" && ST.view !== "normal")) $("mixer").hidden = false;
-    $("mx-lanes").innerHTML = `<div class="empty" style="padding:14px">loading audio tracks...</div>`;
-    setState("loading tracks...", "");
+    // the lanes' message while there are no lanes: kept as a function, so a language switch draws it again
+    S.msgFn = () => {
+      $("mx-lanes").innerHTML = `<div class="empty" style="padding:14px">${te("mixer.lanes.loading")}</div>`;
+      setState(t("mixer.state.loading"), "");
+    };
+    S.msgFn();
     let man;
     try { man = await api(url); }
     catch (err) {
       if (my !== S.token) return;
-      $("mx-lanes").innerHTML = `<div class="empty" style="padding:14px">${esc(err.message)}${mode === "full" ? `<br><br><button class="sm" id="mx-rebuild">Rebuild proxy with tracks</button>` : ""}</div>`;
-      setState("", "");
-      const b = $("mx-rebuild"); if (b) b.onclick = () => { if (window.PL && PL.state.rec) post(`/api/recordings/${PL.state.rec.id}/proxy`).then(() => { toast("proxy rebuild queued"); b.outerHTML = `<span class="badge">queued</span>`; }).catch(e => toast(e.message, 5000)); };
+      let rebuilt = false;
+      S.msgFn = () => {
+        const btn = mode !== "full" ? "" : rebuilt ? `<br><br><span class="badge">${te("mixer.rebuild.queued")}</span>`
+          : `<br><br><button class="sm" id="mx-rebuild">${te("mixer.rebuild.button")}</button>`;
+        $("mx-lanes").innerHTML = `<div class="empty" style="padding:14px">${esc(err.message)}${btn}</div>`;
+        setState("", "");
+        const b = $("mx-rebuild"); if (b) b.onclick = () => { if (window.PL && PL.state.rec) post(`/api/recordings/${PL.state.rec.id}/proxy`).then(() => { toast(t("mixer.rebuild.queued_toast")); rebuilt = true; if (b.isConnected) b.outerHTML = `<span class="badge">${te("mixer.rebuild.queued")}</span>`; }).catch(e => toast(e.message, 5000)); };
+      };
+      S.msgFn();
       return;
     }
+    S.msgFn = null;
     if (my !== S.token || (isCurrent && !isCurrent())) return;
     build(man, mode);
   }
@@ -262,27 +293,26 @@ const MX = (() => {
     S.span = [man.t0, man.t1];
     // the stem's t=0 is man.t0; the video's local t=0 is the clip window start (or 0 for a proxy)
     S.offset = mode === "full" ? 0 : (man.t0 - (window.PL ? PL.state.w0 : man.t0));
-    $("mx-span").textContent = mode === "full" ? `Whole recording ${tc(man.t0)} \u2013 ${tc(man.t1)}` : `Clip window ${tc(man.t0)} \u2013 ${tc(man.t1)}`;
+    labelSpan();
     const ctx = ensureCtx();
     const holder = $("mx-lanes"); holder.innerHTML = "";
     const pending = [];
-    for (const t of man.tracks) {
-      const st = stateFor(t);
-      const silent = t.role === "silent" || t.peak_db <= -90;
-      const lane = { t, db: st.db, mute: st.mute, solo: st.solo, audio: null, src: null, gain: null, an: null, el_lane: null, canvas: null, level: 0 };
+    for (const tr of man.tracks) {
+      const st = stateFor(tr);
+      const silent = tr.role === "silent" || tr.peak_db <= -90;
+      const lane = { t: tr, db: st.db, mute: st.mute, solo: st.solo, audio: null, src: null, gain: null, an: null, el_lane: null, canvas: null, level: 0, silent, failed: false };
       const el = document.createElement("div");
-      el.className = `lane role-${t.role}${silent ? " silent" : ""}`;
-      const col = (t.role === "silent" || t.role === "dup") ? "var(--dim)" : (ROLE_COLOR[t.role] || "var(--dim)");
-      const tip = `OBS track ${t.idx + 1}: ${t.name || "(no name)"}\nrole: ${ROLE_LABEL[t.role] || t.role}`
-        + (t.normalized ? "\nlifted like in the clip mix" : "") + (t.in_mix ? "\nin the clip mix" : "\nnot in the clip mix");
-      el.innerHTML = `<div class="lctl"><div class="lrow"><span class="lnum" style="color:${col}" title="${esc(tip)}">A${t.idx + 1}</span>
-          <button class="sm ms m" title="mute (wins over solo)">M</button><button class="sm ms s" title="solo (ctrl / shift + click: solo only this one)">S</button>
+      el.className = `lane role-${tr.role}${silent ? " silent" : ""}`;
+      const col = (tr.role === "silent" || tr.role === "dup") ? "var(--dim)" : (ROLE_COLOR[tr.role] || "var(--dim)");
+      el.innerHTML = `<div class="lctl"><div class="lrow"><span class="lnum" style="color:${col}">A${tr.idx + 1}</span>
+          <button class="sm ms m"></button><button class="sm ms s"></button>
           <span class="db"></span></div>
-        <div class="lrow fad">${faderHTML(st.db, "track volume")}</div>
-        <div class="meters" title="level after the fader"><span class="meter"><i></i></span></div></div>
-        <div class="wf"><canvas class="wave" title="${silent ? "digital silence" : "click: seek"}"></canvas></div>`;
+        <div class="lrow fad">${faderHTML(st.db)}</div>
+        <div class="meters"><span class="meter"><i></i></span></div></div>
+        <div class="wf"><canvas class="wave"></canvas></div>`;
       holder.appendChild(el);
       lane.el_lane = el; lane.canvas = el.querySelector("canvas");
+      labelLane(lane);
       el.querySelector(".ms.m").onclick = () => { lane.mute = !lane.mute; remember(lane); applyGains(); drawAll(); };
       el.querySelector(".ms.s").onclick = (e) => {
         if (e.ctrlKey || e.shiftKey) for (const o of S.lanes) if (o !== lane) { o.solo = false; remember(o); }
@@ -292,7 +322,7 @@ const MX = (() => {
       lane.canvas.onclick = (e) => seekAt(lane.canvas, e);
       if (!silent && ctx) {
         const a = new Audio();
-        a.preload = "auto"; a.crossOrigin = "anonymous"; a.src = t.url;
+        a.preload = "auto"; a.crossOrigin = "anonymous"; a.src = tr.url;
         try {
           lane.src = ctx.createMediaElementSource(a);
           lane.gain = ctx.createGain();
@@ -318,13 +348,30 @@ const MX = (() => {
       // a stem that failed to load drops out (its lane stays, dimmed); the rest play
       for (const l of S.lanes) if (l.audio && l.audio.error) {
         try { l.src.disconnect(); l.gain.disconnect(); l.an.disconnect(); } catch (e) { }
-        l.audio = null; l.el_lane.classList.add("silent"); l.canvas.title = "this track could not be loaded";
+        l.audio = null; l.failed = true; l.el_lane.classList.add("silent"); labelLane(l);
       }
       S.settled = true;
       S.ready = S.lanes.some(l => l.audio);
       applyAudioRouting(); syncNow(true); paintState();
     });
     paintState();
+  }
+
+  // one lane's texts: the A-number's tooltip (OBS name, role, clip mix), M / S, the fader, meter and waveform tips
+  function labelLane(lane) {
+    const tr = lane.t, el = lane.el_lane; if (!el) return;
+    const tip = [t("mixer.lane.tip", { n: tr.idx + 1, name: tr.name || t("mixer.lane.no_name"), role: roleLabel(tr.role) }),
+      tr.normalized ? t("mixer.lane.tip_lifted") : "", tr.in_mix ? t("mixer.lane.tip_in_mix") : t("mixer.lane.tip_not_in_mix")].filter(Boolean).join("\n");
+    el.querySelector(".lnum").title = tip;
+    const m = el.querySelector(".ms.m"); m.textContent = t("mixer.lane.mute_btn"); m.title = t("mixer.lane.mute_title");
+    const so = el.querySelector(".ms.s"); so.textContent = t("mixer.lane.solo_btn"); so.title = t("mixer.lane.solo_title");
+    labelFader(el.querySelector(".fader"), "mixer.fader.track");
+    el.querySelector(".meters").title = t("mixer.lane.meter_title");
+    lane.canvas.title = lane.failed ? t("mixer.lane.load_failed") : lane.silent ? t("mixer.role.silent") : t("mixer.lane.wave_title");
+  }
+  function labelSpan() {
+    const man = S.man; if (!man) return;
+    $("mx-span").textContent = t(S.mode === "full" ? "mixer.span.full" : "mixer.span.window", { t0: tc(man.t0), t1: tc(man.t1) });
   }
 
   /* ---------- track details (OBS names, roles, levels) under the lanes, folded ---------- */
@@ -338,13 +385,14 @@ const MX = (() => {
       $("mixer").appendChild(d);
     }
     d.hidden = false; d.open = detOpen;
-    const rows = man.tracks.map(t => `<tr><td class="mono">A${t.idx + 1}</td><td>${esc(t.name || "(no name)")}</td>
-        <td><span class="badge${t.role === "mic" || t.role === "voip" || t.role === "voice" ? " acc" : ""}">${esc(ROLE_LABEL[t.role] || t.role)}</span></td>
-        <td>${t.in_mix ? "yes" : "no"}${t.normalized ? " (lifted)" : ""}</td>
-        <td class="num">${t.peak_db != null && isFinite(t.peak_db) ? t.peak_db.toFixed(1) + " dB" : "-"}</td></tr>`).join("");
-    d.innerHTML = `<summary>${icon("chev", "chev")}Track details <span class="faint">OBS names, roles, clip mix, peaks</span></summary>
-      <div class="mxdet-b"><table class="t"><thead><tr><th>Track</th><th>OBS name</th><th>Role</th><th>In the clip mix</th><th>Peak</th></tr></thead><tbody>${rows}</tbody></table>
-      <p class="faint t-xs">Default mix = the clip mix: game + mic + squad on; desktop, music and silent tracks muted. Mute wins over solo.</p></div>`;
+    const mixKey = (tr) => tr.in_mix ? (tr.normalized ? "mixer.det.yes_lifted" : "mixer.det.yes") : (tr.normalized ? "mixer.det.no_lifted" : "mixer.det.no");
+    const rows = man.tracks.map(tr => `<tr><td class="mono">A${tr.idx + 1}</td><td>${tr.name ? esc(tr.name) : te("mixer.lane.no_name")}</td>
+        <td><span class="badge${tr.role === "mic" || tr.role === "voip" || tr.role === "voice" ? " acc" : ""}">${esc(roleLabel(tr.role))}</span></td>
+        <td>${te(mixKey(tr))}</td>
+        <td class="num">${tr.peak_db != null && isFinite(tr.peak_db) ? te("mixer.det.peak_db", { db: fmtNum(tr.peak_db, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) }) : "-"}</td></tr>`).join("");
+    d.innerHTML = `<summary>${icon("chev", "chev")}${te("mixer.det.summary")} <span class="faint">${te("mixer.det.summary_sub")}</span></summary>
+      <div class="mxdet-b"><table class="t"><thead><tr><th>${te("mixer.det.col_track")}</th><th>${te("mixer.det.col_name")}</th><th>${te("mixer.det.col_role")}</th><th>${te("mixer.det.col_mix")}</th><th>${te("mixer.det.col_peak")}</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="faint t-xs">${te("mixer.det.note")}</p></div>`;
   }
 
   /* ---------- waveforms ---------- */
@@ -517,7 +565,21 @@ const MX = (() => {
   };
 
   buildMaster();
-  { const r = $("mx-reset"); if (r && r.title) { r.dataset.tip = r.title; r.removeAttribute("title"); } }
+  // the Reset mix button's tooltip through the shell's [data-tip] (index.html gives it as a translated title)
+  const resetTip = () => { const r = $("mx-reset"); if (r && r.title) { r.dataset.tip = r.title; r.removeAttribute("title"); } };
+  resetTip();
+
+  // a UI language switch: i18n.js has just put the index.html texts back (the Reset mix title included); set this
+  // module's texts again in place (no rebuild: the stems keep playing)
+  function relabel() {
+    resetTip();
+    labelMaster(); applyMaster();
+    for (const l of S.lanes) labelLane(l);
+    labelSpan();
+    if (S.man) { paintState(); details(S.man); }
+    else if (S.msgFn) S.msgFn();
+  }
+  I18N.onChange(relabel);
 
   return {
     // a clip / look-around window: the same t0 / t1 the clip was rendered with

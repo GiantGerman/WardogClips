@@ -29,6 +29,8 @@ import threading
 import time
 from pathlib import Path
 
+from core.messages import msg, text_i18n
+
 logger = logging.getLogger("wclips.drives")
 
 DEFAULT_BITRATE = 230_000_000          # bits/s: typical 3440x1440 60 fps OBS footage (220-240 Mb/s)
@@ -308,7 +310,7 @@ def benchmark(root_or_drive: str, files: list[str] | None = None, *, block: int 
         files = library_files(root_or_drive)
     files = [f for f in files if os.path.isfile(f)]
     if not files:
-        raise BenchError(f"no footage files to read on {root_or_drive}")
+        raise BenchError(msg("server.drive.no_footage", "There are no footage files to read on {drive}.", drive=root_or_drive)["message"])
     drive = norm_drive(root_or_drive)
     rng = random.Random(seed)
     readers = tuple(sorted(set(int(n) for n in readers if int(n) >= 1))) or READERS
@@ -331,7 +333,8 @@ def benchmark(root_or_drive: str, files: list[str] | None = None, *, block: int 
                 r.close()
             raise
         if n > len(files):
-            notes.append(f"n{n} shares {len(files)} files")
+            notes.append(msg("server.drive.note_shared", "With {n} readers, more than one reader shares a file "
+                             "({files} files).", n=n, files=len(files))["message"])
         bypass_all = bypass_all and all(getattr(r, "bypass", False) for r in rd)
         lock = threading.Lock()
         state = {"bytes": 0, "err": None}
@@ -371,13 +374,14 @@ def benchmark(root_or_drive: str, files: list[str] | None = None, *, block: int 
         for r in rd:
             r.close()
         if state["err"] is not None:
-            raise BenchError(f"read failed with {n} readers: {state['err']}")
+            raise BenchError(msg("server.drive.read_failed", "Reading failed with {n} readers at once: {error}", n=n, error=state["err"])["message"])
         mb_s[n] = round(state["bytes"] / dt / 1e6, 1)
         total_bytes += state["bytes"]
     best_n, conc_n = _scaling(mb_s)
     kind = guess_kind(mb_s, conc_n, _drive_type_is_remote(files[0]))
     if not bypass_all:
-        notes.append("file cache not bypassed: plain reads at offsets not read recently")
+        notes.append(msg("server.drive.note_cache", "The Windows file cache was not bypassed, so the test read "
+                         "parts of the files that were not read recently.")["message"])
     res = {"drive": drive, "mb_s": {str(k): v for k, v in mb_s.items()}, "best_n": best_n, "conc_n": conc_n,
            "kind": kind, "cache_bypass": bool(bypass_all), "files": len(files), "bytes": int(total_bytes),
            "seconds": round(time.monotonic() - t_all, 2), "block": block, "note": "; ".join(notes), "utc": time.time()}
@@ -395,6 +399,11 @@ def _row_to_bench(row: dict) -> dict:
     except json.JSONDecodeError:
         out["mb_s"] = {}
     out["cache_bypass"] = bool(out.get("cache_bypass"))
+    # the note is English sentences joined with "; " (stored that way): each one translatable on its own
+    metas = [m for m in (text_i18n(x) for x in str(out.get("note") or "").split("; ")) if m]
+    if metas:
+        out["notes_i18n"] = metas
+        out["note_i18n"] = next((m for m in metas if m["code"] == "server.drive.note_cache"), metas[0])
     return out
 
 
@@ -494,7 +503,7 @@ class DriveManager:
         try:
             files = self.files_for(drive)
             if not files:
-                raise BenchError(f"no library files on {drive}")
+                raise BenchError(msg("server.drive.no_files", "There are no library files on {drive}.", drive=drive)["message"])
             if self.queue is not None:
                 began = self.queue.bench_begin(drive, wait_s)
                 if not began:
@@ -510,7 +519,7 @@ class DriveManager:
             return b
         except Exception as e:  # noqa: BLE001 - a failed benchmark leaves the drive at 1 slot
             logger.warning("[Drives] bench failed drive=%s err=%s", drive, e)
-            self.bus.publish("drives", action="bench_failed", drive=drive, error=str(e)[:200])
+            self.bus.publish("drives", action="bench_failed", drive=drive, error=str(e)[:200], error_i18n=text_i18n(str(e)))
             return None
         finally:
             if began and self.queue is not None:

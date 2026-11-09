@@ -1,0 +1,12 @@
+{
+  "pick_first": "Välj en händelse eller spela upp en inspelning först.",
+  "already": "Det här klippet görs redan.",
+  "making_exact": "Klippet görs bildrutsexakt. Det tar lite längre tid eftersom bilden kodas om.",
+  "making_copy": "Klippet görs. Det börjar på närmaste nyckelbild före din in-punkt.",
+  "open_folder": "Öppna mapp",
+  "saved": "Klipp sparat: {name}",
+  "saved_early": "Klipp sparat: {name}\nDet börjar {seconds} före din in-punkt (närmaste nyckelbild).",
+  "check_mismatch": "Klippet stämmer inte helt med inspelningen. Kontrollera det innan du använder det.",
+  "failed": "Klippet kunde inte göras: {error}",
+  "unknown_error": "okänt fel"
+}

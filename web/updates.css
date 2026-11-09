@@ -1,0 +1,16 @@
+/* Update prompt (web/js/updates.js): a non-blocking card above the status bar, no backdrop. */
+.upd-card { position: fixed; right: 16px; bottom: calc(var(--stath) + 12px); z-index: 970; width: min(420px, calc(100vw - 32px));
+  background: var(--raised); border: 1px solid var(--line2); border-left: 3px solid var(--accent); border-radius: var(--r-l);
+  box-shadow: var(--shadow); padding: 12px 16px; font-size: var(--fs-s); color: var(--text); display: flex; flex-direction: column; gap: 8px; }
+.upd-card[hidden] { display: none; }
+.upd-h { display: flex; align-items: center; gap: 8px; }
+.upd-h b { flex: 1; font-size: var(--fs-m); }
+.upd-notes { max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--bg2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 8px 12px; color: var(--text2); line-height: 1.5; }
+.upd-msg.warn { color: var(--warn-text); }
+.upd-msg.bad { color: var(--bad-text); }
+.upd-pg { height: 6px; }
+.upd-acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.upd-acts a.btn { text-decoration: none; }
+.upd-foot { font-size: var(--fs-xs); }
+.upd-last { flex-basis: 100%; font-size: var(--fs-xs); }

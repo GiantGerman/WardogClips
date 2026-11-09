@@ -4,7 +4,10 @@ recent VODs marked in-library / queued, import a selection, and keep favorites.
 Every site lookup blocks for 1-25 s (yt-dlp / a page fetch), so those routes are plain `def` (FastAPI runs
 them on its thread pool) and never hold the event loop."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+
+from core.messages import annotate, annotate_all, http_error
+from utils.i18n import app_error
 
 from media import vodbrowse, vods
 from server.routes.vods import already_imported, queue_vod_import
@@ -31,7 +34,7 @@ def build(ctx) -> APIRouter:
         res = vodbrowse.resolve(ctx.cfg, str(b.get("text") or ""), inspect=inspect)
         if res.get("kind") == "vod" and res.get("meta"):
             res["already"] = already_imported(ctx, res["meta"])
-        return res
+        return annotate(res, "error")
 
     @r.get("/api/vodbrowse/search")
     def vb_search(q: str = "", providers: str = ""):
@@ -39,25 +42,25 @@ def build(ctx) -> APIRouter:
         if provs:
             bad = [p for p in provs if p not in vods.PROVIDER_NAMES]
             if bad:
-                raise HTTPException(400, f"unknown site(s): {', '.join(bad)}")
-        return {"q": q, "results": vodbrowse.search(ctx.cfg, q, provs)}
+                raise app_error(400, "server.vods.unknown_site", "Unknown site: {sites}", sites=", ".join(bad))
+        return {"q": q, "results": annotate_all(vodbrowse.search(ctx.cfg, q, provs), "error")}
 
     @r.get("/api/vodbrowse/channel")
     def vb_channel(provider: str, key: str, limit: int = 30, refresh: int = 0):
         try:
             listing = vodbrowse.list_vods(ctx.cfg, provider, key, limit=limit, refresh=bool(refresh), db=ctx.db)
         except vodbrowse.BrowseError as e:
-            raise HTTPException(400, str(e))
-        return _with_fav(listing)
+            raise http_error(400, e)
+        return _with_fav(annotate(listing, "error"))
 
     @r.post("/api/vodbrowse/import")
     def vb_import(body: dict):
         """{items: [{url, meta?}]} -> one result per item; one bad link never stops the rest."""
         if not ctx.cfg.vods.enabled:
-            raise HTTPException(409, "VOD import is off (Settings > VODs)")
+            raise app_error(409, "server.vods_off", "VOD import is off (Settings > VODs).")
         items = (body or {}).get("items") or []
         if not isinstance(items, list):
-            raise HTTPException(400, "items must be a list")
+            raise app_error(400, "server.bad_request", "The request was not understood.")
         results = []
         for it in items[:200]:
             url = str((it or {}).get("url") or "") if isinstance(it, dict) else str(it or "")
@@ -74,6 +77,10 @@ def build(ctx) -> APIRouter:
                 row["already"] = res["already"]
             if res.get("error"):
                 row["error"] = res["error"]
+                if res.get("error_i18n"):
+                    row["error_i18n"] = res["error_i18n"]
+                else:
+                    annotate(row, "error")
             if res.get("meta"):
                 row["id"] = res["meta"].get("id")
                 row["title"] = res["meta"].get("title")
@@ -91,7 +98,7 @@ def build(ctx) -> APIRouter:
             fav, created = vodbrowse.fav_add(ctx.db, str(b.get("provider") or ""), str(b.get("key") or ""),
                                              str(b.get("name") or ""), str(b.get("url") or ""), str(b.get("note") or ""))
         except ValueError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         return {**fav, "created": created}
 
     @r.put("/api/vodbrowse/favorites/{fav_id}")
@@ -99,18 +106,18 @@ def build(ctx) -> APIRouter:
         b = body or {}
         fav = vodbrowse.fav_update(ctx.db, fav_id, note=b.get("note"), name=b.get("name"))
         if fav is None:
-            raise HTTPException(404, "no such favorite")
+            raise app_error(404, "server.vods.no_favorite", "That favorite does not exist anymore.")
         return fav
 
     @r.delete("/api/vodbrowse/favorites/{fav_id}")
     def vb_fav_del(fav_id: int):
         if not vodbrowse.fav_delete(ctx.db, fav_id):
-            raise HTTPException(404, "no such favorite")
+            raise app_error(404, "server.vods.no_favorite", "That favorite does not exist anymore.")
         return {"ok": True}
 
     @r.post("/api/vodbrowse/favorites/refresh")
     def vb_fav_refresh(body: dict | None = None):
         ids = (body or {}).get("ids") if isinstance(body, dict) else None
-        return {"favorites": vodbrowse.refresh_favorites(ctx.cfg, ctx.db, ids=ids)}
+        return {"favorites": annotate_all(vodbrowse.refresh_favorites(ctx.cfg, ctx.db, ids=ids), "error")}
 
     return r
