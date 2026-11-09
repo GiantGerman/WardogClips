@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekódolja a videót, kiolvassa a HUD szövegét, és szöveggé alakítja a beszédet.",
+  "can.integrated": "Beépített grafika: csak akkor dekódol videót, ha egyetlen másik videokártya sincs „Használja a WardogClips” értékre állítva. A HUD szövege és a beszéd másik kártyán vagy a processzoron fut.",
+  "can.other": "Dekódolja a videót és kiolvassa a HUD szövegét. A beszéd a processzoron alakul szöveggé, mert ahhoz NVIDIA kártya kell.",
+  "none_found": "Nem található videokártya. A WardogClips mindent a processzoron végez.",
+  "role.use": "Használja a WardogClips",
+  "role.leave": "Ne használja",
+  "all_left_alone": "Minden kártya „Ne használja” értéken áll, így a WardogClips mindent a processzoron végez.",
+  "shared_hint": "A játékot futtató kártya közös: játék közben a rajta futó WardogClips-munka néhány képkockába kerülhet. Ha zavar, állítsd azt a kártyát „Ne használja” értékre.",
+  "apply_hint": "A módosítás a következő feladattól érvényes. Ha kártyát adsz hozzá, újraindítás után több videofeladat fut egyszerre.",
+  "load_failed": "A videokártyák listáját nem sikerült betölteni.",
+  "saved": "Mentve: {keys}",
+  "saved_none": "Mentve: nincs változás",
+  "error": "Hiba: {error}"
+}

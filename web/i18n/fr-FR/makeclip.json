@@ -1,0 +1,12 @@
+{
+  "pick_first": "Choisissez d'abord un événement ou lisez un enregistrement.",
+  "already": "Ce clip est déjà en cours de création.",
+  "making_exact": "Création du clip, à l'image près. C'est un peu plus long car l'image est réencodée.",
+  "making_copy": "Création du clip. Il commencera sur l'image clé la plus proche avant votre point d'entrée.",
+  "open_folder": "Ouvrir le dossier",
+  "saved": "Clip enregistré : {name}",
+  "saved_early": "Clip enregistré : {name}\nIl commence {seconds} avant votre point d'entrée (image clé la plus proche).",
+  "check_mismatch": "Le clip ne correspond pas tout à fait à l'enregistrement. Vérifiez-le avant de l'utiliser.",
+  "failed": "Impossible de créer le clip : {error}",
+  "unknown_error": "erreur inconnue"
+}

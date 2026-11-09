@@ -1,0 +1,168 @@
+{
+  "@": "The VOD browser (web/js/vodbrowse.js): the VODs side panel with streamer search, favorites and one streamer's recent past broadcasts (VODs) to import. Site names (YouTube, Twitch, Kick, TikTok, Rumble) are never translated. The short lower-case lines are status notes in the panel's footer.",
+  "title": "Stream VODs",
+  "paste": "Paste link",
+  "paste_tip": "Import one VOD from its link (looks it up first)",
+  "close_tip": "Close (Esc)",
+  "search.box_ph": "Streamer name or a VOD / profile link",
+  "search.go": "Search",
+  "search.go_tip": "Search by name, or open the streamer of a pasted link (Enter)",
+  "search.need_input": "type a streamer name or paste a VOD / profile link",
+  "search.need_name": "type a streamer name",
+  "@search.busy": "{sites} is a list of site names, e.g. \"YouTube, Twitch, and Kick\".",
+  "search.busy": "Asking {sites} for \"{name}\" -- every site at once, a few seconds",
+  "search.found": {
+    "one": "{count} streamer found",
+    "other": "{count} streamers found"
+  },
+  "@search.none": "{sites} is a list of site names joined with \"or\".",
+  "search.none": "no streamer called \"{name}\" on {sites}",
+  "sites.one_on": "at least one site stays on",
+  "link.busy": "Reading the link -- for a VOD link the site is asked whose VOD it is, about 3 s",
+  "@link.unsupported": "{sites} is the list of supported site names.",
+  "link.unsupported": "This is not a link of a supported site. Links of {sites} work (a VOD or the streamer's page).",
+  "favs.title": "Favorites",
+  "favs.check": "Check for new",
+  "favs.check_tip": "List every favorite again and count the VODs that appeared since the last check",
+  "favs.checking": "Checking...",
+  "favs.none_yet": "no favorites yet: open a streamer and click the star",
+  "favs.checking_note": {
+    "one": "checking {count} favorite for new VODs ...",
+    "other": "checking {count} favorites for new VODs ..."
+  },
+  "favs.result_new": {
+    "one": "{count} new VOD across your favorites",
+    "other": "{count} new VODs across your favorites"
+  },
+  "favs.result_nothing": "nothing new since the last check",
+  "@favs.result_failed": "{result} is favs.result_new or favs.result_nothing.",
+  "favs.result_failed": {
+    "one": "{result} ({count} favorite could not be checked)",
+    "other": "{result} ({count} favorites could not be checked)"
+  },
+  "favs.removed": "{name} removed from favorites",
+  "favs.added": "{name} added to favorites",
+  "favs.empty_title": "No favorites yet",
+  "favs.empty_text": "Open a streamer and click the star to keep them here.",
+  "favs.new_badge": {
+    "one": "{count} new",
+    "other": "{count} new"
+  },
+  "favs.new_badge_title": "VODs that appeared since the check before",
+  "favs.remove_title": "Remove from favorites",
+  "favs.remove_aria": "Remove {name} from favorites",
+  "favs.add_title": "Add to favorites",
+  "@favs.checked": "{ago} is a relative time such as \"7 min. ago\".",
+  "favs.checked": "checked {ago}",
+  "pre.error_extra": "{error} -- shown at the top of the list, it cannot be imported now",
+  "pre.in_library": "that VOD is in the library already",
+  "pre.older": "that VOD is older than the recent list: it is shown at the top",
+  "import.label": "Import",
+  "import.label_n": {
+    "one": "Import {count}",
+    "other": "Import {count}"
+  },
+  "import.busy": "Importing...",
+  "import.queue_title": {
+    "one": "queue {count} download",
+    "other": "queue {count} downloads"
+  },
+  "import.select_title": "select the VODs to import",
+  "import.queuing": {
+    "one": "queuing {count} VOD -- each link is checked with the site first ...",
+    "other": "queuing {count} VODs -- each link is checked with the site first ..."
+  },
+  "import.no_answer": "no answer for this link",
+  "import.sum_queued": {
+    "one": "{count} queued",
+    "other": "{count} queued"
+  },
+  "import.sum_already": {
+    "one": "{count} already there",
+    "other": "{count} already there"
+  },
+  "import.sum_failed": {
+    "one": "{count} failed (hover over the red chip)",
+    "other": "{count} failed (hover over the red chip)"
+  },
+  "@import.sum_jobs": "{summary} is a list such as \"2 queued and 1 already there\".",
+  "import.sum_jobs": "{summary} -- Jobs shows the downloads",
+  "import.toast": "VODs: {summary}",
+  "row.in_library": "in library",
+  "row.imported_before": "imported before",
+  "row.already_queued": "already queued",
+  "row.queued": "queued",
+  "row.failed": "failed",
+  "row.job": "job {id}",
+  "row.download_job": "download job {id}",
+  "row.your_link": "your link",
+  "row.your_link_title": "the link you pasted",
+  "row.open_rec_title": "open the recording",
+  "row.live": "live now",
+  "row.upcoming": "upcoming",
+  "row.live_title": "can be imported once the stream has ended",
+  "row.unavailable": "unavailable",
+  "row.not_ready": "not ready",
+  "row.not_ready_title": "not importable yet",
+  "row.processing_title": "the stream just ended and the site is still processing it",
+  "row.new": "new",
+  "row.new_title": "appeared since the check before the last one",
+  "row.older": "older than the list",
+  "row.open_on": "open on {site}",
+  "ch.back_results": "Back to the results",
+  "ch.back_favs": "Back to favorites",
+  "ch.back_aria": "Back",
+  "ch.star_wait": "wait for the listing (it tells the streamer's own key)",
+  "ch.listing_title": "Listing...",
+  "ch.refresh_title": "List again from the site (the list is cached for 5 minutes)",
+  "ch.refresh_aria": "Refresh",
+  "ch.page_title": "their page: {url}",
+  "ch.page_aria": "their page",
+  "ch.listing": "listing ...",
+  "ch.count_listed": {
+    "one": "{count} listed",
+    "other": "{count} listed"
+  },
+  "ch.count_new": {
+    "one": "{count} new",
+    "other": "{count} new"
+  },
+  "ch.count_lib": {
+    "one": "{count} in library",
+    "other": "{count} in library"
+  },
+  "ch.select_new": "Select new",
+  "ch.select_new_title": "select every VOD that is not in the library or queued yet",
+  "ch.none": "None",
+  "ch.none_title": "clear the selection",
+  "ch.listing_busy": "Listing the VODs of {name} on {site} ...",
+  "ch.relisting": "listing again ...",
+  "ch.empty_title": "No VODs listed",
+  "ch.empty_text": "The streamer may keep no past broadcasts, or they are for subscribers only.",
+  "ch.load_older": "Load older ({count})",
+  "ch.max_listed": "Only the newest {count} are listed -- paste an older VOD's link to import it.",
+  "home.short": "Type a name and press Enter, or paste a VOD / profile link.",
+  "home.find_html": "<b>Find a streamer</b> -- type their name and press Enter; every site that is on is asked at once.",
+  "home.paste_html": "<b>Or paste a link</b> -- a streamer's page lists their recent VODs; a VOD link opens its streamer with that VOD selected.",
+  "home.import_html": "Select VODs and click <b>Import</b>: they download one after the other (Jobs), then get transcribed and scanned like a recording.",
+  "res.head": "Results for \"{query}\"",
+  "res.clear": "Clear the results",
+  "res.empty_title": "Nothing found",
+  "res.empty_text": "Check the spelling, turn more sites on, or paste the link of their page.",
+  "res.no_hits": "No streamer by that name on the sites that are on.",
+  "res.not_found": "not found",
+  "res.fav_title": "a favorite",
+  "res.recent": {
+    "one": "{count} recent",
+    "other": "{count} recent"
+  },
+  "res.recent_more": "{count}+ recent",
+  "res.no_recent": "no recent VODs listed",
+  "single.title": "One VOD",
+  "single.clear": "Clear",
+  "single.site": "Site",
+  "single.link": "Link",
+  "single.recheck": "Import checks the link with the site again.",
+  "single.no_channel": "The site did not say whose VOD this is, so there is no streamer to list. This one VOD can still be imported.",
+  "single.import": "Import this VOD"
+}

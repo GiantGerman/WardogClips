@@ -1,0 +1,19 @@
+{
+  "tray.open": "Otvoriť WardogClips",
+  "tray.update": "K dispozícii je aktualizácia...",
+  "tray.pause": "Pozastaviť počas hrania",
+  "tray.speed": "Rýchlosť",
+  "tray.mode_full": "Plný výkon",
+  "tray.mode_balanced": "Vyvážený",
+  "tray.mode_background": "Na pozadí",
+  "tray.open_data": "Otvoriť priečinok s dátami",
+  "tray.open_log": "Otvoriť log",
+  "tray.quit": "Ukončiť",
+  "tray.balloon": "WardogClips beží. Ukončíte ho pravým kliknutím na ikonu v oblasti oznámení.",
+  "tray.update_notify": "K dispozícii je WardogClips {version}. Zobrazíte ho cez K dispozícii je aktualizácia... v ponuke ikony.",
+  "launcher.could_not_start": "WardogClips sa nepodarilo spustiť:\n\n{error}",
+  "launcher.scan_running": "Tento priečinok s dátami používa skenovanie WardogClips (scan.bat / --scan):\n\n{dir}\n\nPočkajte, kým skončí (alebo ho zastavte v jeho okne), a potom WardogClips spustite znova.",
+  "launcher.not_answering": "WardogClips už beží, ale neodpovedá.\n\nUkončite ho cez ikonu v oblasti oznámení (alebo minútu počkajte) a skúste to znova.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips je poškodený (chýba runtime alebo súbory aplikácie).\n\nPreinštalujte ho.\n\nHľadané:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips sa zastavil hneď po spustení (kód ukončenia {code}).\n\nPríčinu môže uvádzať log:\n{log}"
+}

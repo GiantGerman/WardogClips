@@ -1,0 +1,161 @@
+{
+  "title": "Stream-VOD's",
+  "paste": "Link plakken",
+  "paste_tip": "Eén VOD importeren via de link (eerst opzoeken)",
+  "close_tip": "Sluiten (Esc)",
+  "search.box_ph": "Naam van streamer of een VOD- / profiellink",
+  "search.go": "Zoeken",
+  "search.go_tip": "Zoeken op naam, of de streamer van een geplakte link openen (Enter)",
+  "search.need_input": "typ een streamernaam of plak een VOD- / profiellink",
+  "search.need_name": "typ een streamernaam",
+  "search.busy": "{sites} wordt gevraagd naar “{name}” -- alle sites tegelijk, een paar seconden",
+  "search.found": {
+    "one": "{count} streamer gevonden",
+    "other": "{count} streamers gevonden"
+  },
+  "search.none": "geen streamer met de naam “{name}” op {sites}",
+  "sites.one_on": "er blijft minstens één site aan",
+  "link.busy": "Link lezen -- bij een VOD-link wordt de site gevraagd van wie de VOD is, ongeveer 3 s",
+  "link.unsupported": "Dit is geen link van een ondersteunde site. Links van {sites} werken (een VOD of de pagina van de streamer).",
+  "favs.title": "Favorieten",
+  "favs.check": "Nieuwe zoeken",
+  "favs.check_tip": "Elke favoriet opnieuw ophalen en de VOD's tellen die sinds de vorige controle verschenen zijn",
+  "favs.checking": "Controleren...",
+  "favs.none_yet": "nog geen favorieten: open een streamer en klik op de ster",
+  "favs.checking_note": {
+    "one": "{count} favoriet controleren op nieuwe VOD's ...",
+    "other": "{count} favorieten controleren op nieuwe VOD's ..."
+  },
+  "favs.result_new": {
+    "one": "{count} nieuwe VOD bij je favorieten",
+    "other": "{count} nieuwe VOD's bij je favorieten"
+  },
+  "favs.result_nothing": "niets nieuws sinds de vorige controle",
+  "favs.result_failed": {
+    "one": "{result} ({count} favoriet kon niet worden gecontroleerd)",
+    "other": "{result} ({count} favorieten konden niet worden gecontroleerd)"
+  },
+  "favs.removed": "{name} verwijderd uit favorieten",
+  "favs.added": "{name} toegevoegd aan favorieten",
+  "favs.empty_title": "Nog geen favorieten",
+  "favs.empty_text": "Open een streamer en klik op de ster om hem hier te bewaren.",
+  "favs.new_badge": {
+    "one": "{count} nieuw",
+    "other": "{count} nieuw"
+  },
+  "favs.new_badge_title": "VOD's die sinds de controle daarvoor verschenen zijn",
+  "favs.remove_title": "Uit favorieten verwijderen",
+  "favs.remove_aria": "{name} uit favorieten verwijderen",
+  "favs.add_title": "Aan favorieten toevoegen",
+  "favs.checked": "gecontroleerd {ago}",
+  "pre.error_extra": "{error} -- bovenaan de lijst getoond, kan nu niet worden geïmporteerd",
+  "pre.in_library": "die VOD staat al in de bibliotheek",
+  "pre.older": "die VOD is ouder dan de recente lijst: hij staat bovenaan",
+  "import.label": "Importeren",
+  "import.label_n": {
+    "one": "{count} importeren",
+    "other": "{count} importeren"
+  },
+  "import.busy": "Importeren...",
+  "import.queue_title": {
+    "one": "{count} download in wachtrij zetten",
+    "other": "{count} downloads in wachtrij zetten"
+  },
+  "import.select_title": "selecteer de VOD's om te importeren",
+  "import.queuing": {
+    "one": "{count} VOD in wachtrij zetten -- elke link wordt eerst bij de site gecontroleerd ...",
+    "other": "{count} VOD's in wachtrij zetten -- elke link wordt eerst bij de site gecontroleerd ..."
+  },
+  "import.no_answer": "geen antwoord voor deze link",
+  "import.sum_queued": {
+    "one": "{count} in wachtrij",
+    "other": "{count} in wachtrij"
+  },
+  "import.sum_already": {
+    "one": "{count} was er al",
+    "other": "{count} waren er al"
+  },
+  "import.sum_failed": {
+    "one": "{count} mislukt (ga met de muis over het rode label)",
+    "other": "{count} mislukt (ga met de muis over het rode label)"
+  },
+  "import.sum_jobs": "{summary} -- Taken toont de downloads",
+  "import.toast": "VOD's: {summary}",
+  "row.in_library": "in bibliotheek",
+  "row.imported_before": "eerder geïmporteerd",
+  "row.already_queued": "al in wachtrij",
+  "row.queued": "in wachtrij",
+  "row.failed": "mislukt",
+  "row.job": "taak {id}",
+  "row.download_job": "downloadtaak {id}",
+  "row.your_link": "jouw link",
+  "row.your_link_title": "de link die je plakte",
+  "row.open_rec_title": "de opname openen",
+  "row.live": "nu live",
+  "row.upcoming": "binnenkort",
+  "row.live_title": "kan worden geïmporteerd zodra de stream voorbij is",
+  "row.unavailable": "niet beschikbaar",
+  "row.not_ready": "niet klaar",
+  "row.not_ready_title": "nog niet te importeren",
+  "row.processing_title": "de stream is net afgelopen en de site verwerkt hem nog",
+  "row.new": "nieuw",
+  "row.new_title": "verschenen sinds de controle vóór de vorige",
+  "row.older": "ouder dan de lijst",
+  "row.open_on": "openen op {site}",
+  "ch.back_results": "Terug naar de resultaten",
+  "ch.back_favs": "Terug naar favorieten",
+  "ch.back_aria": "Terug",
+  "ch.star_wait": "wacht op de lijst (die geeft de eigen sleutel van de streamer)",
+  "ch.listing_title": "Ophalen...",
+  "ch.refresh_title": "Opnieuw ophalen van de site (de lijst wordt 5 minuten bewaard)",
+  "ch.refresh_aria": "Vernieuwen",
+  "ch.page_title": "hun pagina: {url}",
+  "ch.page_aria": "hun pagina",
+  "ch.listing": "ophalen ...",
+  "ch.count_listed": {
+    "one": "{count} opgehaald",
+    "other": "{count} opgehaald"
+  },
+  "ch.count_new": {
+    "one": "{count} nieuw",
+    "other": "{count} nieuw"
+  },
+  "ch.count_lib": {
+    "one": "{count} in bibliotheek",
+    "other": "{count} in bibliotheek"
+  },
+  "ch.select_new": "Nieuwe selecteren",
+  "ch.select_new_title": "elke VOD selecteren die nog niet in de bibliotheek of de wachtrij staat",
+  "ch.none": "Geen",
+  "ch.none_title": "de selectie wissen",
+  "ch.listing_busy": "VOD's van {name} op {site} ophalen ...",
+  "ch.relisting": "opnieuw ophalen ...",
+  "ch.empty_title": "Geen VOD's gevonden",
+  "ch.empty_text": "De streamer bewaart misschien geen eerdere uitzendingen, of ze zijn alleen voor abonnees.",
+  "ch.load_older": "Oudere laden ({count})",
+  "ch.max_listed": "Alleen de nieuwste {count} worden getoond -- plak de link van een oudere VOD om hem te importeren.",
+  "home.short": "Typ een naam en druk op Enter, of plak een VOD- / profiellink.",
+  "home.find_html": "<b>Een streamer zoeken</b> -- typ de naam en druk op Enter; elke site die aan staat wordt tegelijk gevraagd.",
+  "home.paste_html": "<b>Of plak een link</b> -- de pagina van een streamer toont de recente VOD's; een VOD-link opent de streamer met die VOD geselecteerd.",
+  "home.import_html": "Selecteer VOD's en klik op <b>Importeren</b>: ze worden na elkaar gedownload (Taken) en daarna getranscribeerd en gescand zoals een opname.",
+  "res.head": "Resultaten voor “{query}”",
+  "res.clear": "De resultaten wissen",
+  "res.empty_title": "Niets gevonden",
+  "res.empty_text": "Controleer de spelling, zet meer sites aan of plak de link van hun pagina.",
+  "res.no_hits": "Geen streamer met die naam op de sites die aan staan.",
+  "res.not_found": "niet gevonden",
+  "res.fav_title": "een favoriet",
+  "res.recent": {
+    "one": "{count} recente",
+    "other": "{count} recente"
+  },
+  "res.recent_more": "{count}+ recente",
+  "res.no_recent": "geen recente VOD's gevonden",
+  "single.title": "Eén VOD",
+  "single.clear": "Wissen",
+  "single.site": "Site",
+  "single.link": "Link",
+  "single.recheck": "Importeren controleert de link opnieuw bij de site.",
+  "single.no_channel": "De site gaf niet aan van wie deze VOD is, dus er is geen streamer om te tonen. Deze ene VOD kan wel worden geïmporteerd.",
+  "single.import": "Deze VOD importeren"
+}

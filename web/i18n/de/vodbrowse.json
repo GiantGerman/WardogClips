@@ -1,0 +1,161 @@
+{
+  "title": "Stream-VODs",
+  "paste": "Link einfügen",
+  "paste_tip": "Ein VOD über seinen Link importieren (wird zuerst nachgeschlagen)",
+  "close_tip": "Schließen (Esc)",
+  "search.box_ph": "Streamername oder VOD- / Profil-Link",
+  "search.go": "Suchen",
+  "search.go_tip": "Nach Namen suchen oder den Streamer eines eingefügten Links öffnen (Eingabe)",
+  "search.need_input": "Streamernamen eingeben oder VOD- / Profil-Link einfügen",
+  "search.need_name": "Streamernamen eingeben",
+  "search.busy": "Frage {sites} nach „{name}“ -- alle Seiten gleichzeitig, ein paar Sekunden",
+  "search.found": {
+    "one": "{count} Streamer gefunden",
+    "other": "{count} Streamer gefunden"
+  },
+  "search.none": "kein Streamer namens „{name}“ auf {sites}",
+  "sites.one_on": "mindestens eine Seite bleibt an",
+  "link.busy": "Link wird gelesen -- bei einem VOD-Link wird die Seite gefragt, wem das VOD gehört, etwa 3 s",
+  "link.unsupported": "Das ist kein Link einer unterstützten Seite. Links von {sites} funktionieren (ein VOD oder die Seite des Streamers).",
+  "favs.title": "Favoriten",
+  "favs.check": "Auf Neues prüfen",
+  "favs.check_tip": "Alle Favoriten neu auflisten und die VODs zählen, die seit der letzten Prüfung dazugekommen sind",
+  "favs.checking": "Prüfe...",
+  "favs.none_yet": "noch keine Favoriten: öffne einen Streamer und klick auf den Stern",
+  "favs.checking_note": {
+    "one": "prüfe {count} Favoriten auf neue VODs ...",
+    "other": "prüfe {count} Favoriten auf neue VODs ..."
+  },
+  "favs.result_new": {
+    "one": "{count} neues VOD bei deinen Favoriten",
+    "other": "{count} neue VODs bei deinen Favoriten"
+  },
+  "favs.result_nothing": "nichts Neues seit der letzten Prüfung",
+  "favs.result_failed": {
+    "one": "{result} ({count} Favorit konnte nicht geprüft werden)",
+    "other": "{result} ({count} Favoriten konnten nicht geprüft werden)"
+  },
+  "favs.removed": "{name} aus den Favoriten entfernt",
+  "favs.added": "{name} zu den Favoriten hinzugefügt",
+  "favs.empty_title": "Noch keine Favoriten",
+  "favs.empty_text": "Öffne einen Streamer und klick auf den Stern, um ihn hier zu behalten.",
+  "favs.new_badge": {
+    "one": "{count} neu",
+    "other": "{count} neu"
+  },
+  "favs.new_badge_title": "VODs, die seit der vorherigen Prüfung dazugekommen sind",
+  "favs.remove_title": "Aus Favoriten entfernen",
+  "favs.remove_aria": "{name} aus Favoriten entfernen",
+  "favs.add_title": "Zu Favoriten hinzufügen",
+  "favs.checked": "geprüft {ago}",
+  "pre.error_extra": "{error} -- oben in der Liste angezeigt, kann gerade nicht importiert werden",
+  "pre.in_library": "dieses VOD ist schon in der Bibliothek",
+  "pre.older": "dieses VOD ist älter als die aktuelle Liste: es wird oben angezeigt",
+  "import.label": "Importieren",
+  "import.label_n": {
+    "one": "{count} importieren",
+    "other": "{count} importieren"
+  },
+  "import.busy": "Importiere...",
+  "import.queue_title": {
+    "one": "{count} Download einreihen",
+    "other": "{count} Downloads einreihen"
+  },
+  "import.select_title": "die zu importierenden VODs auswählen",
+  "import.queuing": {
+    "one": "reihe {count} VOD ein -- jeder Link wird zuerst bei der Seite geprüft ...",
+    "other": "reihe {count} VODs ein -- jeder Link wird zuerst bei der Seite geprüft ..."
+  },
+  "import.no_answer": "keine Antwort für diesen Link",
+  "import.sum_queued": {
+    "one": "{count} eingereiht",
+    "other": "{count} eingereiht"
+  },
+  "import.sum_already": {
+    "one": "{count} schon vorhanden",
+    "other": "{count} schon vorhanden"
+  },
+  "import.sum_failed": {
+    "one": "{count} fehlgeschlagen (Maus über den roten Chip halten)",
+    "other": "{count} fehlgeschlagen (Maus über den roten Chip halten)"
+  },
+  "import.sum_jobs": "{summary} -- Aufträge zeigt die Downloads",
+  "import.toast": "VODs: {summary}",
+  "row.in_library": "in Bibliothek",
+  "row.imported_before": "früher importiert",
+  "row.already_queued": "schon eingereiht",
+  "row.queued": "eingereiht",
+  "row.failed": "fehlgeschlagen",
+  "row.job": "Auftrag {id}",
+  "row.download_job": "Download-Auftrag {id}",
+  "row.your_link": "dein Link",
+  "row.your_link_title": "der Link, den du eingefügt hast",
+  "row.open_rec_title": "Aufnahme öffnen",
+  "row.live": "jetzt live",
+  "row.upcoming": "demnächst",
+  "row.live_title": "kann importiert werden, sobald der Stream beendet ist",
+  "row.unavailable": "nicht verfügbar",
+  "row.not_ready": "nicht bereit",
+  "row.not_ready_title": "noch nicht importierbar",
+  "row.processing_title": "der Stream ist gerade zu Ende und die Seite verarbeitet ihn noch",
+  "row.new": "neu",
+  "row.new_title": "seit der vorletzten Prüfung dazugekommen",
+  "row.older": "älter als die Liste",
+  "row.open_on": "auf {site} öffnen",
+  "ch.back_results": "Zurück zu den Ergebnissen",
+  "ch.back_favs": "Zurück zu den Favoriten",
+  "ch.back_aria": "Zurück",
+  "ch.star_wait": "warte auf die Liste (sie liefert den eigenen Schlüssel des Streamers)",
+  "ch.listing_title": "Liste wird geladen...",
+  "ch.refresh_title": "Neu von der Seite auflisten (die Liste wird 5 Minuten zwischengespeichert)",
+  "ch.refresh_aria": "Aktualisieren",
+  "ch.page_title": "Seite des Streamers: {url}",
+  "ch.page_aria": "Seite des Streamers",
+  "ch.listing": "liste auf ...",
+  "ch.count_listed": {
+    "one": "{count} aufgelistet",
+    "other": "{count} aufgelistet"
+  },
+  "ch.count_new": {
+    "one": "{count} neu",
+    "other": "{count} neu"
+  },
+  "ch.count_lib": {
+    "one": "{count} in Bibliothek",
+    "other": "{count} in Bibliothek"
+  },
+  "ch.select_new": "Neue wählen",
+  "ch.select_new_title": "jedes VOD auswählen, das noch nicht in der Bibliothek oder eingereiht ist",
+  "ch.none": "Keine",
+  "ch.none_title": "Auswahl aufheben",
+  "ch.listing_busy": "Liste die VODs von {name} auf {site} auf ...",
+  "ch.relisting": "liste erneut auf ...",
+  "ch.empty_title": "Keine VODs aufgelistet",
+  "ch.empty_text": "Der Streamer behält vielleicht keine alten Übertragungen, oder sie sind nur für Abonnenten.",
+  "ch.load_older": "Ältere laden ({count})",
+  "ch.max_listed": "Nur die neuesten {count} werden aufgelistet -- füg den Link eines älteren VODs ein, um es zu importieren.",
+  "home.short": "Gib einen Namen ein und drück Eingabe, oder füg einen VOD- / Profil-Link ein.",
+  "home.find_html": "<b>Streamer finden</b> -- Namen eingeben und Eingabe drücken; alle aktiven Seiten werden gleichzeitig gefragt.",
+  "home.paste_html": "<b>Oder Link einfügen</b> -- die Seite eines Streamers listet seine neuesten VODs; ein VOD-Link öffnet den Streamer mit diesem VOD ausgewählt.",
+  "home.import_html": "VODs auswählen und auf <b>Importieren</b> klicken: Sie werden nacheinander geladen (Aufträge), dann wie eine Aufnahme transkribiert und gescannt.",
+  "res.head": "Ergebnisse für „{query}“",
+  "res.clear": "Ergebnisse leeren",
+  "res.empty_title": "Nichts gefunden",
+  "res.empty_text": "Prüf die Schreibweise, schalte mehr Seiten ein oder füg den Link der Streamer-Seite ein.",
+  "res.no_hits": "Kein Streamer mit diesem Namen auf den aktiven Seiten.",
+  "res.not_found": "nicht gefunden",
+  "res.fav_title": "ein Favorit",
+  "res.recent": {
+    "one": "{count} aktuell",
+    "other": "{count} aktuell"
+  },
+  "res.recent_more": "{count}+ aktuell",
+  "res.no_recent": "keine aktuellen VODs aufgelistet",
+  "single.title": "Ein VOD",
+  "single.clear": "Leeren",
+  "single.site": "Seite",
+  "single.link": "Link",
+  "single.recheck": "Beim Importieren wird der Link erneut bei der Seite geprüft.",
+  "single.no_channel": "Die Seite hat nicht gesagt, wem dieses VOD gehört, daher gibt es keinen Streamer zum Auflisten. Dieses eine VOD kann trotzdem importiert werden.",
+  "single.import": "Dieses VOD importieren"
+}

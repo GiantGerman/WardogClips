@@ -20,8 +20,9 @@ import threading
 import time
 from pathlib import Path
 
+from core import workmode
 from media import encoder
-from utils import paths
+from utils import gpus, paths
 
 logger = logging.getLogger("wclips.clips")
 
@@ -114,15 +115,28 @@ def _video_codec_args(codec: str, quality: int, bitrate_k: int | None = None) ->
     from media import ffmpeg
     hw = ffmpeg.hw_info()
     if codec in ("h264_nvenc", "hevc_nvenc") and hw.get(codec):
-        args = ["-c:v", codec, "-preset", "p4", "-tune", "hq", "-rc", "vbr"]
+        args = ["-c:v", codec, *gpus.nvenc_args(), "-preset", "p4", "-tune", "hq", "-rc", "vbr"]
         if bitrate_k:
             args += ["-b:v", f"{bitrate_k}k", "-maxrate", f"{bitrate_k * 2}k", "-bufsize", f"{bitrate_k * 2}k"]
         else:
             args += ["-cq", str(quality), "-b:v", "0"]
         return args + ["-pix_fmt", "yuv420p"]
+    if codec in ("h264_amf", "hevc_amf") and hw.get(codec):
+        # AMD AMF: the driver picks the AMD card itself
+        args = ["-c:v", codec, "-quality", "balanced"]
+        if bitrate_k:
+            args += ["-rc", "vbr_peak", "-b:v", f"{bitrate_k}k", "-maxrate", f"{bitrate_k * 2}k"]
+        else:
+            args += ["-rc", "cqp", "-qp_i", str(quality), "-qp_p", str(quality + 2)]
+        return args + ["-pix_fmt", "yuv420p"]
+    if codec in ("h264_qsv", "hevc_qsv") and hw.get(codec):
+        # Intel Quick Sync wants nv12 frames
+        args = ["-c:v", codec, "-preset", "medium"]
+        args += ["-b:v", f"{bitrate_k}k", "-maxrate", f"{bitrate_k * 2}k"] if bitrate_k else ["-global_quality", str(quality)]
+        return args + ["-pix_fmt", "nv12"]
     args = ["-c:v", "libx264", "-preset", "veryfast"]
     args += ["-b:v", f"{bitrate_k}k"] if bitrate_k else ["-crf", str(quality)]
-    return args + ["-pix_fmt", "yuv420p"]
+    return args + ["-pix_fmt", "yuv420p"] + workmode.ffmpeg_thread_args()     # fewer encoder threads while you play
 
 
 def _cmd(path: str, out: str, t0: float | None, dur: float | None, height: int, tracks: list[int],
@@ -136,7 +150,7 @@ def _cmd(path: str, out: str, t0: float | None, dur: float | None, height: int, 
     if progress:
         cmd += ["-nostats", "-progress", "pipe:1"]
     if hwaccel:
-        cmd += ["-hwaccel", "cuda"]
+        cmd += gpus.decode_args()            # [] = no usable card: the CPU decodes
     if t0 is not None:
         cmd += ["-ss", f"{max(0.0, t0):.3f}"]
     if dur is not None:
@@ -150,13 +164,11 @@ def _cmd(path: str, out: str, t0: float | None, dur: float | None, height: int, 
     return cmd + list(extra_out or [])
 
 
-_BELOW_NORMAL = 0x00004000                 # BELOW_NORMAL_PRIORITY_CLASS: a CPU encode yields to the game
-
-
 def _run(cmd: list[str], timeout: float, on_out_time=None, stop=None, low_priority: bool = False) -> None:
-    flags = _NO_WINDOW | (_BELOW_NORMAL if low_priority and os.name == "nt" else 0)
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                            errors="replace", creationflags=flags)
+    # priority from the work mode (core/workmode.py); low_priority (a CPU encode) = at most below-normal
+    flags = workmode.child_flags(_NO_WINDOW, low_priority=low_priority)
+    proc = workmode.track(subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                                           encoding="utf-8", errors="replace", creationflags=flags))
     err_tail: list[str] = []
 
     def _drain():
@@ -250,13 +262,14 @@ def render_clip(db, cfg, rec: dict, t0: float, t1: float, height: int = 720, tim
 
 
 def _encode(make_cmd, codec: str, timeout: float, what: str, on_out_time=None, stop=None) -> tuple[str | None, str | None]:
-    """Run an encode: NVDEC decode first, then CPU decode; an NVENC encode that still fails (no free
-    session, driver hiccup, CUDA out of memory) is retried with x264, again NVDEC then CPU decode.
+    """Run an encode: GPU decode first (NVDEC / D3D11VA on the job's card), then CPU decode; a GPU encode (NVENC /
+    AMF / Quick Sync) that still fails (no free session, driver hiccup, out of memory) is retried with x264, again GPU
+    then CPU decode.
     x264 runs at below-normal priority. One overall deadline (``timeout``) covers every attempt, and
     a timeout is not retried. Returns (encoder that worked, None) or (None, last error); 'stopped'
     is re-raised at once."""
     attempts = [(codec, True), (codec, False)]
-    if codec in encoder.NVENC:
+    if codec in encoder.HW_ENCODERS:
         attempts += [("libx264", True), ("libx264", False)]
     deadline = time.monotonic() + timeout
     err = None

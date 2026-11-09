@@ -1,0 +1,12 @@
+/* Language picker in the top bar (langpick.js): a compact select with a globe icon, right of the search field. */
+.lang-pick { position: relative; display: inline-flex; align-items: center; gap: 4px; height: 30px; padding: 0 2px 0 8px;
+  border: 1px solid var(--line2); border-radius: var(--r); background: var(--surface); color: var(--text2); flex: none; cursor: pointer; }
+.lang-pick:hover { border-color: var(--line2); color: var(--text); background: var(--raised); }
+.lang-pick:focus-within { border-color: var(--accent); }
+.lang-pick .i { width: 14px; height: 14px; flex: none; }
+.lang-pick .lang-sel { appearance: auto; border: 0; background: transparent; color: inherit; height: 28px; padding: 0 2px; outline: none;
+  font-size: var(--fs-s); max-width: 150px; min-width: 0; cursor: pointer; text-overflow: ellipsis; }
+.lang-pick .lang-sel option, .lang-pick .lang-sel optgroup { background: var(--raised); color: var(--text); }
+/* narrow windows: the icon alone shows (the select stays usable and keeps its accessible name) */
+@media (max-width: 900px) { .lang-pick .lang-sel { max-width: 44px; } }
+.lp-beta { margin: -4px 0 8px; }

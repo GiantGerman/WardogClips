@@ -1,0 +1,100 @@
+{
+  "@": "Eesti (et). Klipimängija.",
+  "title.none": "klippi pole",
+  "title.rendering": "{kind} ajal {time} · renderdamine {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proksi {height}p · terve salvestis",
+  "title.no_proxy": "Proksit veel pole",
+  "tip.event": "{kind} ajal {time}: {render}",
+  "tip.around": "umbes {time}: {render}",
+  "tip.cached": "{height}p klippide vahemälust",
+  "tip.rendered": "{height}p renderdatud {seconds} s-ga",
+  "tip.rendered_enc": "{height}p renderdatud {seconds} s-ga ({encoder})",
+  "tip.proxy": "{name}: terve salvestise proksi",
+  "tip.no_proxy": "{name}: terve salvestise proksit veel pole",
+  "busy.clip": "klipi renderdamine ({height}p)...",
+  "busy.at": "renderdamine {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Seda klippi ei saanud renderdada",
+  "err.at": "Ei saanud renderdada {time}",
+  "err.retry": "Proovi uuesti",
+  "err.encoding": "Kodeerimise seaded",
+  "err.play_clip": "Seda klippi ei saanud esitada.",
+  "err.play_proxy": "Proksit ei saanud esitada.",
+  "pick.title": "Vali sündmus",
+  "pick.text": "Vali üks jaotisest Sündmused (või vajuta N): selle klipp esitatakse siin eelkerimisest alates.",
+  "pick.more": "Või klõpsa all ajajoonel, et vaadata selle salvestise mis tahes hetke.",
+  "pick.short": "Vali üks jaotisest Sündmused (või vajuta N) või klõpsa all ajajoonel.",
+  "proxy.card_title": "Sellel salvestisel pole veel proksit",
+  "proxy.card_text": "{height}p proksi on koopia kogu {duration} failist, et seda algusest lõpuni kerida (see valmib mitu korda kiiremini kui reaalajas).",
+  "proxy.building": "ehitamine",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "järjekorras",
+  "proxy.build": "Ehita proksi",
+  "proxy.all": "Proksid kõigile sündmustega",
+  "proxy.all_tip": "Lisa järjekorda proksid igale sündmustega salvestisele",
+  "proxy.queued_toast": "proksi on järjekorras",
+  "proxy.all_toast": {
+    "one": "järjekorda lisati {count} proksi ({candidates} sündmustega salvestisel see puudub)",
+    "other": "järjekorda lisati {count} proksit ({candidates} sündmustega salvestisel see puudub)"
+  },
+  "mode.full_tip": "Terve salvestis, esitatuna selle proksist",
+  "mode.full_noproxy_tip": "Terve salvestis: proksit veel pole (ehita see siit)",
+  "bound.wait": "oota, kuni selle sündmuse klipp laadib",
+  "bound.in_before_out": "algus peab olema enne lõppu",
+  "bound.out_after_in": "lõpp peab olema pärast algust",
+  "bound.reset": "klipp tagasi eel- / järelkerimisele",
+  "bound.in_set": "algus = {time} (klipp {length} s)",
+  "bound.out_set": "lõpp = {time} (klipp {length} s)",
+  "mark.nothing": "midagi ei esitata",
+  "mark.done": "käsitsi märge ajal {time}",
+  "play_aria": "Esita",
+  "pause_aria": "Peata",
+  "time.pos": "{pos} / {total}",
+  "time.rel": "{offset} s sündmusest",
+  "time.clip": "klipp {in} – {out} = {length} s",
+  "pip.loop": "Tsükkel algus → lõpp",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · skoor {score}",
+  "tl.tip_status": "{kind} · {time} · skoor {score} · {status}",
+  "tl.status_kept": "hoitud",
+  "tl.status_false": "valepositiivne",
+  "tl.whole": "Terve salvestis",
+  "tl.no_events": "sündmusi pole",
+  "tl.not_detected": "pole veel tuvastatud",
+  "tl.no_proxy": "proksit pole",
+  "tl.no_proxy_tip": "Terve salvestise režiim vajab proksit (ehita see mängijast)",
+  "tl.kind.kill": {
+    "one": "{count} tapmine",
+    "other": "{count} tapmist"
+  },
+  "tl.kind.assist": {
+    "one": "{count} abistus",
+    "other": "{count} abistust"
+  },
+  "tl.kind.death": {
+    "one": "{count} surm",
+    "other": "{count} surma"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} märgatud",
+    "other": "{count} märgatud"
+  },
+  "tl.kind.revive": {
+    "one": "{count} elustamine",
+    "other": "{count} elustamist"
+  },
+  "tl.kind.squad": {
+    "one": "{count} salk",
+    "other": "{count} salka"
+  },
+  "tl.kind.voice": {
+    "one": "{count} hääl",
+    "other": "{count} häält"
+  },
+  "tl.kind.manual": {
+    "one": "{count} käsitsi",
+    "other": "{count} käsitsi"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

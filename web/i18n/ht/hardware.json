@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekode videyo, li tèks HUD la epi chanje pawòl an tèks.",
+  "can.integrated": "Grafik entegre: dekode videyo sèlman lè pa gen lòt kat grafik ki mete sou Itilize pou WardogClips. Tèks HUD ak pawòl fèt sou yon lòt kat oswa sou prosesè a.",
+  "can.other": "Dekode videyo epi li tèks HUD la. Pawòl chanje an tèks sou prosesè a, paske sa bezwen yon kat NVIDIA.",
+  "none_found": "Nou pa jwenn okenn kat grafik. WardogClips fè tout travay li sou prosesè a.",
+  "role.use": "Itilize pou WardogClips",
+  "role.leave": "Pa touche l",
+  "all_left_alone": "Tout kat yo mete sou Pa touche l, kidonk WardogClips fè tout travay li sou prosesè a.",
+  "shared_hint": "Kat ki fè jwèt ou a mache a pataje: pandan w ap jwe, travay WardogClips sou li ka fè jwèt la pèdi kèk frame. Mete kat sa a sou Pa touche l si sa deranje w.",
+  "apply_hint": "Yon chanjman aplike pou pwochen travay la. Lè w ajoute yon kat, plis travay videyo mache ansanm apre yon redemaraj.",
+  "load_failed": "Nou pa t ka chaje lis kat grafik yo.",
+  "saved": "Sove: {keys}",
+  "saved_none": "Sove: pa gen chanjman",
+  "error": "Erè: {error}"
+}

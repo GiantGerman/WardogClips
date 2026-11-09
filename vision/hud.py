@@ -64,19 +64,19 @@ def rois(width: int, height: int, profile: str = DEFAULT_PROFILE) -> dict[str, R
     return out
 
 
-# the centred `RESPAWNING IN` text at 3440x1440 (OCR'd to confirm a death without a feed row)
+# the centered `RESPAWNING IN` text at 3440x1440 (OCR'd to confirm a death without a feed row)
 CENTER_BASE = (1400, 440)
 
 
 def respawn_roi(width: int, height: int) -> Roi:
-    """The built-in respawn-text box: 1400x440 px centred, NOT scaled (as detect has always read it;
+    """The built-in respawn-text box: 1400x440 px centered, NOT scaled (as detect has always read it;
     core/zones.py scales it with the height for templates and the zones editor's default)."""
     cw, ch = CENTER_BASE
     return Roi("center", max(0, width // 2 - cw // 2), max(0, height // 2 - ch // 2), min(width, cw), min(height, ch))
 
 
 def refine_center_roi(width: int, height: int) -> Roi:
-    """The built-in 400x200 centre box whose darkness times a death to the frame (detect pass 3)."""
+    """The built-in 400x200 center box whose darkness times a death to the frame (detect pass 3)."""
     return Roi("center", width // 2 - 200, height // 2 - 100, 400, 200)
 
 

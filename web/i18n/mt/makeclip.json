@@ -1,0 +1,12 @@
+{
+  "pick_first": "L-ewwel agħżel avveniment jew ħaddem reġistrazzjoni.",
+  "already": "Dan il-klip diġà qed isir.",
+  "making_exact": "Qed isir il-klip, eżatt għall-frame. Dan jieħu ftit aktar għax l-istampa terġa' tiġi encoded.",
+  "making_copy": "Qed isir il-klip. Se jibda fuq l-eqreb keyframe qabel l-in point tiegħek.",
+  "open_folder": "Iftaħ il-folder",
+  "saved": "Klip issejvjat: {name}",
+  "saved_early": "Klip issejvjat: {name}\nJibda {seconds} qabel l-in point tiegħek (l-eqreb keyframe).",
+  "check_mismatch": "Il-klip ma jaqbilx għal kollox mar-reġistrazzjoni. Iċċekkjah qabel tużah.",
+  "failed": "Il-klip ma setax isir: {error}",
+  "unknown_error": "żball mhux magħruf"
+}

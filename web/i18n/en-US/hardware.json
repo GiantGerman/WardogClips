@@ -1,0 +1,18 @@
+{
+  "@": "Settings > Hardware: the graphics cards and what WardogClips may do with each (web/js/hardware.js).",
+  "can.nvidia": "Decodes video, reads the HUD text and turns speech into text.",
+  "can.integrated": "Built-in graphics: decodes video only when no other graphics card is set to Use for WardogClips. HUD text and speech run on another card or on the processor.",
+  "can.other": "Decodes video and reads the HUD text. Speech turns into text on the processor, because that needs an NVIDIA card.",
+  "@can.integrated": "\"Use for WardogClips\" is the name of the role.use option; keep them the same.",
+  "none_found": "No graphics card was found. WardogClips does all its work on the processor.",
+  "role.use": "Use for WardogClips",
+  "role.leave": "Leave alone",
+  "all_left_alone": "Every card is set to Leave alone, so WardogClips does all its work on the processor.",
+  "shared_hint": "The card that runs your game is shared: while you play, WardogClips work on it can cost the game a few frames. Set that card to Leave alone if it bothers you.",
+  "apply_hint": "A change applies to the next job. When you add a card, more video jobs run at once after a restart.",
+  "load_failed": "The list of graphics cards could not be loaded.",
+  "saved": "Saved: {keys}",
+  "@saved": "keys = the names of the changed settings (internal names, not translated).",
+  "saved_none": "Saved: no change",
+  "error": "Error: {error}"
+}

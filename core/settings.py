@@ -10,16 +10,24 @@ import typing
 from dataclasses import dataclass, field
 from typing import Any
 
-from utils import paths
+from core import speechlang
+from utils import i18n, paths
 
 logger = logging.getLogger("wclips.settings")
 
-SCHEMA_VERSION = 3       # 2: proxies.codec h264_nvenc (the old default) -> libx264
+SCHEMA_VERSION = 5       # 2: proxies.codec h264_nvenc (the old default) -> libx264
                          # 3: setup + updates sections; empty personal defaults (wizard)
-STT_MODELS = ("tiny.en", "small.en", "medium.en", "large-v3", "large-v3-turbo")  # turbo: ~1.6 GB download on first use
+                         # 4: highlights.keywords ';' text -> per-language map (the old text = "en")
+                         # 5: ui section (ui.language); stt.language_chosen (a set-up install keeps its language)
+# turbo: ~1.6 GB download on first use; tiny / small / medium = the multilingual twins of the .en models
+STT_MODELS = ("tiny.en", "tiny", "small.en", "small", "medium.en", "medium", "large-v3", "large-v3-turbo")
 STT_COMPUTE = ("float16", "int8_float16", "int8")
 OCR_DEVICES = ("auto", "gpu", "cpu")
-PROXY_CODECS = ("auto", "h264_nvenc", "hevc_nvenc", "libx264")
+PROXY_CODECS = ("auto", "h264_nvenc", "hevc_nvenc", "h264_amf", "h264_qsv", "libx264")
+CLIP_MODES = ("copy", "exact")
+X264_PRESETS = ("ultrafast", "superfast", "veryfast", "faster", "fast", "medium", "slow")
+UPDATE_CHANNELS = ("stable", "beta")
+PERF_MODES = ("full", "balanced", "background")     # core/workmode.py
 MARKER_COLORS = ("Blue", "Cyan", "Green", "Yellow", "Red", "Pink", "Purple", "Fuchsia", "Rose",
                  "Lavender", "Sky", "Mint", "Lemon", "Sand", "Cocoa", "Cream")
 
@@ -71,6 +79,14 @@ class Stt:
     hotwords: str = ""                  # extra vocabulary for the decoder; player + squad names are always added
     batched: bool = False               # faster-whisper BatchedInferencePipeline (VAD speech chunks, batch_size at once)
     batch_size: int = 8                 # chunks per batch in batched mode (1-32)
+    # speech language (core/speechlang.py): "auto", one code ("en"), or a short list ("en,es") to detect among;
+    # anything but "en" swaps an English-only model for its multilingual twin
+    language: str = "en"
+    # True once the user picked the speech language (Settings, the wizard): until then a UI language other than
+    # English also sets the speech language (apply_speech_default)
+    language_chosen: bool = False
+    redetect_windows: bool = False      # "auto" only: detect the language again for every line (mixed-language talk)
+    translate: bool = False             # also write an English translation beside non-English lines (searchable)
 
 
 @dataclass
@@ -91,7 +107,8 @@ class Detection:
 
 @dataclass
 class Highlights:
-    keywords: str = "let's go;nice shot;got him;holy;oh my god;no way;are you kidding"
+    # voice keywords per speech language {"en": [...], "es": [...]}; an old ';' text is read as the "en" list
+    keywords: dict[str, list[str]] = field(default_factory=speechlang.default_keywords)
     rms_spike_db: float = 10.0          # voice level jump over the rolling floor that counts as excitement
     multikill_s: float = 10.0
     pre_roll_s: float = 8.0
@@ -121,6 +138,16 @@ class Vods:
 
 
 @dataclass
+class ClipPool:
+    """Make clip: trimmed copies of moments, written to a folder of their own (never scanned by the library)."""
+    dir: str = ""                       # "" = <Videos>/WardogClips/Clips (made on first use)
+    mode: str = "copy"                  # copy = lossless, starts on the keyframe at / before the in point;
+                                        # exact = starts on the exact frame, the picture re-encoded with x264
+    crf: int = 16                       # exact mode: x264 quality (lower = better, bigger)
+    preset: str = "fast"                # exact mode: x264 speed / size trade-off
+
+
+@dataclass
 class Resolve:
     enabled: bool = True
     launch_on_start: bool = False       # WardogClips start: start Resolve if it is not running (off by default:
@@ -146,11 +173,36 @@ class Jobs:
     stt_lanes: int = 1                  # CUDA compute: one at a time (one whisper model resident)
     paused: bool = False
     parallel: str = "auto"              # footage jobs per drive: "auto" = from the drive benchmark, or a fixed number
-    gpu_parallel: int = 3               # video-lane jobs at once across all drives (NVDEC / NVENC sessions)
+    gpu_parallel: int = 3               # video-lane jobs at once PER graphics card in use (NVDEC / NVENC sessions);
+                                        # no card in use -> this many on the CPU
     max_parallel: int = 4               # ceiling for one drive's slots
     auto_bench: bool = True             # benchmark each library drive once, in the background, when it is idle
     auto_transcribe: bool = True        # a successful probe queues transcribe (unless already transcribed)
     auto_detect: bool = True            # ... and detect, so new footage is ready to cut
+
+
+@dataclass
+class Hardware:
+    """Graphics cards (utils/gpus.py). Every card is used unless its key is listed here; keys are built from the
+    card's PCI ids (the LUID changes on every boot), so a role survives restarts and a new card."""
+    leave_alone: list[str] = field(default_factory=list)
+    auto_gpu_encoder: bool = False      # 'auto' may encode on an AMD (AMF) / Intel (Quick Sync) card's video engine
+
+
+@dataclass
+class Performance:
+    """Work mode (core/workmode.py): how much of the PC WardogClips takes while you use it."""
+    mode: str = "balanced"              # full | balanced | background
+    auto_detect: bool = True            # slow down while a game, a full-screen app or an OBS recording is noticed
+    idle_min: int = 5                   # background mode: start new work only after this many minutes without input
+    gpu_busy_pct: int = 40              # 3D load of the busiest graphics card that counts as "a game is running"
+
+
+@dataclass
+class Ui:
+    """The page's language (web/i18n, utils/i18n.py). "" = the language the installer ran in, else the Windows
+    display language; else a supported code such as "de" or "pt-BR"."""
+    language: str = ""
 
 
 @dataclass
@@ -163,9 +215,12 @@ class Setup:
 
 @dataclass
 class Updates:
-    """Release check against GitHub. repo empty = never check."""
-    check: bool = True
+    """Release check against GitHub (core/updates.py). repo empty = never check."""
+    auto_check: bool = True             # check on startup and every interval_hours (was "check" before 0.3)
     repo: str = ""                      # "owner/WardogClips"
+    channel: str = "stable"             # stable | beta (beta also offers pre-releases)
+    interval_hours: int = 24
+    skipped_version: str = ""           # "Skip this version": never offered again (a newer one is)
     last_check: str = ""
     latest: str = ""
 
@@ -184,14 +239,19 @@ class Settings:
     resolve: Resolve = field(default_factory=Resolve)
     jobs: Jobs = field(default_factory=Jobs)
     vods: Vods = field(default_factory=Vods)
+    hardware: Hardware = field(default_factory=Hardware)
     setup: Setup = field(default_factory=Setup)
     updates: Updates = field(default_factory=Updates)
+    clippool: ClipPool = field(default_factory=ClipPool)
+    performance: Performance = field(default_factory=Performance)
+    ui: Ui = field(default_factory=Ui)
     _extra: dict[str, Any] = field(default_factory=dict, repr=False)
 
 
 _SECTIONS = {"server": Server, "library": Library, "player": Player, "audio": Audio, "stt": Stt,
              "detection": Detection, "highlights": Highlights, "proxies": Proxies, "resolve": Resolve,
-             "jobs": Jobs, "vods": Vods, "setup": Setup, "updates": Updates}
+             "jobs": Jobs, "vods": Vods, "setup": Setup, "updates": Updates, "hardware": Hardware,
+             "clippool": ClipPool, "performance": Performance, "ui": Ui}
 
 
 def _as_list(v) -> list[str]:
@@ -215,6 +275,8 @@ def _fill(cls, data: dict) -> Any:
         try:
             if typing.get_origin(t) is list:
                 v = _as_list(v)
+            elif typing.get_origin(t) is dict:
+                v = speechlang.clean_keyword_map(v)
             elif t is bool:
                 v = bool(v)
             elif t is int:
@@ -232,7 +294,9 @@ def _fill(cls, data: dict) -> Any:
 def load() -> Settings:
     if not paths.SETTINGS_FILE.exists():
         logger.info("[Settings] no settings.json -- using defaults")
-        return Settings()
+        cfg = Settings()
+        apply_speech_default(cfg)
+        return cfg
     try:
         raw = json.loads(paths.SETTINGS_FILE.read_text(encoding="utf-8"))
     except Exception:
@@ -245,7 +309,21 @@ def load() -> Settings:
     cfg._extra = {k: v for k, v in raw.items() if k not in _SECTIONS and k != "schema_version"}
     migrate(cfg, raw)
     validate(cfg)
+    apply_speech_default(cfg)
     return cfg
+
+
+def apply_speech_default(cfg: Settings) -> bool:
+    """A speech language the user never picked follows the UI language (German UI -> German speech; English, or a
+    language Whisper cannot transcribe -> English). True when it changed stt.language."""
+    if cfg.stt.language_chosen:
+        return False
+    want = speechlang.default_speech_language(i18n.active_language(cfg))
+    if cfg.stt.language == want:
+        return False
+    cfg.stt.language = want
+    logger.info("[Settings] speech language follows the ui language stt.language=%s", want)
+    return True
 
 
 def migrate(cfg: Settings, raw: dict | None = None) -> None:
@@ -263,6 +341,23 @@ def migrate(cfg: Settings, raw: dict | None = None) -> None:
         if (had.get("library") or {}).get("roots") or (had.get("player") or {}).get("aliases"):
             cfg.setup.done = True
             logger.info("[Settings] migrated: existing setup -> setup.done (schema 3)")
+    upd = (raw or {}).get("updates") or {}
+    if isinstance(upd, dict) and "check" in upd and "auto_check" not in upd:
+        cfg.updates.auto_check = bool(upd["check"])     # the 0.2 name of the automatic-check switch
+    if cfg.schema_version < 4:
+        # the single English keyword text became the "en" list (done by _fill); the other languages get their
+        # defaults, since there was no way to set them before
+        old = ((raw or {}).get("highlights") or {}).get("keywords")
+        if isinstance(old, str):
+            for lang, words in speechlang.default_keywords().items():
+                cfg.highlights.keywords.setdefault(lang, words)
+            logger.info("[Settings] migrated highlights.keywords -> per-language map (schema 4)")
+    if cfg.schema_version < 5:
+        # an install that is set up (or chose a speech language) keeps it: only a fresh one follows the UI language
+        stt_raw = (raw or {}).get("stt") or {}
+        if cfg.setup.done or (isinstance(stt_raw, dict) and stt_raw.get("language") not in (None, "", "en")):
+            cfg.stt.language_chosen = True
+            logger.info("[Settings] migrated: speech language kept as chosen (schema 5)")
     if cfg.schema_version < SCHEMA_VERSION:
         cfg.schema_version = SCHEMA_VERSION
 
@@ -295,6 +390,10 @@ def validate(cfg: Settings) -> None:
         st.batch_size = int(_clamp(int(st.batch_size), 1, 32))
     except (TypeError, ValueError):
         st.batch_size = 8
+    st.language = speechlang.normalize(st.language)
+    st.language_chosen = bool(st.language_chosen)
+    st.redetect_windows = bool(st.redetect_windows)
+    st.translate = bool(st.translate)
     d = cfg.detection
     d.roi_fps = int(_clamp(d.roi_fps, 1, 10))
     d.refine_window_s = _clamp(float(d.refine_window_s), 1.0, 30.0)
@@ -309,6 +408,7 @@ def validate(cfg: Settings) -> None:
     except (TypeError, ValueError):
         d.ticker_every = 1
     h = cfg.highlights
+    h.keywords = speechlang.clean_keyword_map(h.keywords)
     h.rms_spike_db = _clamp(float(h.rms_spike_db), 1.0, 40.0)
     h.multikill_s = _clamp(float(h.multikill_s), 1.0, 60.0)
     h.pre_roll_s = _clamp(float(h.pre_roll_s), 0.0, 60.0)
@@ -331,10 +431,24 @@ def validate(cfg: Settings) -> None:
     v.dir = str(v.dir or "").strip().strip('"')
     r.exe = str(r.exe or "").strip().strip('"')
     r.project = str(r.project or "").strip()
+    cp = cfg.clippool
+    cp.dir = str(cp.dir or "").strip().strip('"').strip()
+    if cp.mode not in CLIP_MODES:
+        cp.mode = "copy"
+    cp.crf = int(_clamp(cp.crf, 0, 35))
+    if cp.preset not in X264_PRESETS:
+        cp.preset = "fast"
     u = cfg.updates
     u.repo = str(u.repo or "").strip().strip("/")
     if u.repo.lower().startswith("https://github.com/"):
         u.repo = u.repo[len("https://github.com/"):].strip("/")
+    if u.channel not in UPDATE_CHANNELS:
+        u.channel = "stable"
+    try:
+        u.interval_hours = int(_clamp(int(u.interval_hours), 1, 168))
+    except (TypeError, ValueError):
+        u.interval_hours = 24
+    u.skipped_version = str(u.skipped_version or "").strip().lstrip("vV")[:40]
     j = cfg.jobs
     j.io_lanes = int(_clamp(j.io_lanes, 1, 4))
     j.video_lanes = int(_clamp(j.video_lanes, 1, 2))
@@ -347,7 +461,17 @@ def validate(cfg: Settings) -> None:
             par = "auto"
     j.parallel = par
     j.gpu_parallel = int(_clamp(j.gpu_parallel, 1, 8))
+    hw = cfg.hardware
+    hw.leave_alone = list(dict.fromkeys(str(k).strip().lower() for k in hw.leave_alone if str(k).strip()))[:16]
+    hw.auto_gpu_encoder = bool(hw.auto_gpu_encoder)
     j.max_parallel = int(_clamp(j.max_parallel, 1, 16))
+    pf = cfg.performance
+    pf.mode = str(pf.mode or "").strip().lower()
+    if pf.mode not in PERF_MODES:
+        pf.mode = "balanced"
+    pf.idle_min = int(_clamp(pf.idle_min, 1, 120))
+    pf.gpu_busy_pct = int(_clamp(pf.gpu_busy_pct, 10, 95))
+    cfg.ui.language = i18n.normalize_setting(cfg.ui.language)
 
 
 def to_dict(cfg: Settings) -> dict:
@@ -365,14 +489,21 @@ def apply_patch(cfg: Settings, patch: dict) -> list[str]:
         if cls is None or not isinstance(body, dict):
             continue
         cur = getattr(cfg, sec_name)
+        if sec_name == "highlights" and "keywords" in body:
+            # per-language merge: {"es": [...]} changes Spanish only; a plain ';' text is the English list
+            body = {**body, "keywords": {**cur.keywords, **speechlang.clean_keyword_map(body["keywords"])}}
         merged = dataclasses.asdict(cur)
         merged.update(body)
+        if sec_name == "stt" and "language" in body and "language_chosen" not in body:
+            merged["language_chosen"] = True       # the user picked it: the UI language no longer decides it
         new = _fill(cls, merged)
         for f in dataclasses.fields(cls):
             if getattr(cur, f.name) != getattr(new, f.name):
                 changed.append(f"{sec_name}.{f.name}")
         setattr(cfg, sec_name, new)
     validate(cfg)
+    if "ui.language" in changed and apply_speech_default(cfg):
+        changed.append("stt.language")
     return changed
 
 
@@ -390,5 +521,36 @@ def patterns(cfg: Settings) -> list[str]:
     return [p.strip().lower() for p in cfg.library.patterns.split(";") if p.strip()]
 
 
-def keywords(cfg: Settings) -> list[str]:
-    return [k.strip().lower() for k in cfg.highlights.keywords.split(";") if k.strip()]
+def keywords(cfg: Settings, lang: str | None = None) -> list[str]:
+    """Voice keywords: every language's (lang None), else that language's plus the English ones (gamers say
+    "nice shot" in any language)."""
+    kw = cfg.highlights.keywords
+    if isinstance(kw, str):                       # a hand-built Settings with the old text
+        kw = speechlang.clean_keyword_map(kw)
+    langs = list(kw) if lang is None else [lang, "en"]
+    out: list[str] = []
+    for code in langs:
+        for k in kw.get(code) or []:
+            k = k.strip().lower()
+            if k and k not in out:
+                out.append(k)
+    return out
+
+
+def keyword_map(cfg: Settings) -> dict[str, list[str]]:
+    kw = cfg.highlights.keywords
+    return speechlang.clean_keyword_map(kw)
+
+
+def keywords_for(keywords, lang: str | None) -> list[str]:
+    """One line's voice keywords from a plain list (used as is) or the per-language map: that language's plus the
+    English ones; every language's when `lang` is None."""
+    if not isinstance(keywords, dict):
+        return [k.strip().lower() for k in (keywords or []) if k and k.strip()]
+    out: list[str] = []
+    for code in (list(keywords) if not lang else [lang, "en"]):
+        for k in keywords.get(code) or []:
+            k = k.strip().lower()
+            if k and k not in out:
+                out.append(k)
+    return out

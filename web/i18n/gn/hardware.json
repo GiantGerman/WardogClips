@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Odecodifica video, olee HUD moñe'ẽrã ha ombohasa ñe'ẽ jehaípe.",
+  "can.integrated": "Tarjeta gráfica oĩmbáva: odecodifica video ndaipóriramo ambue tarjeta Eipuru WardogClips-pe ndive. HUD moñe'ẽrã ha ñe'ẽ ojeporu ambue tarjeta térã procesador-pe.",
+  "can.other": "Odecodifica video ha olee HUD moñe'ẽrã. Ñe'ẽ oñembohasa jehaípe procesador-pe, oikotevẽgui tarjeta NVIDIA.",
+  "none_found": "Ndojejuhúi tarjeta gráfica. WardogClips omba'apo procesador-pe añónte.",
+  "role.use": "Eipuru WardogClips-pe",
+  "role.leave": "Ani rejapo mba'eve",
+  "all_left_alone": "Opaite tarjeta oĩ Ani rejapo mba'eve ramo, upévare WardogClips omba'apo procesador-pe añónte.",
+  "shared_hint": "Tarjeta nde juego oipurúva ojeporu oñondive: rembosarái aja, WardogClips tembiapo ikatu omboguejy sa'ive frame juegope. Emoĩ upe tarjeta Ani rejapo mba'eve ramo nemomarañárõ.",
+  "apply_hint": "Ñemoambue oiko tembiapo oúvape. Rembojuajúrõ tarjeta, hetave tembiapo video omba'apo oñondive ñepyrũjey rire.",
+  "load_failed": "Ndaikatúi ojehupi tarjeta gráfica rysýi.",
+  "saved": "Oñongatúma: {keys}",
+  "saved_none": "Oñongatúma: ndaipóri ñemoambue",
+  "error": "Jejavy: {error}"
+}

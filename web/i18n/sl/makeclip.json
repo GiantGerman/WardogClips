@@ -1,0 +1,12 @@
+{
+  "pick_first": "Najprej izberite dogodek ali predvajajte posnetek.",
+  "already": "Ta klip se že izdeluje.",
+  "making_exact": "Izdelujem klip, natančno na sličico. To traja malo dlje, ker se slika ponovno kodira.",
+  "making_copy": "Izdelujem klip. Začel se bo na najbližji ključni sličici pred vašo začetno točko.",
+  "open_folder": "Odpri mapo",
+  "saved": "Klip shranjen: {name}",
+  "saved_early": "Klip shranjen: {name}\nZačne se {seconds} pred vašo začetno točko (najbližja ključna sličica).",
+  "check_mismatch": "Klip se ne ujema popolnoma s posnetkom. Pred uporabo ga preverite.",
+  "failed": "Klipa ni bilo mogoče izdelati: {error}",
+  "unknown_error": "neznana napaka"
+}

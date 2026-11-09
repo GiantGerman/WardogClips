@@ -1,0 +1,13 @@
+{
+  "@": "Hrvatski (hr). Izradi isječak.",
+  "pick_first": "Najprije odaberi događaj ili pokreni snimku.",
+  "already": "Ovaj se isječak već izrađuje.",
+  "making_exact": "Izrađujem isječak točno po sličici. To traje malo dulje jer se slika ponovno kodira.",
+  "making_copy": "Izrađujem isječak. Počet će na najbližoj ključnoj sličici prije tvoje ulazne točke.",
+  "open_folder": "Otvori mapu",
+  "saved": "Isječak spremljen: {name}",
+  "saved_early": "Isječak spremljen: {name}\nPočinje {seconds} prije tvoje ulazne točke (najbliža ključna sličica).",
+  "check_mismatch": "Isječak se ne podudara potpuno sa snimkom. Provjeri ga prije upotrebe.",
+  "failed": "Isječak nije moguće izraditi: {error}",
+  "unknown_error": "nepoznata pogreška"
+}

@@ -1,0 +1,161 @@
+{
+  "title": "Stream-VOD:ar",
+  "paste": "Klistra in länk",
+  "paste_tip": "Importera en VOD via dess länk (kollar upp den först)",
+  "close_tip": "Stäng (Esc)",
+  "search.box_ph": "Streamernamn eller en VOD-/profillänk",
+  "search.go": "Sök",
+  "search.go_tip": "Sök på namn, eller öppna streamern för en inklistrad länk (Enter)",
+  "search.need_input": "skriv ett streamernamn eller klistra in en VOD-/profillänk",
+  "search.need_name": "skriv ett streamernamn",
+  "search.busy": "Frågar {sites} efter ”{name}” – alla sajter samtidigt, några sekunder",
+  "search.found": {
+    "one": "{count} streamer hittad",
+    "other": "{count} streamers hittade"
+  },
+  "search.none": "ingen streamer som heter ”{name}” på {sites}",
+  "sites.one_on": "minst en sajt måste vara på",
+  "link.busy": "Läser länken – för en VOD-länk frågas sajten vems VOD det är, cirka 3 s",
+  "link.unsupported": "Det här är inte en länk från en sajt som stöds. Länkar från {sites} fungerar (en VOD eller streamerns sida).",
+  "favs.title": "Favoriter",
+  "favs.check": "Sök efter nya",
+  "favs.check_tip": "Lista alla favoriter igen och räkna VOD:arna som tillkommit sedan förra kontrollen",
+  "favs.checking": "Kontrollerar...",
+  "favs.none_yet": "inga favoriter än: öppna en streamer och klicka på stjärnan",
+  "favs.checking_note": {
+    "one": "kontrollerar {count} favorit efter nya VOD:ar ...",
+    "other": "kontrollerar {count} favoriter efter nya VOD:ar ..."
+  },
+  "favs.result_new": {
+    "one": "{count} ny VOD bland dina favoriter",
+    "other": "{count} nya VOD:ar bland dina favoriter"
+  },
+  "favs.result_nothing": "inget nytt sedan förra kontrollen",
+  "favs.result_failed": {
+    "one": "{result} ({count} favorit kunde inte kontrolleras)",
+    "other": "{result} ({count} favoriter kunde inte kontrolleras)"
+  },
+  "favs.removed": "{name} borttagen från favoriter",
+  "favs.added": "{name} tillagd i favoriter",
+  "favs.empty_title": "Inga favoriter än",
+  "favs.empty_text": "Öppna en streamer och klicka på stjärnan för att spara den här.",
+  "favs.new_badge": {
+    "one": "{count} ny",
+    "other": "{count} nya"
+  },
+  "favs.new_badge_title": "VOD:ar som tillkommit sedan kontrollen innan",
+  "favs.remove_title": "Ta bort från favoriter",
+  "favs.remove_aria": "Ta bort {name} från favoriter",
+  "favs.add_title": "Lägg till i favoriter",
+  "favs.checked": "kontrollerad {ago}",
+  "pre.error_extra": "{error} – visas överst i listan, kan inte importeras nu",
+  "pre.in_library": "den VOD:en finns redan i biblioteket",
+  "pre.older": "den VOD:en är äldre än den senaste listan: den visas överst",
+  "import.label": "Importera",
+  "import.label_n": {
+    "one": "Importera {count}",
+    "other": "Importera {count}"
+  },
+  "import.busy": "Importerar...",
+  "import.queue_title": {
+    "one": "köa {count} nedladdning",
+    "other": "köa {count} nedladdningar"
+  },
+  "import.select_title": "välj VOD:arna som ska importeras",
+  "import.queuing": {
+    "one": "köar {count} VOD – varje länk kontrolleras först med sajten ...",
+    "other": "köar {count} VOD:ar – varje länk kontrolleras först med sajten ..."
+  },
+  "import.no_answer": "inget svar för den här länken",
+  "import.sum_queued": {
+    "one": "{count} köad",
+    "other": "{count} köade"
+  },
+  "import.sum_already": {
+    "one": "{count} fanns redan",
+    "other": "{count} fanns redan"
+  },
+  "import.sum_failed": {
+    "one": "{count} misslyckades (håll muspekaren över den röda etiketten)",
+    "other": "{count} misslyckades (håll muspekaren över den röda etiketten)"
+  },
+  "import.sum_jobs": "{summary} – Jobb visar nedladdningarna",
+  "import.toast": "VOD:ar: {summary}",
+  "row.in_library": "i biblioteket",
+  "row.imported_before": "importerad tidigare",
+  "row.already_queued": "redan köad",
+  "row.queued": "köad",
+  "row.failed": "misslyckades",
+  "row.job": "jobb {id}",
+  "row.download_job": "nedladdningsjobb {id}",
+  "row.your_link": "din länk",
+  "row.your_link_title": "länken du klistrade in",
+  "row.open_rec_title": "öppna inspelningen",
+  "row.live": "live nu",
+  "row.upcoming": "kommande",
+  "row.live_title": "kan importeras när streamen har avslutats",
+  "row.unavailable": "ej tillgänglig",
+  "row.not_ready": "inte klar",
+  "row.not_ready_title": "kan inte importeras än",
+  "row.processing_title": "streamen avslutades nyss och sajten bearbetar den fortfarande",
+  "row.new": "ny",
+  "row.new_title": "tillkommit sedan kontrollen före den senaste",
+  "row.older": "äldre än listan",
+  "row.open_on": "öppna på {site}",
+  "ch.back_results": "Tillbaka till resultaten",
+  "ch.back_favs": "Tillbaka till favoriter",
+  "ch.back_aria": "Tillbaka",
+  "ch.star_wait": "vänta på listningen (den anger streamerns egen nyckel)",
+  "ch.listing_title": "Listar...",
+  "ch.refresh_title": "Lista igen från sajten (listan cachas i 5 minuter)",
+  "ch.refresh_aria": "Uppdatera",
+  "ch.page_title": "deras sida: {url}",
+  "ch.page_aria": "deras sida",
+  "ch.listing": "listar ...",
+  "ch.count_listed": {
+    "one": "{count} listad",
+    "other": "{count} listade"
+  },
+  "ch.count_new": {
+    "one": "{count} ny",
+    "other": "{count} nya"
+  },
+  "ch.count_lib": {
+    "one": "{count} i biblioteket",
+    "other": "{count} i biblioteket"
+  },
+  "ch.select_new": "Välj nya",
+  "ch.select_new_title": "välj alla VOD:ar som inte finns i biblioteket eller är köade än",
+  "ch.none": "Inga",
+  "ch.none_title": "rensa urvalet",
+  "ch.listing_busy": "Listar VOD:arna för {name} på {site} ...",
+  "ch.relisting": "listar igen ...",
+  "ch.empty_title": "Inga VOD:ar listade",
+  "ch.empty_text": "Streamern kanske inte sparar tidigare sändningar, eller så är de bara för prenumeranter.",
+  "ch.load_older": "Läs in äldre ({count})",
+  "ch.max_listed": "Bara de {count} senaste listas – klistra in länken till en äldre VOD för att importera den.",
+  "home.short": "Skriv ett namn och tryck Enter, eller klistra in en VOD-/profillänk.",
+  "home.find_html": "<b>Hitta en streamer</b> – skriv namnet och tryck Enter; alla sajter som är på tillfrågas samtidigt.",
+  "home.paste_html": "<b>Eller klistra in en länk</b> – en streamers sida listar de senaste VOD:arna; en VOD-länk öppnar streamern med den VOD:en vald.",
+  "home.import_html": "Välj VOD:ar och klicka på <b>Importera</b>: de laddas ned en i taget (Jobb) och transkriberas och skannas sedan som en inspelning.",
+  "res.head": "Resultat för ”{query}”",
+  "res.clear": "Rensa resultaten",
+  "res.empty_title": "Inget hittades",
+  "res.empty_text": "Kontrollera stavningen, slå på fler sajter eller klistra in länken till deras sida.",
+  "res.no_hits": "Ingen streamer med det namnet på sajterna som är på.",
+  "res.not_found": "hittades inte",
+  "res.fav_title": "en favorit",
+  "res.recent": {
+    "one": "{count} senaste",
+    "other": "{count} senaste"
+  },
+  "res.recent_more": "{count}+ senaste",
+  "res.no_recent": "inga senaste VOD:ar listade",
+  "single.title": "En VOD",
+  "single.clear": "Rensa",
+  "single.site": "Sajt",
+  "single.link": "Länk",
+  "single.recheck": "Import kontrollerar länken med sajten igen.",
+  "single.no_channel": "Sajten angav inte vems VOD det är, så det finns ingen streamer att lista. Den här VOD:en kan ändå importeras.",
+  "single.import": "Importera den här VOD:en"
+}

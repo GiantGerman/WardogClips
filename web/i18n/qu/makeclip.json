@@ -1,0 +1,12 @@
+{
+  "pick_first": "Ñawpaqta huk evento akllay utaq huk grabación purichiy.",
+  "already": "Kay clip ña ruwakuchkanmi.",
+  "making_exact": "Clip ruwakuchkan, frame chiqanta. Huk chhikanta unayninqa, rikchay wakmanta codificakusqanrayku.",
+  "making_copy": "Clip ruwakuchkan. In nisqaykimanta ñawpaqnin aswan sichpa keyframe-pi qallarinqa.",
+  "open_folder": "Carpetata kichay",
+  "saved": "Clip waqaychasqa: {name}",
+  "saved_early": "Clip waqaychasqa: {name}\nIn nisqaykimanta {seconds} ñawpaqta qallarin (aswan sichpa keyframe).",
+  "check_mismatch": "Clipqa mana grabacionwan llapanpi tupanchu. Manaraq llamkachispa qhaway.",
+  "failed": "Clipta mana ruwayta atikunchu: {error}",
+  "unknown_error": "mana riqsisqa pantay"
+}

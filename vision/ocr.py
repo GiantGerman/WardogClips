@@ -113,9 +113,29 @@ def _session_holder(mod):
     return getattr(mod, "infer", None) or getattr(mod, "session", None)
 
 
-def _to_gpu(eng) -> bool:
-    """Move the detector + recognizer sessions of a built engine to the GPU provider. False when not possible (another
-    package generation, no GPU provider, the session will not build) -- the engine is then left as it was."""
+def _gpu_device_id() -> int | None:
+    """The graphics card GPU OCR runs on (Direct3D index = DirectML device_id): this job's card when it can OCR, else
+    the best usable one (utils/gpus.py, Settings > Hardware); None = no card may be used."""
+    try:
+        from utils import gpus
+        return gpus.ocr_device_id(cuda=gpu_provider() == "CUDAExecutionProvider")
+    except Exception:  # noqa: BLE001 - the card list is a hint: the default card as before
+        return 0
+
+
+def _gpu_device_ids() -> set[int]:
+    """Every device_id GPU OCR may use now (Settings > Hardware); idle engines on any other card are released."""
+    try:
+        from utils import gpus
+        return gpus.ocr_device_ids(cuda=gpu_provider() == "CUDAExecutionProvider")
+    except Exception:  # noqa: BLE001
+        return {0}
+
+
+def _to_gpu(eng, device_id: int = 0) -> bool:
+    """Move the detector + recognizer sessions of a built engine to the GPU provider on card device_id. False when
+    not possible (another package generation, no GPU provider, the session will not build) -- the engine is then left
+    as it was."""
     ep = gpu_provider()
     if ep is None:
         return False
@@ -132,7 +152,8 @@ def _to_gpu(eng) -> bool:
             so.log_severity_level = 3
             so.enable_mem_pattern = False                    # DirectML wants these two
             so.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
-            s = ort.InferenceSession(path, sess_options=so, providers=[ep, "CPUExecutionProvider"])
+            s = ort.InferenceSession(path, sess_options=so, providers=[(ep, {"device_id": str(int(device_id))}),
+                                                                       "CPUExecutionProvider"])
             if s.get_providers()[0] != ep:
                 return False
             new.append((holder, s))
@@ -170,7 +191,8 @@ class Ocr:
     def gpu_ready(self) -> bool:
         if self.gpu_failed and time.monotonic() >= self._gpu_off_until:
             self.gpu_failed = False               # try the GPU again after the cooldown
-        return not self.gpu_failed and not _gpu_lost and gpu_provider() is not None
+        return (not self.gpu_failed and not _gpu_lost and gpu_provider() is not None
+                and _gpu_device_id() is not None)
 
     def last_device(self) -> str:
         return getattr(self._tl, "dev", "cpu")
@@ -201,8 +223,12 @@ class Ocr:
         eng = _fast_engine(RapidOCR) if self.fast else None
         if eng is None:
             eng = RapidOCR()
+        devid = None
         if dev == "gpu":
-            if not _to_gpu(eng):
+            devid = _gpu_device_id()
+            if devid is None:
+                raise _NoGpu("no graphics card may be used (Settings > Hardware)")
+            if not _to_gpu(eng, devid):
                 # one count per cooldown window, process-wide: the two pools (ocr, ocr_fast) each have their own
                 # cooldown, so without this a feed read's build right after a failed ticker build counted twice
                 now = time.monotonic()
@@ -215,10 +241,11 @@ class Ocr:
                 raise _NoGpu("the GPU engine could not be built")
             _gpu_state["build_fails"], _gpu_state["last_fail"] = 0, None
         eng._wclips_dev = dev
+        eng._wclips_devid = devid
         eng._wclips_gen = self._gpu_gen
         logger.info("[OCR] engine ready in %.1fs engines=%d kind=%s device=%s", time.monotonic() - t0,
                     self._built[dev] + 1, "fast" if self.fast and getattr(eng, "_wclips_fast", False) else "full",
-                    gpu_provider() if dev == "gpu" else "cpu")
+                    f"{gpu_provider()}:{devid}" if dev == "gpu" else "cpu")
         return eng
 
     def _acquire(self, dev: str = "cpu"):
@@ -226,6 +253,24 @@ class Ocr:
             while True:
                 if dev == "gpu" and (self.gpu_failed or _gpu_lost):
                     raise _NoGpu("GPU OCR is off after an error")
+                if dev == "gpu" and self._free["gpu"]:
+                    allowed = _gpu_device_ids()
+                    for e in [e for e in self._free["gpu"] if getattr(e, "_wclips_devid", 0) not in allowed]:
+                        self._free["gpu"].remove(e)          # its card is left alone now (Settings > Hardware)
+                        self._built["gpu"] -= 1
+                    want = _gpu_device_id()
+                    match = [e for e in self._free["gpu"] if getattr(e, "_wclips_devid", 0) == want]
+                    if match:
+                        self._free["gpu"].remove(match[-1])
+                        return match[-1]
+                    if self._free["gpu"] and self._built["gpu"] + self._building["gpu"] >= self.max_engines:
+                        self._free["gpu"].pop(0)             # an idle engine on another card makes room for this one
+                        self._built["gpu"] -= 1
+                    if self._built["gpu"] + self._building["gpu"] < self.max_engines:
+                        self._building["gpu"] += 1
+                        break
+                    self._cv.wait(1.0)
+                    continue
                 if self._free[dev]:
                     return self._free[dev].pop()
                 if self._built[dev] + self._building[dev] < self.max_engines:
@@ -318,7 +363,7 @@ class Ocr:
             if dev == "gpu":
                 self.gpu_calls += 1
         self._tl.dev = dev
-        return _normalise(res, min_conf), True
+        return _normalize(res, min_conf), True
 
 
 class _NoGpu(RuntimeError):
@@ -348,7 +393,7 @@ def _fast_engine(RapidOCR):
         return None
 
 
-def _normalise(res, min_conf: float) -> list[Box]:
+def _normalize(res, min_conf: float) -> list[Box]:
     out: list[Box] = []
     if res is None:
         return out

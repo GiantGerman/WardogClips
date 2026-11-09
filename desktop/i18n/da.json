@@ -1,0 +1,19 @@
+{
+  "tray.open": "Åbn WardogClips",
+  "tray.update": "Opdatering tilgængelig...",
+  "tray.pause": "Pause, mens jeg spiller",
+  "tray.speed": "Fart",
+  "tray.mode_full": "Fuld fart",
+  "tray.mode_balanced": "Afbalanceret",
+  "tray.mode_background": "Baggrund",
+  "tray.open_data": "Åbn datamappe",
+  "tray.open_log": "Åbn log",
+  "tray.quit": "Afslut",
+  "tray.balloon": "WardogClips kører. Højreklik på ikonet i meddelelsesområdet for at afslutte.",
+  "tray.update_notify": "WardogClips {version} er tilgængelig. Vælg Opdatering tilgængelig... i menuen i meddelelsesområdet for at se den.",
+  "launcher.could_not_start": "WardogClips kunne ikke starte:\n\n{error}",
+  "launcher.scan_running": "En WardogClips-scanning (scan.bat / --scan) bruger denne datamappe:\n\n{dir}\n\nVent, til den er færdig (eller stop den i dens vindue), og start så WardogClips igen.",
+  "launcher.not_answering": "WardogClips kører allerede, men svarer ikke.\n\nAfslut den fra dens ikon i meddelelsesområdet (eller vent et minut), og prøv igen.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips er beskadiget (runtime eller appfilerne mangler).\n\nGeninstallér den.\n\nLedte efter:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips stoppede lige efter start (afslutningskode {code}).\n\nLoggen fortæller måske hvorfor:\n{log}"
+}

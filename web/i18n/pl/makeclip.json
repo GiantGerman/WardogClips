@@ -1,0 +1,12 @@
+{
+  "pick_first": "Najpierw wybierz zdarzenie lub odtwórz nagranie.",
+  "already": "Ten klip jest już tworzony.",
+  "making_exact": "Tworzenie klipu co do klatki. Trwa to trochę dłużej, bo obraz jest ponownie kodowany.",
+  "making_copy": "Tworzenie klipu. Zacznie się od najbliższej klatki kluczowej przed punktem wejścia.",
+  "open_folder": "Otwórz folder",
+  "saved": "Zapisano klip: {name}",
+  "saved_early": "Zapisano klip: {name}\nZaczyna się {seconds} przed punktem wejścia (najbliższa klatka kluczowa).",
+  "check_mismatch": "Klip nie w pełni odpowiada nagraniu. Sprawdź go przed użyciem.",
+  "failed": "Nie udało się utworzyć klipu: {error}",
+  "unknown_error": "nieznany błąd"
+}

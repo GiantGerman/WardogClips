@@ -41,6 +41,7 @@ from pathlib import Path
 
 from resolve import export
 from utils import paths
+from utils.i18n import msg
 
 logger = logging.getLogger("wclips.resolve")
 
@@ -147,7 +148,8 @@ def _in_thread(fn, timeout: float, what: str):
     global _inflight
     with _inflight_lock:
         if _inflight is not None and _inflight.is_alive():
-            raise ResolveNotRunning(f"Resolve is not answering ({what} still pending -- is it starting up?)")
+            raise ResolveNotRunning(msg("server.resolve.pending", "Resolve is not answering ({what} still pending -- is it starting up?)",
+                                        what=what)["message"])
         box: dict = {}
 
         def work():
@@ -162,7 +164,7 @@ def _in_thread(fn, timeout: float, what: str):
         if t.is_alive():
             _inflight = t
             logger.warning("[Resolve] %s timed out after %.1fs", what, timeout)
-            raise ResolveNotRunning(f"Resolve did not answer within {timeout:.0f} s (starting up or busy?)")
+            raise ResolveNotRunning(_timeout_text(timeout))
         _inflight = None
     if "e" in box:
         e = box["e"]
@@ -172,7 +174,14 @@ def _in_thread(fn, timeout: float, what: str):
     return box.get("r")
 
 
-NOT_RUNNING = "DaVinci Resolve is not running or refuses scripting -- " + SCRIPTING_HINT
+NOT_RUNNING = msg("server.resolve.not_running", "DaVinci Resolve is not running or refuses scripting -- start DaVinci "
+                  "Resolve, open the project, and check Preferences > System > General > External scripting using = "
+                  "Local")["message"]
+
+
+def _timeout_text(timeout: float) -> str:
+    return msg("server.resolve.timeout", "Resolve did not answer within {seconds} s (starting up or busy?)",
+               seconds=f"{timeout:.0f}")["message"]
 # Resolve's internal script server can fail to start (e.g. when it comes up late on a busy machine): Resolve retries,
 # gives up, and for the rest of that session nothing can script it although Resolve itself works. Its debug log says
 # so; only a restart of Resolve brings scripting back.
@@ -282,7 +291,7 @@ def probes_held() -> bool:
     return starting_session()
 
 
-STARTING = "Resolve is starting (waiting for its scripting server)"
+STARTING = msg("server.resolve.starting", "Resolve is starting (waiting for its scripting server)")["message"]
 
 
 def connect(timeout: float = CONNECT_TIMEOUT_S):
@@ -364,7 +373,7 @@ def probe_subprocess(timeout: float | None = None) -> dict:
                             text=True, encoding="utf-8", errors="replace", timeout=timeout, creationflags=flags)
     except subprocess.TimeoutExpired:
         logger.warning("[Resolve] probe timed out after %.1fs", timeout)
-        return {"connected": False, "error": f"Resolve did not answer within {timeout:.0f} s (starting up or busy?)"}
+        return {"connected": False, "error": _timeout_text(timeout)}
     except OSError as e:
         return {"connected": False, "error": f"probe could not start: {e}"}
     line = next((ln for ln in reversed(cp.stdout.splitlines()) if ln.startswith("WCLIPS_PROBE ")), None)
@@ -442,14 +451,15 @@ def status(fresh: bool = False, timeout: float | None = None) -> dict:
             out[k] = res[k]
     out["connected"] = bool(out["connected"])
     if out["connected"] and not out["project"]:
-        out["error"] = "no project open in Resolve"
+        out["error"] = msg("server.resolve.no_project_open", "no project open in Resolve")["message"]
     return out
 
 
 @contextmanager
 def _op(what: str):
     if not _op_lock.acquire(timeout=OP_WAIT_S):
-        raise ResolveError(f"another Resolve hand-off is still running ({what} not started)")
+        raise ResolveError(msg("server.resolve.handoff_busy", "another Resolve hand-off is still running ({what} not started)",
+                               what=what)["message"])
     try:
         yield
     finally:
@@ -458,7 +468,7 @@ def _op(what: str):
 
 # ---- object-model helpers ---------------------------------------------------------------------
 def norm_path(p) -> str:
-    """Windows path compare key: separators unified, normalised, case-folded."""
+    """Windows path compare key: separators unified, normalized, case-folded."""
     s = str(p or "").strip().strip('"').replace("/", "\\")
     return ntpath.normpath(s).lower() if s else ""
 
@@ -466,7 +476,8 @@ def norm_path(p) -> str:
 def _project(resolve):
     proj = _call(_call(resolve, "GetProjectManager"), "GetCurrentProject")
     if not proj:
-        raise ResolveError("no project open in Resolve -- open the project you are cutting first")
+        raise ResolveError(msg("server.resolve.no_project_hint",
+                               "no project open in Resolve -- open the project you are cutting first")["message"])
     mp = _call(proj, "GetMediaPool")
     if not mp:
         raise ResolveError("the open project has no media pool (API refused)")

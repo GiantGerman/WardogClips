@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekodira video, bere besedilo HUD in pretvarja govor v besedilo.",
+  "can.integrated": "Vgrajena grafika: dekodira video le, kadar nobena druga grafična kartica ni nastavljena na Uporabi za WardogClips. Besedilo HUD in govor tečeta na drugi kartici ali na procesorju.",
+  "can.other": "Dekodira video in bere besedilo HUD. Govor se v besedilo pretvarja na procesorju, ker je za to potrebna kartica NVIDIA.",
+  "none_found": "Grafične kartice ni bilo mogoče najti. WardogClips vse delo opravi na procesorju.",
+  "role.use": "Uporabi za WardogClips",
+  "role.leave": "Pusti pri miru",
+  "all_left_alone": "Vse kartice so nastavljene na Pusti pri miru, zato WardogClips vse delo opravi na procesorju.",
+  "shared_hint": "Kartica, na kateri teče vaša igra, je v skupni rabi: med igranjem lahko delo WardogClips na njej igri vzame nekaj sličic. Če vas to moti, to kartico nastavite na Pusti pri miru.",
+  "apply_hint": "Sprememba velja za naslednje opravilo. Ko dodate kartico, po ponovnem zagonu hkrati teče več video opravil.",
+  "load_failed": "Seznama grafičnih kartic ni bilo mogoče naložiti.",
+  "saved": "Shranjeno: {keys}",
+  "saved_none": "Shranjeno: brez sprememb",
+  "error": "Napaka: {error}"
+}

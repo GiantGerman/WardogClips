@@ -11,7 +11,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 
 from media import ffmpeg
-from utils import paths
+from utils import i18n, paths
+from utils.i18n import app_error, with_msg
 from utils.logging_config import console_level
 
 logger = logging.getLogger("wclips.system")
@@ -43,6 +44,7 @@ def build(ctx) -> APIRouter:
             "running": [{"id": j["id"], "stage": j["stage"], "rec_id": j["rec_id"]} for j in ctx.jobs.running.values()],
             "events": {"subscribers": ctx.bus.subscribers, "published": ctx.bus.published},
             "ffmpeg": {"found": bool(paths.ffmpeg_exe()), "ffprobe": bool(paths.ffprobe_exe())},
+            "ui_language": i18n.active_language(ctx.cfg), "ui_language_setting": ctx.cfg.ui.language,
         }
 
     @r.post("/api/system/quit")
@@ -50,10 +52,12 @@ def build(ctx) -> APIRouter:
         """Stop this instance like the tray's Quit (lanes stopped, running jobs back to queued, instance.json
         removed). 127.0.0.1 only. The shutdown starts QUIT_DELAY_S after the answer so the caller gets it."""
         if not is_local(request):
-            return JSONResponse({"ok": False, "error": "only this computer can stop WardogClips"}, status_code=403)
+            return JSONResponse(with_msg({"ok": False}, "error", "server.system.quit_local_only",
+                                         "Only this computer can stop WardogClips."), status_code=403)
         cb = getattr(ctx, "request_quit", None)
         if cb is None:
-            return JSONResponse({"ok": False, "error": "this instance has no quit hook (tests / --scan)"}, status_code=503)
+            return JSONResponse(with_msg({"ok": False}, "error", "server.system.no_quit",
+                                         "This copy of WardogClips cannot be stopped from the page."), status_code=503)
         logger.info("[System] quit requested over HTTP client=%s", request.client.host if request.client else "?")
 
         def _later():
@@ -67,7 +71,16 @@ def build(ctx) -> APIRouter:
 
     @r.get("/api/system/hw")
     def hw():
-        return ffmpeg.hw_info()
+        from utils import gpus
+        return {**ffmpeg.hw_info(), "gpus": gpus.summary(ctx.cfg)}
+
+    @r.get("/api/system/gpus")
+    def gpu_list(refresh: bool = False):
+        """The graphics cards (utils/gpus.py): role per card (Settings > Hardware), what each can do."""
+        from utils import gpus
+        if refresh:
+            gpus.adapters(refresh=True)
+        return gpus.summary(ctx.cfg)
 
     @r.get("/api/system/encoder")
     def encoder_status():
@@ -79,6 +92,27 @@ def build(ctx) -> APIRouter:
         out["clip_effective"] = encoder.choose(ctx.cfg.proxies.clip_codec)[0]
         out["proxy_effective"] = encoder.choose(ctx.cfg.proxies.codec)[0]
         return out
+
+    @r.get("/api/system/workmode")
+    def workmode_status():
+        """Work mode (core/workmode.py): mode, busy + why, priority, limits, the signals behind it."""
+        return ctx.workmode.snapshot()
+
+    @r.post("/api/system/workmode")
+    def workmode_set(body: dict | None = None):
+        """{mode: full | balanced | background} and / or {paused: bool} (the tray's "Pause while I play")."""
+        from core.workmode import MODES
+        body = body or {}
+        mode = body.get("mode")
+        if mode is not None and mode not in MODES:
+            raise app_error(400, "server.workmode.bad_mode", "Unknown work mode: {mode}", mode=str(mode))
+        if "paused" in body:
+            ctx.jobs.set_paused(bool(body["paused"]))
+        if mode is not None:
+            ctx.workmode.set_mode(mode)
+        if mode is not None or "paused" in body:
+            ctx.save_settings()
+        return ctx.workmode.tick(force_publish=True, read=False)
 
     @r.get("/api/system/logs")
     def logs(tail: int = 120):

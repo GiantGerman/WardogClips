@@ -1,0 +1,12 @@
+{
+  "pick_first": "Vælg en hændelse eller afspil en optagelse først.",
+  "already": "Dette klip er allerede ved at blive lavet.",
+  "making_exact": "Laver klippet, frame-præcist. Det tager lidt længere, fordi billedet genkodes.",
+  "making_copy": "Laver klippet. Det starter på nærmeste keyframe før dit ind-punkt.",
+  "open_folder": "Åbn mappe",
+  "saved": "Klip gemt: {name}",
+  "saved_early": "Klip gemt: {name}\nDet starter {seconds} før dit ind-punkt (nærmeste keyframe).",
+  "check_mismatch": "Klippet passer ikke helt med optagelsen. Tjek det, før du bruger det.",
+  "failed": "Klippet kunne ikke laves: {error}",
+  "unknown_error": "ukendt fejl"
+}

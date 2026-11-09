@@ -1,0 +1,12 @@
+{
+  "pick_first": "Előbb válassz egy eseményt, vagy játssz le egy felvételt.",
+  "already": "Ez a klip már készül.",
+  "making_exact": "A klip képkockapontosan készül. Ez kicsit tovább tart, mert a kép újrakódolódik.",
+  "making_copy": "A klip készül. A kezdőpontod előtti legközelebbi kulcskockánál fog kezdődni.",
+  "open_folder": "Mappa megnyitása",
+  "saved": "Klip mentve: {name}",
+  "saved_early": "Klip mentve: {name}\n{seconds} értékkel a kezdőpontod előtt indul (legközelebbi kulcskocka).",
+  "check_mismatch": "A klip nem egyezik teljesen a felvétellel. Használat előtt ellenőrizd.",
+  "failed": "A klipet nem sikerült elkészíteni: {error}",
+  "unknown_error": "ismeretlen hiba"
+}

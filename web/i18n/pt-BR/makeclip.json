@@ -1,0 +1,12 @@
+{
+  "pick_first": "Escolha um evento ou reproduza uma gravação primeiro.",
+  "already": "Este clipe já está sendo criado.",
+  "making_exact": "Criando o clipe com precisão de quadro. Demora um pouco mais porque a imagem é recodificada.",
+  "making_copy": "Criando o clipe. Ele vai começar no keyframe mais próximo antes do seu ponto de entrada.",
+  "open_folder": "Abrir pasta",
+  "saved": "Clipe salvo: {name}",
+  "saved_early": "Clipe salvo: {name}\nEle começa {seconds} antes do seu ponto de entrada (keyframe mais próximo).",
+  "check_mismatch": "O clipe não corresponde totalmente à gravação. Confira antes de usar.",
+  "failed": "Não foi possível criar o clipe: {error}",
+  "unknown_error": "erro desconhecido"
+}

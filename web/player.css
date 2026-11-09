@@ -58,7 +58,7 @@
 .lbl-btn .tc:empty { display: none; }
 .pltime { margin-left: auto; font: var(--fs-s) var(--mono); color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .pltime b { color: var(--text); font-weight: 500; }
-#pl-tools { position: absolute; right: 16px; bottom: 52px; z-index: 30; width: 280px; }
+#pl-tools { position: absolute; right: 16px; bottom: 52px; z-index: 30; width: max-content; min-width: 280px; max-width: min(360px, calc(100% - 32px)); }
 #pl-loop.on > svg.i { color: var(--accent-2); }
 #pl-loop.on { color: var(--accent-2); }
 

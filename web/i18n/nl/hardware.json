@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Decodeert video, leest de HUD-tekst en zet spraak om in tekst.",
+  "can.integrated": "Ingebouwde graphics: decodeert alleen video als geen andere videokaart op Gebruiken voor WardogClips staat. HUD-tekst en spraak lopen op een andere kaart of op de processor.",
+  "can.other": "Decodeert video en leest de HUD-tekst. Spraak wordt op de processor omgezet in tekst, want daarvoor is een NVIDIA-kaart nodig.",
+  "none_found": "Er is geen videokaart gevonden. WardogClips doet al het werk op de processor.",
+  "role.use": "Gebruiken voor WardogClips",
+  "role.leave": "Met rust laten",
+  "all_left_alone": "Elke kaart staat op Met rust laten, dus WardogClips doet al het werk op de processor.",
+  "shared_hint": "De kaart waarop je game draait wordt gedeeld: terwijl je speelt, kan werk van WardogClips op die kaart de game een paar frames kosten. Zet die kaart op Met rust laten als dat je stoort.",
+  "apply_hint": "Een wijziging geldt voor de volgende taak. Voeg je een kaart toe, dan lopen er na een herstart meer videotaken tegelijk.",
+  "load_failed": "De lijst met videokaarten kon niet worden geladen.",
+  "saved": "Opgeslagen: {keys}",
+  "saved_none": "Opgeslagen: geen wijziging",
+  "error": "Fout: {error}"
+}

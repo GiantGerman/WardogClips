@@ -1,0 +1,12 @@
+{
+  "pick_first": "Roghnaigh eachtra nó seinn taifeadadh ar dtús.",
+  "already": "Tá an ghearrthóg seo á déanamh cheana.",
+  "making_exact": "Gearrthóg á déanamh, cruinn go dtí an fráma. Tógann sé seo beagán níos faide mar go n-athchódaítear an pictiúr.",
+  "making_copy": "Gearrthóg á déanamh. Tosóidh sí ar an eochairfhráma is gaire roimh do phointe isteach.",
+  "open_folder": "Oscail an fillteán",
+  "saved": "Gearrthóg sábháilte: {name}",
+  "saved_early": "Gearrthóg sábháilte: {name}\nTosaíonn sí {seconds} roimh do phointe isteach (an t-eochairfhráma is gaire).",
+  "check_mismatch": "Ní mheaitseálann an ghearrthóg an taifeadadh go hiomlán. Seiceáil í sula n-úsáideann tú í.",
+  "failed": "Níorbh fhéidir an ghearrthóg a dhéanamh: {error}",
+  "unknown_error": "earráid anaithnid"
+}

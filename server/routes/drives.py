@@ -6,9 +6,10 @@ POST /api/drives/benchmark       {drive?: "D:"} -> runs in a background thread p
                                  bench_done / bench_skipped / bench_failed)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from core.drives import norm_drive
+from utils.i18n import app_error
 
 
 def build(ctx) -> APIRouter:
@@ -24,12 +25,12 @@ def build(ctx) -> APIRouter:
         mgr = ctx.jobs.drives
         if drive:
             if drive not in mgr.known_drives():
-                raise HTTPException(404, f"no library files on {drive}")
+                raise app_error(404, "server.drive.no_files", "There are no library files on {drive}.", drive=drive)
             if drive in mgr.status():
-                raise HTTPException(409, f"{drive} is already being benchmarked")
+                raise app_error(409, "server.drive.busy", "{drive} is already being measured.", drive=drive)
         started = mgr.request(drive or None)
         if drive and not started:
-            raise HTTPException(409, f"{drive} is already being benchmarked")
+            raise app_error(409, "server.drive.busy", "{drive} is already being measured.", drive=drive)
         ctx.bus.publish("drives", action="bench_requested", drives=started)
         return {"ok": True, "started": started}
 

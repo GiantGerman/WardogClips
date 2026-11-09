@@ -1,0 +1,99 @@
+{
+  "title.none": "няма клип",
+  "title.rendering": "{kind} в {time} · рендиране {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Прокси {height}p · целият запис",
+  "title.no_proxy": "Още няма прокси",
+  "tip.event": "{kind} в {time}: {render}",
+  "tip.around": "около {time}: {render}",
+  "tip.cached": "{height}p от кеша на клиповете",
+  "tip.rendered": "{height}p, рендирано за {seconds} с",
+  "tip.rendered_enc": "{height}p, рендирано за {seconds} с ({encoder})",
+  "tip.proxy": "{name}: прокси на целия запис",
+  "tip.no_proxy": "{name}: още няма прокси на целия запис",
+  "busy.clip": "клипът се рендира ({height}p)...",
+  "busy.at": "рендиране на {time} ({height}p)...",
+  "busy.seconds": "{seconds} с",
+  "err.clip": "Този клип не можа да бъде рендиран",
+  "err.at": "{time} не можа да бъде рендирано",
+  "err.retry": "Опитай пак",
+  "err.encoding": "Настройки за кодиране",
+  "err.play_clip": "Този клип не можа да бъде пуснат.",
+  "err.play_proxy": "Проксито не можа да бъде пуснато.",
+  "pick.title": "Избери събитие",
+  "pick.text": "Избери едно в Събития (или натисни N): клипът му се пуска тук от началния запас.",
+  "pick.more": "Или кликни на времевата линия отдолу, за да видиш всеки момент от този запис.",
+  "pick.short": "Избери едно в Събития (или натисни N), или кликни на времевата линия отдолу.",
+  "proxy.card_title": "Още няма прокси за този запис",
+  "proxy.card_text": "Прокси {height}p е копие на целия файл ({duration}), за да го превърташ от край до край (прави се няколко пъти по-бързо от реалното време).",
+  "proxy.building": "създава се",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "в опашката",
+  "proxy.build": "Създай прокси",
+  "proxy.all": "Прокси за всички със събития",
+  "proxy.all_tip": "Сложи в опашката прокси за всеки запис със събития",
+  "proxy.queued_toast": "проксито е в опашката",
+  "proxy.all_toast": {
+    "one": "{count} прокси в опашката ({candidates} записа със събития нямат прокси)",
+    "other": "{count} проксита в опашката ({candidates} записа със събития нямат прокси)"
+  },
+  "mode.full_tip": "Целият запис, пуснат от проксито му",
+  "mode.full_noproxy_tip": "Целият запис: още няма прокси (създай го оттук)",
+  "bound.wait": "изчакай клипът на това събитие да се зареди",
+  "bound.in_before_out": "началото трябва да е преди края",
+  "bound.out_after_in": "краят трябва да е след началото",
+  "bound.reset": "клипът е върнат към началния / крайния запас",
+  "bound.in_set": "начало = {time} (клип {length} с)",
+  "bound.out_set": "край = {time} (клип {length} с)",
+  "mark.nothing": "нищо не се пуска",
+  "mark.done": "ръчен маркер в {time}",
+  "play_aria": "Пусни",
+  "pause_aria": "Пауза",
+  "time.pos": "{pos} от {total}",
+  "time.rel": "{offset} с от събитието",
+  "time.clip": "клип {in} – {out} = {length} с",
+  "pip.loop": "Цикъл начало → край",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · резултат {score}",
+  "tl.tip_status": "{kind} · {time} · резултат {score} · {status}",
+  "tl.status_kept": "запазен",
+  "tl.status_false": "фалшиво попадение",
+  "tl.whole": "Целият запис",
+  "tl.no_events": "няма събития",
+  "tl.not_detected": "още не е разпознат",
+  "tl.no_proxy": "няма прокси",
+  "tl.no_proxy_tip": "Режимът Целият запис изисква прокси (създай го от плейъра)",
+  "tl.kind.kill": {
+    "one": "{count} убийство",
+    "other": "{count} убийства"
+  },
+  "tl.kind.assist": {
+    "one": "{count} асистенция",
+    "other": "{count} асистенции"
+  },
+  "tl.kind.death": {
+    "one": "{count} смърт",
+    "other": "{count} смърти"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} забелязан",
+    "other": "{count} забелязани"
+  },
+  "tl.kind.revive": {
+    "one": "{count} съживяване",
+    "other": "{count} съживявания"
+  },
+  "tl.kind.squad": {
+    "one": "{count} отряд",
+    "other": "{count} отряд"
+  },
+  "tl.kind.voice": {
+    "one": "{count} глас",
+    "other": "{count} глас"
+  },
+  "tl.kind.manual": {
+    "one": "{count} ръчно",
+    "other": "{count} ръчни"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

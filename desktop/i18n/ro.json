@@ -1,0 +1,20 @@
+{
+  "@": "Romanian (ro), machine-translated (beta). Tray menu and launcher message boxes.",
+  "tray.open": "Deschide WardogClips",
+  "tray.update": "Actualizare disponibilă...",
+  "tray.pause": "Pauză cât joc",
+  "tray.speed": "Viteză",
+  "tray.mode_full": "Viteză maximă",
+  "tray.mode_balanced": "Echilibrat",
+  "tray.mode_background": "În fundal",
+  "tray.open_data": "Deschide folderul de date",
+  "tray.open_log": "Deschide jurnalul",
+  "tray.quit": "Ieșire",
+  "tray.balloon": "WardogClips rulează. Clic dreapta pe pictograma din tavă pentru a ieși.",
+  "tray.update_notify": "WardogClips {version} este disponibil. Alege Actualizare disponibilă... din meniul din tavă pentru a-l vedea.",
+  "launcher.could_not_start": "WardogClips nu a putut porni:\n\n{error}",
+  "launcher.scan_running": "O scanare WardogClips (scan.bat / --scan) folosește acest folder de date:\n\n{dir}\n\nAșteaptă să se termine (sau oprește-o în fereastra ei), apoi pornește din nou WardogClips.",
+  "launcher.not_answering": "WardogClips rulează deja, dar nu răspunde.\n\nÎnchide-l din pictograma din tavă (sau așteaptă un minut) și încearcă din nou.\n\nJurnal: {log}",
+  "launcher.damaged": "WardogClips este deteriorat (lipsesc runtime-ul sau fișierele aplicației).\n\nTe rugăm să-l reinstalezi.\n\nS-a căutat:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips s-a oprit imediat după pornire (cod de ieșire {code}).\n\nJurnalul poate spune de ce:\n{log}"
+}

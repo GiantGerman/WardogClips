@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Video decodifica, HUD qillqat liyi, aru qillqañaruw tukuyi.",
+  "can.integrated": "Mantat gráficos: video decodifica, yaqha tarjeta gráfica janiw “WardogClips ukatak apnaqaña” ukar uchatäki ukhakiw. HUD qillqata, aru yaqha tarjetan jan ukax procesador ukan irnaqi.",
+  "can.other": "Video decodifica, HUD qillqat liyi. Aru qillqañax procesador ukanwa, NVIDIA tarjetaw munasi.",
+  "none_found": "Janiw tarjeta gráfica jikxatatäkiti. WardogClips taqi irnaqäwip procesador ukan luri.",
+  "role.use": "WardogClips ukatak apnaqaña",
+  "role.leave": "Jan llamkt'aña",
+  "all_left_alone": "Taqi tarjetanakax Jan llamkt'aña ukankiwa, ukatwa WardogClips taqi irnaqäwip procesador ukan luri.",
+  "shared_hint": "Anatäwim irnaqki uka tarjetax mayacht'atawa: anatkasax, WardogClips irnaqäwipax mä qawqha frame apaqaspawa. Jan walïchixa, uka tarjeta Jan llamkt'aña ukar uchma.",
+  "apply_hint": "Mayjt'awix jutir irnaqawitwa. Tarjeta yapxatasax, juk'amp video irnaqawinakaw mayakiw sarantani, wasitat qalltasa.",
+  "load_failed": "Tarjeta gráfica siqix janiw apkatatäkaspati.",
+  "saved": "Imatawa: {keys}",
+  "saved_none": "Imatawa: janiw mayjt'awix utjkiti",
+  "error": "Pantja: {error}"
+}

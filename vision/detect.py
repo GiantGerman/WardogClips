@@ -14,7 +14,7 @@ Three passes over one recording:
 Every signal that agreed is recorded in `events.source`; confidence is their sum.
 
 Where the HUD is: a zone template (core/zones.py -- pinned to the recording, or the streamer's
-version for the recording's date) gives the ticker / feed / money / centre boxes; without one the
+version for the recording's date) gives the ticker / feed / money / center boxes; without one the
 built-in Season 2 boxes of vision/hud.py apply. `stages.detect` records
 `template_id` + `zones_source`, `recordings.hud_profile` = `tpl:<id>` or the hud profile.
 """
@@ -113,7 +113,7 @@ KINDS = {"kill": "kill", "headshot": "kill", "assist": "assist", "spotted_destro
 
 
 def _cluster(items, window: float):
-    """Sort by t and group runs whose neighbours are within `window`."""
+    """Sort by t and group runs whose neighbors are within `window`."""
     out, cur = [], []
     for it in sorted(items, key=lambda x: x.t_s):
         if cur and it.t_s - cur[-1].t_s > window:
@@ -158,8 +158,8 @@ def _nearest(times: list[float], t: float) -> float:
 
 
 def _respawn_text(path: str, t: float, width: int, height: int, min_conf: float, roi: hud.Roi | None = None) -> bool:
-    """Is the centred `RESPAWNING IN N...` line on screen at t? (Dark cockpits, bunkers and
-    menus are dark too; only the respawn screen says so.) `roi` = a zone template's centre box."""
+    """Is the centered `RESPAWNING IN N...` line on screen at t? (Dark cockpits, bunkers and
+    menus are dark too; only the respawn screen says so.) `roi` = a zone template's center box."""
     roi = roi or hud.respawn_roi(width, height)
     try:
         crop = frames.grab_crops(path, t, {"center": roi})["center"]
@@ -178,13 +178,17 @@ def _same_row(a: feed_mod.Row, b: feed_mod.Row, window_s: float = 20.0) -> bool:
             and feed_mod.name_matches(a.victim, [b.victim], 0.8))
 
 
-def _keywords_near(db, rec_id: int, t: float, keywords: list[str], span: float = 8.0) -> list[str]:
-    rows = db.query("SELECT text FROM transcript_segments WHERE rec_id=? AND t1 >= ? AND t0 <= ?",
+def _keywords_near(db, rec_id: int, t: float, keywords, span: float = 8.0) -> list[str]:
+    """`keywords` = a list, or the per-language map: each line is matched with its own language's keywords plus the
+    English ones (a line from before speech languages existed counts as English)."""
+    rows = db.query("SELECT text, lang FROM transcript_segments WHERE rec_id=? AND t1 >= ? AND t0 <= ?",
                     (rec_id, t - span, t + span))
     hits = []
     for r in rows:
         low = r["text"].lower()
-        hits += [k for k in keywords if k in low]
+        from core import settings as settings_mod
+        kws = settings_mod.keywords_for(keywords, r.get("lang") or "en")
+        hits += [k for k in kws if k in low]
     return sorted(set(hits))
 
 
@@ -232,7 +236,8 @@ def run(ctx) -> str:
         respawn_box, refine_center = None, hud.refine_center_roi(width, height)
     rules = [(r["pattern"], r["label"]) for r in ctx.db.query("SELECT pattern, label FROM ticker_labels ORDER BY id")]
     aliases, squad = list(cfg.player.aliases), list(cfg.player.squad)
-    keywords = [k.strip().lower() for k in cfg.highlights.keywords.split(";") if k.strip()]
+    from core import settings as settings_mod
+    keywords = settings_mod.keyword_map(cfg)            # voice keywords per speech language
     t_start = time.monotonic()
     oc = _OcrCount(cfg.detection.ocr_device)
     every = max(1, int(cfg.detection.ticker_every or 1))     # ticker read on every Nth keyframe
@@ -313,7 +318,7 @@ def run(ctx) -> str:
                     money.append((t, profit, account))
                 lines = ticker_mod.read_lines(boxes, t, money_y, row_h, rules)
                 if anchor is not None and anchor[2] is boxes and any(ln.label == "other" for ln in lines):
-                    # an unrecognised line may be a misread (e.g. 'KILLASSST 205XP' for a ticker read right as KILLASSIST
+                    # an unrecognized line may be a misread (e.g. 'KILLASSST 205XP' for a ticker read right as KILLASSIST
                     # on an identical frame 2 s later): the OCR is not deterministic, so such a reading is never
                     # reused -- the next keyframe gets a fresh read
                     anchor = None
@@ -654,7 +659,7 @@ def ticker_summary(db, rec_id: int | None = None) -> list[dict]:
     rows = db.query(f"SELECT text, label, cash, xp FROM ticker_lines {where}", params)
     groups: dict[str, dict] = {}
     for r in rows:
-        key = _TEXT_RE.sub(" ", re.sub(r"\d[\d,.]*", "#", ticker_mod.normalise(r["text"]))).strip()
+        key = _TEXT_RE.sub(" ", re.sub(r"\d[\d,.]*", "#", ticker_mod.normalize(r["text"]))).strip()
         g = groups.setdefault(key, {"pattern": key, "label": r["label"], "n": 0, "examples": [], "cash": set(), "xp": set()})
         g["n"] += 1
         if r["text"] not in g["examples"] and len(g["examples"]) < 3:

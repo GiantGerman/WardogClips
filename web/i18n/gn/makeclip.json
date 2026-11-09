@@ -1,0 +1,12 @@
+{
+  "pick_first": "Eiporavo raẽ peteĩ evento térã embopu peteĩ grabación.",
+  "already": "Ko clip ojejapohína.",
+  "making_exact": "Clip ojejapohína, frame peve. Are'ive, ta'ãnga oñecodificajeýgui.",
+  "making_copy": "Clip ojejapohína. Oñepyrũta keyframe hi'aguĩvévape nde In mboyve.",
+  "open_folder": "Embojuruja ñongatuha",
+  "saved": "Clip oñongatúma: {name}",
+  "saved_early": "Clip oñongatúma: {name}\nOñepyrũ {seconds} nde In mboyve (keyframe hi'aguĩvéva).",
+  "check_mismatch": "Clip noñembojojapái grabación ndive. Ehecha reipuru mboyve.",
+  "failed": "Ndaikatúi ojejapo clip: {error}",
+  "unknown_error": "jejavy ojekuaa'ỹva"
+}

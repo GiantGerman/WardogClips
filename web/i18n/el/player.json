@@ -1,0 +1,99 @@
+{
+  "title.none": "κανένα κλιπ",
+  "title.rendering": "{kind} στο {time} · απόδοση {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · όλη η εγγραφή",
+  "title.no_proxy": "Δεν υπάρχει ακόμη proxy",
+  "tip.event": "{kind} στο {time}: {render}",
+  "tip.around": "γύρω στο {time}: {render}",
+  "tip.cached": "{height}p από την προσωρινή μνήμη κλιπ",
+  "tip.rendered": "{height}p αποδόθηκε σε {seconds} δ",
+  "tip.rendered_enc": "{height}p αποδόθηκε σε {seconds} δ ({encoder})",
+  "tip.proxy": "{name}: το proxy όλης της εγγραφής",
+  "tip.no_proxy": "{name}: δεν υπάρχει ακόμη proxy όλης της εγγραφής",
+  "busy.clip": "απόδοση του κλιπ ({height}p)...",
+  "busy.at": "απόδοση του {time} ({height}p)...",
+  "busy.seconds": "{seconds} δ",
+  "err.clip": "Δεν ήταν δυνατή η απόδοση αυτού του κλιπ",
+  "err.at": "Δεν ήταν δυνατή η απόδοση του {time}",
+  "err.retry": "Ξανά",
+  "err.encoding": "Ρυθμίσεις κωδικοποίησης",
+  "err.play_clip": "Δεν ήταν δυνατή η αναπαραγωγή αυτού του κλιπ.",
+  "err.play_proxy": "Δεν ήταν δυνατή η αναπαραγωγή του proxy.",
+  "pick.title": "Επιλέξτε ένα συμβάν",
+  "pick.text": "Επιλέξτε ένα στα Συμβάντα (ή πατήστε N): το κλιπ του παίζει εδώ από το pre-roll.",
+  "pick.more": "Ή κάντε κλικ στο timeline παρακάτω για να δείτε οποιαδήποτε στιγμή της εγγραφής.",
+  "pick.short": "Επιλέξτε ένα στα Συμβάντα (ή πατήστε N), ή κάντε κλικ στο timeline παρακάτω.",
+  "proxy.card_title": "Δεν υπάρχει ακόμη proxy για αυτή την εγγραφή",
+  "proxy.card_text": "Ένα proxy {height}p είναι αντίγραφο ολόκληρου του αρχείου {duration} για περιήγηση από την αρχή ως το τέλος (δημιουργείται αρκετές φορές ταχύτερα από τον πραγματικό χρόνο).",
+  "proxy.building": "δημιουργία",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "στην ουρά",
+  "proxy.build": "Δημιουργία proxy",
+  "proxy.all": "Proxy για όλες με συμβάντα",
+  "proxy.all_tip": "Βάζει στην ουρά proxy για κάθε εγγραφή με συμβάντα",
+  "proxy.queued_toast": "το proxy μπήκε στην ουρά",
+  "proxy.all_toast": {
+    "one": "μπήκε στην ουρά {count} proxy ({candidates} εγγραφές με συμβάντα δεν έχουν)",
+    "other": "μπήκαν στην ουρά {count} proxy ({candidates} εγγραφές με συμβάντα δεν έχουν)"
+  },
+  "mode.full_tip": "Όλη η εγγραφή, από το proxy της",
+  "mode.full_noproxy_tip": "Όλη η εγγραφή: δεν υπάρχει ακόμη proxy (δημιουργήστε ένα από εδώ)",
+  "bound.wait": "περιμένετε να φορτώσει το κλιπ αυτού του συμβάντος",
+  "bound.in_before_out": "η είσοδος πρέπει να είναι πριν την έξοδο",
+  "bound.out_after_in": "η έξοδος πρέπει να είναι μετά την είσοδο",
+  "bound.reset": "το κλιπ επέστρεψε στο pre-roll / post-roll",
+  "bound.in_set": "είσοδος = {time} (κλιπ {length} δ)",
+  "bound.out_set": "έξοδος = {time} (κλιπ {length} δ)",
+  "mark.nothing": "δεν παίζει τίποτα",
+  "mark.done": "χειροκίνητη σήμανση στο {time}",
+  "play_aria": "Αναπαραγωγή",
+  "pause_aria": "Παύση",
+  "time.pos": "{pos} από {total}",
+  "time.rel": "{offset} δ από το συμβάν",
+  "time.clip": "κλιπ {in} – {out} = {length} δ",
+  "pip.loop": "Βρόχος είσοδος → έξοδος",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · βαθμολογία {score}",
+  "tl.tip_status": "{kind} · {time} · βαθμολογία {score} · {status}",
+  "tl.status_kept": "κρατημένο",
+  "tl.status_false": "ψευδώς θετικό",
+  "tl.whole": "Όλη η εγγραφή",
+  "tl.no_events": "κανένα συμβάν",
+  "tl.not_detected": "δεν έγινε ακόμη εντοπισμός",
+  "tl.no_proxy": "χωρίς proxy",
+  "tl.no_proxy_tip": "Η λειτουργία πλήρους εγγραφής χρειάζεται proxy (δημιουργήστε το από το πρόγραμμα αναπαραγωγής)",
+  "tl.kind.kill": {
+    "one": "{count} kill",
+    "other": "{count} kill"
+  },
+  "tl.kind.assist": {
+    "one": "{count} assist",
+    "other": "{count} assist"
+  },
+  "tl.kind.death": {
+    "one": "{count} θάνατος",
+    "other": "{count} θάνατοι"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} εντοπισμός",
+    "other": "{count} εντοπισμοί"
+  },
+  "tl.kind.revive": {
+    "one": "{count} αναβίωση",
+    "other": "{count} αναβιώσεις"
+  },
+  "tl.kind.squad": {
+    "one": "{count} συμβάν ομάδας",
+    "other": "{count} συμβάντα ομάδας"
+  },
+  "tl.kind.voice": {
+    "one": "{count} φωνητικό",
+    "other": "{count} φωνητικά"
+  },
+  "tl.kind.manual": {
+    "one": "{count} χειροκίνητο",
+    "other": "{count} χειροκίνητα"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

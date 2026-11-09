@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Decodifica vídeo, lê o texto do HUD e transforma fala em texto.",
+  "can.integrated": "Placa integrada: decodifica vídeo só quando nenhuma outra placa de vídeo está em Usar no WardogClips. O texto do HUD e a fala rodam em outra placa ou no processador.",
+  "can.other": "Decodifica vídeo e lê o texto do HUD. A fala vira texto no processador, porque isso exige uma placa NVIDIA.",
+  "none_found": "Nenhuma placa de vídeo encontrada. O WardogClips faz todo o trabalho no processador.",
+  "role.use": "Usar no WardogClips",
+  "role.leave": "Não usar",
+  "all_left_alone": "Todas as placas estão em Não usar, então o WardogClips faz todo o trabalho no processador.",
+  "shared_hint": "A placa que roda seu jogo é compartilhada: enquanto você joga, o trabalho do WardogClips nela pode custar alguns quadros ao jogo. Coloque essa placa em Não usar se isso incomodar.",
+  "apply_hint": "Uma mudança vale a partir da próxima tarefa. Ao adicionar uma placa, mais tarefas de vídeo rodam ao mesmo tempo depois de reiniciar.",
+  "load_failed": "Não foi possível carregar a lista de placas de vídeo.",
+  "saved": "Salvo: {keys}",
+  "saved_none": "Salvo: nada mudou",
+  "error": "Erro: {error}"
+}

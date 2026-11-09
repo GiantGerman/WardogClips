@@ -1,22 +1,37 @@
-/* Shared helpers: DOM, fetch, formatting, toast. */
+/* Shared helpers: DOM, fetch, formatting, toast. Text goes through t() (i18n.js, loaded before this file). */
 "use strict";
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-// a failed request throws an Error carrying the HTTP status (e.status), so callers can tell a 404 / 409 apart
-async function _httpErr(r) { const e = new Error((await r.json().catch(() => ({}))).detail || r.statusText || ("HTTP " + r.status)); e.status = r.status; return e; }
+// a failed request throws an Error carrying the HTTP status (e.status), so callers can tell a 404 / 409 apart. A
+// translatable server error ({"detail": English, "code": "server.<key>", "params": {...}}) gets the page's text for
+// that key (e.code / e.params kept); otherwise the server's English detail.
+async function _httpErr(r) {
+  const b = await r.json().catch(() => ({}));
+  let text = "";
+  if (b && b.code) text = srvText({ detail: b.detail, code: b.code, params: b.params }, "detail");
+  else if (b && b.detail && typeof b.detail === "object") text = srvText(b.detail, "message");
+  else if (b && typeof b.detail === "string") text = b.detail;
+  const e = new Error(text || r.statusText || ("HTTP " + r.status)); e.status = r.status;
+  if (b && b.code) { e.code = b.code; e.params = b.params || {}; }
+  return e;
+}
 // every request carries X-WardogClips: 1 -- the server refuses a non-GET /api/* call (and check-folder) without it,
 // and a cross-site page cannot send a custom header (it forces a CORS preflight the server never approves)
 const WC_HDR = { "X-WardogClips": "1" };
 const _hdrs = (json) => json ? Object.assign({ "Content-Type": "application/json" }, WC_HDR) : Object.assign({}, WC_HDR);
 async function api(url) { const r = await fetch(url, { headers: _hdrs(false) }); if (!r.ok) throw await _httpErr(r); return r.json(); }
 async function post(url, body) { const r = await fetch(url, { method: "POST", headers: _hdrs(true), body: JSON.stringify(body || {}) }); if (!r.ok) throw await _httpErr(r); return r.json(); }
-async function del(url) { const r = await fetch(url, { method: "DELETE", headers: _hdrs(false) }); if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText); return r.json(); }
-async function put(url, body) { const r = await fetch(url, { method: "PUT", headers: _hdrs(true), body: JSON.stringify(body || {}) }); if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText); return r.json(); }
+async function del(url) { const r = await fetch(url, { method: "DELETE", headers: _hdrs(false) }); if (!r.ok) throw await _httpErr(r); return r.json(); }
+async function put(url, body) { const r = await fetch(url, { method: "PUT", headers: _hdrs(true), body: JSON.stringify(body || {}) }); if (!r.ok) throw await _httpErr(r); return r.json(); }
 
 const KIND_COLORS = { kill: "var(--k-kill)", assist: "var(--k-assist)", death: "var(--k-death)", spotted: "var(--k-spotted)", revive: "var(--k-revive)", squad: "var(--k-squad)", voice: "var(--k-voice)", manual: "var(--k-manual)" };
-const KIND_LABEL = { kill: "kill", assist: "assist", death: "death", spotted: "spotted", revive: "revive", squad: "squad", voice: "voice", manual: "manual" };
-// display names (capitalised) for headings / badges; KIND_LABEL stays lower case for running text
-const KIND_NAME = { kill: "Kill", assist: "Assist", death: "Death", spotted: "Spotted", revive: "Revive", squad: "Squad", voice: "Voice", manual: "Manual" };
+// event kinds in the UI language: KIND_NAME = display names for headings / badges (core.kind.<kind>), KIND_LABEL =
+// the lower-case form for running text (core.kind_label.<kind>). Filled from the catalogs, again after a switch.
+const KIND_LABEL = {}, KIND_NAME = {};
+function _kindNames() {
+  for (const k of Object.keys(KIND_COLORS)) { KIND_NAME[k] = t("core.kind." + k); KIND_LABEL[k] = t("core.kind_label." + k); }
+}
+_kindNames(); I18N.onChange(_kindNames);
 
 /* Inline SVG icons (24x24, stroke = currentColor). icon("play") -> markup; static markup in index.html uses
    <i data-ic="play"></i> placeholders that hydrateIcons() swaps for the svg (runs once at load, and on any
@@ -52,6 +67,7 @@ const ICONS = {
   pausej: '<rect x="7" y="6" width="3.5" height="12" rx="1"/><rect x="13.5" y="6" width="3.5" height="12" rx="1"/>', target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
   mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
   calib: '<path d="M4 20h16M6 16l4-10 4 10M8 12h4M17 6v10"/>', plus: '<path d="M12 5v14M5 12h14"/>', filter: '<path d="M4 5h16l-6 8v6l-4-2v-4z"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
   panel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>', cmd: '<path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z"/>'
 };
 const FILLED_ICONS = { play: 1, pause: 1 };
@@ -63,28 +79,15 @@ function hydrateIcons(root) {
   (root || document).querySelectorAll("i[data-ic]").forEach(el => { el.outerHTML = icon(el.dataset.ic, el.className || ""); });
 }
 
-function fmtDur(s) {
-  if (s == null || isNaN(s)) return "-";
-  s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-  return (h ? h + "h " : "") + String(m).padStart(h ? 2 : 1, "0") + "m " + String(sec).padStart(2, "0") + "s";
-}
-function fmtHours(s) { return (s / 3600).toFixed(1) + " h"; }
-function fmtBytes(b) {
-  if (b == null) return "-";
-  if (b >= 1e12) return (b / 1e12).toFixed(2) + " TB";
-  if (b >= 1e9) return (b / 1e9).toFixed(1) + " GB";
-  if (b >= 1e6) return (b / 1e6).toFixed(0) + " MB";
-  return Math.round(b / 1e3) + " KB";
-}
-function fmtDate(utc) {
-  if (!utc) return "-";
-  const d = new Date(utc * 1000); const p = (n) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-}
-function fmtTime(utc) { if (!utc) return "-"; const d = new Date(utc * 1000); const p = (n) => String(n).padStart(2, "0"); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`; }
-function fmtAgo(utc) { if (!utc) return "-"; const s = Math.max(0, Date.now() / 1000 - utc); if (s < 60) return Math.round(s) + "s ago"; if (s < 3600) return Math.round(s / 60) + "m ago"; if (s < 86400) return (s / 3600).toFixed(1) + "h ago"; return Math.round(s / 86400) + "d ago"; }
-function fmtMbps(b) { return b ? (b / 1e6).toFixed(0) + " Mb/s" : "-"; }
-const pct = (x) => Math.round((x || 0) * 100) + "%";
+// formatting in the UI language (i18n.js does the Intl work): sizes, durations, dates, times, rates
+function fmtDur(s) { return fmtDuration(s); }                         // 1h 02m 03s
+function fmtHours(s) { return s == null || isNaN(s) ? "-" : fmtUnit(s / 3600, "hour", 1); }
+function fmtBytes(b) { return fmtSize(b); }                           // 6.4 GB
+function fmtDate(utc) { return fmtDateTime(utc, "datetime"); }        // en-US: 11/07/2026, 3:45 PM
+function fmtTime(utc) { return fmtDateTime(utc, "time"); }            // en-US: 3:45:07 PM
+function fmtAgo(utc) { return fmtRelative(utc); }                     // 5 min. ago
+function fmtMbps(b) { return b ? fmtUnit(b / 1e6, "megabit-per-second", 0) : "-"; }
+const pct = (x) => fmtPct(x || 0);
 
 let _toastT = null, _toastEl = null;
 // An open modal <dialog> sits in the top layer above everything in the body, so the toast is shown inside
@@ -110,5 +113,5 @@ document.addEventListener("close", (e) => {
   if (!t || !d || d.tagName !== "DIALOG" || !d.contains(t)) return;
   const home = _toastHome(); if (home !== d) home.appendChild(t); else document.body.appendChild(t);
 }, true);
-function copyText(s) { try { navigator.clipboard.writeText(s); toast("copied: " + s); } catch (e) { toast("clipboard blocked"); } }
+function copyText(s) { try { navigator.clipboard.writeText(s); toast(t("core.copied", { text: s })); } catch (e) { toast(t("core.clipboard_blocked")); } }
 hydrateIcons(document);

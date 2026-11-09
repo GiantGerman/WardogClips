@@ -15,6 +15,11 @@ number from ``nvidia-smi --query-gpu=encoder.stats.sessionCount``; no process is
 holds one (OBS), encodes on the CPU with x264 at below-normal priority instead (a 720p clip takes a few
 seconds and the game keeps the CPU it asks for). With NVENC idle it uses
 h264_nvenc as before. Decoding (NVDEC, ``-hwaccel cuda``) is a separate engine and unaffected.
+
+AMD (AMF, ``h264_amf``) and Intel (Quick Sync, ``h264_qsv``): there is no driver-level session count to ask without
+looking at processes, so ``auto`` never takes those engines on its own -- only when Settings > Hardware allows it
+(``hardware.auto_gpu_encoder``), and then for jobs on a card of that brand. The default stays x264. Which card a job
+runs on: utils/gpus.py.
 """
 
 import logging
@@ -27,8 +32,11 @@ from contextlib import contextmanager
 
 logger = logging.getLogger("wclips.encoder")
 
-CHOICES = ("auto", "h264_nvenc", "hevc_nvenc", "libx264")
+CHOICES = ("auto", "h264_nvenc", "hevc_nvenc", "h264_amf", "h264_qsv", "libx264")
 NVENC = ("h264_nvenc", "hevc_nvenc")
+HW_ENCODERS = NVENC + ("h264_amf", "hevc_amf", "h264_qsv", "hevc_qsv")    # a failed encode on these retries with x264
+ENCODER_VENDOR = {"h264_nvenc": "nvidia", "hevc_nvenc": "nvidia", "h264_amf": "amd", "hevc_amf": "amd",
+                  "h264_qsv": "intel", "hevc_qsv": "intel"}
 CACHE_S = 2.0
 _NO_WINDOW = 0x08000000
 
@@ -67,18 +75,51 @@ def nvenc_sessions(max_age: float = CACHE_S) -> int | None:
     return n
 
 
+def _auto_gpu(hw: dict) -> tuple[str, str] | None:
+    """auto on this thread's card when it is not an NVIDIA card: (encoder, why); None = the NVIDIA logic below."""
+    from utils import gpus
+    if gpus.source() == "none":
+        return None                                    # no card list at all: the NVIDIA-first behavior as before
+    a = gpus.current()
+    if a is None:
+        return "libx264", "no graphics card in use (Settings > Hardware) -- x264 on the CPU"
+    if a["vendor"] == "nvidia":
+        return None
+    enc = gpus.ENCODERS.get(a["vendor"])
+    brand = gpus.VENDOR_NAMES.get(a["vendor"], "this")
+    if not enc or not hw.get(enc):
+        return "libx264", f"no video encoder for the {brand} card in this ffmpeg -- x264 on the CPU"
+    hwcfg = getattr(gpus.settings(), "hardware", None)
+    if not getattr(hwcfg, "auto_gpu_encoder", False):
+        return "libx264", f"the {brand} card's encoder is off for auto (Settings > Hardware) -- x264 on the CPU"
+    return enc, f"the {brand} card's encoder, allowed in Settings > Hardware"
+
+
 def choose(setting: str, hw: dict | None = None) -> tuple[str, str]:
-    """(ffmpeg encoder, why). An explicit setting is used as is (NVENC falls back to x264 when this
-    ffmpeg lacks it); auto = NVENC only while nothing else is encoding on it."""
+    """(ffmpeg encoder, why). An explicit setting is used as is (a GPU encoder falls back to x264 when this
+    ffmpeg lacks it or no usable card of that brand is in the PC); auto = NVENC only while nothing else is encoding
+    on it, an AMD / Intel encoder only when Settings > Hardware allows it."""
     global _last_reason
     if hw is None:
         from media import ffmpeg
         hw = ffmpeg.hw_info()
     setting = setting if setting in CHOICES else "auto"
     if setting != "auto":
-        if setting in NVENC and not hw.get(setting):
+        if setting in HW_ENCODERS and not hw.get(setting):
             return "libx264", f"{setting} not available in this ffmpeg"
+        ven = ENCODER_VENDOR.get(setting)
+        if ven:
+            from utils import gpus
+            if gpus.source() != "none" and not any(a["vendor"] == ven for a in gpus.usable()):
+                return "libx264", f"no usable {gpus.VENDOR_NAMES[ven]} graphics card for {setting}"
         return setting, "set in Settings"
+    other = _auto_gpu(hw)
+    if other is not None:
+        codec, why = other
+        if why != _last_reason:
+            logger.info("[Encoder] auto -> %s (%s)", codec, why)
+            _last_reason = why
+        return codec, why
     if not hw.get("h264_nvenc"):
         return "libx264", "no NVENC in this ffmpeg"
     n = nvenc_sessions()

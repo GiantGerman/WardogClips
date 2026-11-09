@@ -1,6 +1,6 @@
 /* First-run setup wizard (dialog#dlg-setup), Settings > Add-ons rows and the status bar download item.
-   Tokens only (style.css :root); type >= 12 px; the one accent. The wizard is a large centred card: on a first run
-   the backdrop is the page colour (the empty app behind it says nothing yet), on a re-run the usual blur. */
+   Tokens only (style.css :root); type >= 12 px; the one accent. The wizard is a large centered card: on a first run
+   the backdrop is the page color (the empty app behind it says nothing yet), on a re-run the usual blur. */
 
 dialog.dlg.setup { width: min(1040px, calc(100vw - 32px)); height: min(760px, calc(100vh - 32px)); max-height: none; padding: 0; overflow: hidden; }
 dialog.dlg.setup[open] { display: flex; }
@@ -15,7 +15,7 @@ dialog.dlg.setup.first::backdrop { background: radial-gradient(1200px 600px at 5
 .su-brand b { display: block; font-size: var(--fs-m); font-weight: 600; }
 .su-brand small { display: block; color: var(--faint); font-size: var(--fs-xs); }
 .su-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; counter-reset: none; }
-.su-steps button { display: flex; align-items: center; gap: 12px; width: 100%; height: 38px; padding: 0 8px; border: 0; border-radius: var(--r-s); background: transparent; color: var(--muted); font-size: var(--fs-s); text-align: left; cursor: pointer; }
+.su-steps button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 38px; line-height: 1.25; padding: 0 8px; border: 0; border-radius: var(--r-s); background: transparent; color: var(--muted); font-size: var(--fs-s); text-align: left; cursor: pointer; }
 .su-steps button:hover:not(:disabled) { background: var(--raised); color: var(--text); }
 .su-steps button:disabled { opacity: 1; pointer-events: none; cursor: default; color: var(--faint); }
 .su-steps .n { width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; border: 1px solid var(--line2); font-size: var(--fs-xs); font-variant-numeric: tabular-nums; flex: none; color: var(--text2); background: var(--surface); }
@@ -36,9 +36,10 @@ dialog.dlg.setup.first::backdrop { background: radial-gradient(1200px 600px at 5
 .su-sub { font-size: var(--fs-xs); font-weight: 600; letter-spacing: .7px; text-transform: uppercase; color: var(--faint); margin: 24px 0 8px; }
 .su-loading { height: 100%; display: grid; place-content: center; text-align: center; color: var(--muted); font-size: var(--fs-s); max-width: none; }
 .su-foot { flex: none; }
-.su-foot .su-msg { color: var(--muted); font-size: var(--fs-s); max-width: 520px; text-align: right; }
+.su-foot .su-msg { color: var(--muted); font-size: var(--fs-s); max-width: 520px; text-align: right; min-width: 0; }
 .su-foot .su-msg.bad { color: var(--warn-text); }
-.su-foot #su-skip { font-size: var(--fs-s); color: var(--muted); }
+.su-foot #su-skip { font-size: var(--fs-s); color: var(--muted); white-space: nowrap; flex: none; }
+.su-foot > .btn { flex: none; }
 .su-foot #su-skip:hover { color: var(--text); }
 .su-foot .btn svg.i { width: 14px; height: 14px; }
 .ok-t { color: var(--ok-text); } .warn-t { color: var(--warn-text); } .bad-t { color: var(--bad-text); }
@@ -128,7 +129,7 @@ dialog.setup .opt .badge svg.i { width: 11px; height: 11px; }
   .su-side { flex-direction: row; align-items: center; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--line); gap: 16px; overflow-x: auto; }
   .su-brand small { display: none; }
   .su-steps { flex-direction: row; }
-  .su-steps button { width: auto; height: 32px; }
+  .su-steps button { width: auto; height: 32px; min-height: 0; white-space: nowrap; }
   .su-steps li:not(.on) button > span:last-child { display: none; }
   .su-body { padding: 24px 16px; }
   .su-field { grid-template-columns: 1fr; gap: 8px; }
@@ -166,3 +167,7 @@ dialog.setup .su-card .num { font-size: var(--fs-s); }
 .su-saveto { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-s); }
 .su-saveto .path { flex: 1 1 200px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .su-sum .mono.faint { margin-top: 2px; }
+
+/* wizard language menu: pinned to the bottom of the side column */
+.su-side .su-lang { margin-top: auto; display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-xs); color: var(--muted); }
+.su-side .su-lang select { width: 100%; }

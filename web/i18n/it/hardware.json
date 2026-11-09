@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Decodifica i video, legge il testo dell'HUD e trasforma il parlato in testo.",
+  "can.integrated": "Grafica integrata: decodifica i video solo quando nessun'altra scheda video è impostata su Usa per WardogClips. Testo dell'HUD e parlato vengono elaborati su un'altra scheda o sul processore.",
+  "can.other": "Decodifica i video e legge il testo dell'HUD. Il parlato diventa testo sul processore, perché serve una scheda NVIDIA.",
+  "none_found": "Nessuna scheda video trovata. WardogClips fa tutto il lavoro sul processore.",
+  "role.use": "Usa per WardogClips",
+  "role.leave": "Non usare",
+  "all_left_alone": "Tutte le schede sono impostate su Non usare, quindi WardogClips fa tutto il lavoro sul processore.",
+  "shared_hint": "La scheda che fa girare il gioco è condivisa: mentre giochi, il lavoro di WardogClips su di essa può costare al gioco qualche fotogramma. Se ti dà fastidio, imposta quella scheda su Non usare.",
+  "apply_hint": "Una modifica vale dalla prossima attività. Se aggiungi una scheda, dopo un riavvio girano più attività video insieme.",
+  "load_failed": "Impossibile caricare l'elenco delle schede video.",
+  "saved": "Salvato: {keys}",
+  "saved_none": "Salvato: nessuna modifica",
+  "error": "Errore: {error}"
+}

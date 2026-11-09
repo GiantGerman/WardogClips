@@ -1,0 +1,12 @@
+{
+  "pick_first": "Valitse ensin tapahtuma tai toista tallenne.",
+  "already": "Tätä klippiä tehdään jo.",
+  "making_exact": "Klippiä tehdään ruudun tarkkuudella. Tämä kestää hieman kauemmin, koska kuva koodataan uudelleen.",
+  "making_copy": "Klippiä tehdään. Se alkaa lähimmästä avainruudusta ennen alkupistettäsi.",
+  "open_folder": "Avaa kansio",
+  "saved": "Klippi tallennettu: {name}",
+  "saved_early": "Klippi tallennettu: {name}\nSe alkaa {seconds} ennen alkupistettäsi (lähin avainruutu).",
+  "check_mismatch": "Klippi ei vastaa täysin tallennetta. Tarkista se ennen käyttöä.",
+  "failed": "Klippiä ei voitu tehdä: {error}",
+  "unknown_error": "tuntematon virhe"
+}

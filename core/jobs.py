@@ -6,8 +6,10 @@ prep, refine) and `stt` (whisper: one model resident, its own fixed thread count
 Drive-aware parallelism: a footage-heavy job (video or stt lane) takes a *slot*
 on the drive its recording lives on. Each drive has ``core.drives.slots()`` of them per stage
 (from the drive's read benchmark: an NVMe SSD feeds several keyframe passes, a SATA HDD
-about one), and video-lane jobs share a global GPU cap (``settings.jobs.gpu_parallel``). The
-claim walks the queue in priority order and hands out the first job whose drive (and the GPU)
+about one), and video-lane jobs take a share of a graphics card: one pool per card in use (utils/gpus.py),
+``settings.jobs.gpu_parallel`` shares each (no card in use -> one CPU pool of that size). A job runs on the card
+whose pool it got (bound to its thread; `jobs.gpu` records the card's name). The
+claim walks the queue in priority order and hands out the first job whose drive (and a card)
 has a free slot, so a full HDD never blocks work on an SSD. Slots are counted in memory under a
 condition variable; ``_run`` releases them in its finally. Code outside the queue (e.g. a clip
 export) takes a slot with ``with queue.drive_slot(drive, stage):``.
@@ -29,6 +31,9 @@ import traceback
 from collections import Counter
 
 from core import drives as drives_mod
+from core import queue_order
+from core.messages import annotate, annotate_all, msg
+from utils import gpus as gpus_mod
 from utils.logging_config import set_context
 
 logger = logging.getLogger("wclips.jobs")
@@ -44,6 +49,7 @@ STAGE_LANES = {
     "thumbs": "io",
     "proxy": "video",       # browser proxy of the whole recording
     "download": "net",      # a stream VOD (yt-dlp) into the provider folder; jobs.arg = the import as JSON
+    "makeclip": "io",       # Make clip (media/makeclip.py): a short, user-started copy -- never waits behind detects
 }
 SLOT_STAGES = ("detect", "proxy", "transcribe")      # the stages the UI shows per-drive slots for
 
@@ -73,9 +79,9 @@ class JobContext:
         self._last = now
         frac = max(0.0, min(1.0, float(frac)))
         self.db.execute("UPDATE jobs SET progress=?, message=? WHERE id=?", (frac, message[:200], self.job["id"]))
-        self.bus.publish("job", action="progress", job={"id": self.job["id"], "rec_id": self.job["rec_id"],
-                                                        "stage": self.job["stage"], "progress": frac,
-                                                        "message": message[:200]})
+        self.bus.publish("job", action="progress", job=annotate({"id": self.job["id"], "rec_id": self.job["rec_id"],
+                                                                 "stage": self.job["stage"], "progress": frac,
+                                                                 "message": message[:200]}, "message"))
 
     def stopping(self) -> bool:
         """The app is shutting down, or Stop was pressed on this job (POST /api/jobs/{id}/stop)."""
@@ -93,6 +99,7 @@ class JobQueue:
         self.cfg = cfg
         self.db = db
         self.bus = bus
+        gpus_mod.configure(cfg)                     # Settings > Hardware roles are read live from this cfg
         self.handlers: dict[str, callable] = {}
         self._threads: list[threading.Thread] = []
         self._stop = threading.Event()
@@ -113,6 +120,7 @@ class JobQueue:
         self.finished: Counter = Counter()          # (stage, state) -> n, for drain() summaries
         self.poll_s = 2.0
         self.drives = drives_mod.DriveManager(cfg, db, bus, self)
+        queue_order.ensure(db)                      # queue_boost: a recording moved to the top keeps its follow-ups there
 
     @property
     def running(self) -> dict[int, dict]:
@@ -136,6 +144,7 @@ class JobQueue:
                           (rec_id, stage, arg))
         if dup is not None:
             return None
+        priority = queue_order.boosted(self.db, rec_id, priority)
         jid = self.db.execute(
             "INSERT INTO jobs (rec_id, stage, lane, state, priority, created_utc, arg) VALUES (?,?,?,'queued',?,?,?)",
             (rec_id, stage, lane, priority, time.time(), arg))
@@ -184,6 +193,7 @@ class JobQueue:
         n = self.db.execute("UPDATE jobs SET state='skipped', finished_utc=? WHERE id=? AND state='queued'",
                             (time.time(), job_id))
         if n:
+            queue_order.prune(self.db)
             self.bus.publish("job", action="skipped", job={"id": job_id})
         return bool(n)
 
@@ -195,6 +205,7 @@ class JobQueue:
         marks = ",".join("?" for _ in states)
         n = self.db.execute(f"DELETE FROM jobs WHERE state IN ({marks})", states)
         if n:
+            queue_order.prune(self.db)
             self.bus.publish("jobs", action="cleared", n=n)
         return n
 
@@ -216,6 +227,7 @@ class JobQueue:
                                   tuple(ids)).fetchone()[0]
                 # above the unlisted queued jobs AND above what a new enqueue gets (epoch minutes of the
                 # recording, + small bumps), so the hand-made order is not overtaken by the next follow-up
+                top = max(int(top or 0), queue_order.live_boost_top(con))     # above a "Move to top" boost too
                 base = max(int(top or 0), int(time.time() // 60) + REORDER_HEADROOM) + 1
                 for pos, jid in enumerate(ids):
                     n += con.execute("UPDATE jobs SET priority=? WHERE id=? AND state='queued'",
@@ -228,6 +240,11 @@ class JobQueue:
             self.bus.publish("jobs", action="reordered", n=n)
             self._wake.set()
         return n
+
+    def move(self, ids=None, rec_ids=None, stages=None, to="top", queue_missing: bool = False) -> dict:
+        """Move queued jobs as one block (top / bottom / up / down / before / after another job) in one
+        SQL update; "top" also boosts the moved recordings' later follow-ups (core/queue_order.py)."""
+        return queue_order.move(self, ids=ids, rec_ids=rec_ids, stages=stages, to=to, queue_missing=queue_missing)
 
     def counts(self) -> dict:
         out = {"queued": 0, "running": 0, "done": 0, "failed": 0, "skipped": 0}
@@ -247,18 +264,29 @@ class JobQueue:
                                  " CASE WHEN j.state='queued' THEN -j.priority END,"
                                  " CASE WHEN j.state='queued' THEN j.id END ASC,"
                                  " j.id DESC LIMIT ?", (limit,))
-        return rows
+        return annotate_all(rows, "message", "error")
 
     # -- slots --------------------------------------------------------------------
     def lane_threads(self) -> dict[str, int]:
         """Worker threads per lane. The video lane gets one per GPU share (the drive slots and the
         GPU cap decide how many actually run); stt stays at its own count."""
         j = self.cfg.jobs
-        return {"io": max(1, j.io_lanes), "video": max(1, j.video_lanes, j.gpu_parallel), "stt": max(1, j.stt_lanes),
+        video = max(1, int(j.gpu_parallel)) * len(gpus_mod.pool_keys(self.cfg))
+        return {"io": max(1, j.io_lanes), "video": max(1, j.video_lanes, video), "stt": max(1, j.stt_lanes),
                 "net": max(1, int(getattr(self.cfg.vods, "parallel", 1)))}
 
     def _gpu_held(self) -> int:
         return sum(1 for e in self._held.values() if e["gpu"])
+
+    def _pick_gpu(self) -> str | None:
+        """The card pool (key, or gpus.CPU) with the most free shares; None = every pool is full. Under _slots."""
+        cap = max(1, int(self.cfg.jobs.gpu_parallel))
+        held = Counter(e.get("gpu_key") for e in self._held.values() if e["gpu"])
+        best = None
+        for k in gpus_mod.pool_keys(self.cfg):
+            if held.get(k, 0) < cap and (best is None or held.get(k, 0) < held.get(best, 0)):
+                best = k
+        return best
 
     def _drive_held(self, drive: str) -> int:
         return sum(1 for e in self._held.values() if e["drive"] and e["drive"] == drive)
@@ -267,7 +295,7 @@ class JobQueue:
         """Why a job of this stage on this drive cannot start now (None = it can). Under _slots.
         gpu: whether it needs a GPU share (default: video lane)."""
         need_gpu = (lane == "video") if gpu is None else gpu
-        if need_gpu and self._gpu_held() >= max(1, int(self.cfg.jobs.gpu_parallel)):
+        if need_gpu and self._pick_gpu() is None:
             return "gpu"
         if lane in drives_mod.HEAVY_LANES and drive:
             if drive in self._bench_busy or drive in self._bench_wanted:
@@ -287,9 +315,10 @@ class JobQueue:
     def _reserve(self, token: tuple, drive: str, stage: str, lane: str, job_id=None, rec_id=None,
                  gpu: bool | None = None, bitrate: float | None = None) -> None:
         heavy = lane in drives_mod.HEAVY_LANES
+        need_gpu = (lane == "video") if gpu is None else bool(gpu)
         self._held[token] = {"drive": drive if (heavy and drive) else None, "stage": stage, "lane": lane,
                              "demand": drives_mod.demand_mb_s(stage, bitrate) if (heavy and drive) else 0.0,
-                             "gpu": (lane == "video") if gpu is None else bool(gpu),
+                             "gpu": need_gpu, "gpu_key": (self._pick_gpu() or gpus_mod.CPU) if need_gpu else None,
                              "job_id": job_id, "rec_id": rec_id, "since": time.time(),
                              "thread": threading.current_thread().name}
 
@@ -333,6 +362,7 @@ class JobQueue:
                 why = self._refusal(d, stage, lane, bitrate, gpu=need_gpu)
                 if why is None:
                     self._reserve(token, d, stage, lane, gpu=need_gpu, bitrate=bitrate)
+                    gpu_key = self._held[token]["gpu_key"]
                     break
                 left = None if deadline is None else deadline - time.monotonic()
                 if not wait or (left is not None and left <= 0) or self._stop.is_set():
@@ -343,7 +373,9 @@ class JobQueue:
         self._tls.slot = (d, stage)
         self._tls.gpu = prev_gpu + (1 if need_gpu else 0)
         try:
-            yield {"drive": d, "stage": stage, "reentrant": False}
+            # a new card share runs the block on that card; an inner slot keeps the card of the job around it
+            with gpus_mod.bound(gpu_key) if need_gpu else contextlib.nullcontext():
+                yield {"drive": d, "stage": stage, "reentrant": False}
         finally:
             self._tls.slot = prev
             self._tls.gpu = prev_gpu
@@ -385,7 +417,13 @@ class JobQueue:
         with self._slots:
             gpu = self._gpu_held()
             held = Counter(e["drive"] for e in self._held.values() if e["drive"])
+            per_gpu = Counter(e.get("gpu_key") for e in self._held.values() if e["gpu"])
+        pools = []
+        for k in gpus_mod.pool_keys(self.cfg):
+            a = gpus_mod.find(k)
+            pools.append({"key": k, "name": gpus_mod.label(a), "running": per_gpu.get(k, 0), "cap": max(1, int(j.gpu_parallel))})
         out = {"mode": j.parallel, "gpu_parallel": j.gpu_parallel, "gpu_running": gpu, "max_parallel": j.max_parallel,
+               "gpu_cap": max(1, int(j.gpu_parallel)) * len(pools), "gpus": pools,
                "auto_bench": j.auto_bench, "threads": self.lane_threads(), "drives": {}}
         known = self.drives.known_drives()
         for d in known + [x for x in held if x not in known]:
@@ -468,7 +506,8 @@ class JobQueue:
         """One OCR engine per parallel video job (detect OCRs on the CPU between NVDEC reads)."""
         try:
             from vision.ocr import ocr, ocr_fast
-            n = max(1, self.lane_threads()["video"])
+            from core import workmode
+            n = workmode.ocr_engines(max(1, self.lane_threads()["video"]))     # fewer while you play
             ocr.set_max_engines(n)
             ocr_fast.set_max_engines(n)          # the ticker's fast pool: every parallel detect reads its ticker there
         except Exception:  # noqa: BLE001 - numpy / vision missing is the detect stage's problem
@@ -601,11 +640,13 @@ class JobQueue:
             return None
         if lane == "video":
             with self._slots:
-                if self._gpu_held() >= max(1, int(self.cfg.jobs.gpu_parallel)):
+                if self._pick_gpu() is None:
                     return None
         con = self.db.connect()
         chosen = None
         with self._claim_lock:
+            if lane != "io" and self._workmode_refusal(lane):     # under the claim lock: two lanes never both pass
+                return None
             con.execute("BEGIN IMMEDIATE")
             try:
                 # a queued job waits while its twin (same recording + stage + arg) runs: enqueue(after_running=True)
@@ -629,8 +670,11 @@ class JobQueue:
                 if chosen is None:
                     con.execute("COMMIT")
                     return None
-                con.execute("UPDATE jobs SET state='running', started_utc=?, progress=0, message='' WHERE id=?",
-                            (time.time(), chosen["id"]))
+                with self._slots:
+                    gkey = (self._held.get(("job", chosen["id"])) or {}).get("gpu_key")
+                card = gpus_mod.label(gpus_mod.find(gkey)) if gkey else None     # the card this job runs on
+                con.execute("UPDATE jobs SET state='running', started_utc=?, progress=0, message='', gpu=? WHERE id=?",
+                            (time.time(), card, chosen["id"]))
                 con.execute("COMMIT")
             except Exception:
                 con.execute("ROLLBACK")
@@ -638,9 +682,18 @@ class JobQueue:
                     self._release(("job", chosen["id"]))
                 raise
         job = {k: chosen[k] for k in chosen.keys() if not k.startswith("_")}
+        job["gpu"] = card
         if chosen["_drive"] and lane in drives_mod.HEAVY_LANES:
             logger.debug("[Jobs] claim lane=%s stage=%s rec=%s drive=%s", lane, job["stage"], job["rec_id"], chosen["_drive"])
         return job
+
+    def _workmode_refusal(self, lane: str) -> str | None:
+        """Work mode (core/workmode.py): while you play, fewer jobs of this lane at once; in background mode, none
+        until you are away. Only NEW claims wait -- running jobs finish."""
+        from core import workmode
+        with self._slots:
+            n = sum(1 for e in self._held.values() if e["job_id"] is not None and e["lane"] == lane)
+        return workmode.claim_refusal(lane, n)
 
     def _run(self, job: dict) -> None:
         token = ("job", job["id"])
@@ -655,39 +708,45 @@ class JobQueue:
         handler = self.handlers.get(job["stage"])
         t0 = time.monotonic()
         state = "failed"
+        gpu_key = (ent or {}).get("gpu_key")
+        prev_card = gpus_mod.bound_key()
         try:
+            if gpu_key:
+                # this job's card: the ffmpeg readers / encoders and OCR ask utils/gpus.current()
+                gpus_mod.bind(gpu_key)
             # inside the try: anything raising here must still release the drive / GPU slot
             rec = self.db.one("SELECT * FROM recordings WHERE id=?", (job["rec_id"],)) if job["rec_id"] else None
             set_context((rec or {}).get("name", "")[:10])
             self.bus.publish("job", action="started", job={"id": job["id"], "rec_id": job["rec_id"], "stage": job["stage"],
-                                                           "drive": (ent or {}).get("drive")})
+                                                           "drive": (ent or {}).get("drive"), "gpu": job.get("gpu")})
             if handler is None:
-                raise RuntimeError(f"no handler registered for stage {job['stage']!r}")
+                raise RuntimeError(f"no handler registered for stage {job['stage']!r}")   # a programming error
             if rec is None and job["rec_id"]:
-                raise RuntimeError("recording row vanished")
+                raise RuntimeError(msg("server.job.no_recording", "The recording was removed from the library.")["message"])
             ctx = JobContext(self, job, rec)
             result = handler(ctx)
-            msg = (result if isinstance(result, str) else "")[:200]
+            text = (result if isinstance(result, str) else "")[:200]
             self.db.execute("UPDATE jobs SET state='done', progress=1, message=?, finished_utc=? WHERE id=?",
-                            (msg, time.time(), job["id"]))
+                            (text, time.time(), job["id"]))
             state = "done"
-            logger.info("[Jobs] done stage=%s rec=%s %.1fs %s", job["stage"], job["rec_id"], time.monotonic() - t0, msg)
-            self.bus.publish("job", action="done", job={"id": job["id"], "rec_id": job["rec_id"], "stage": job["stage"],
-                                                        "message": msg})
+            logger.info("[Jobs] done stage=%s rec=%s %.1fs %s", job["stage"], job["rec_id"], time.monotonic() - t0, text)
+            self.bus.publish("job", action="done", job=annotate({"id": job["id"], "rec_id": job["rec_id"],
+                                                                 "stage": job["stage"], "message": text}, "message"))
         except Exception as e:  # noqa: BLE001 - a failing stage must never take the worker down
             ev = self._cancel.get(job["id"])
             if ev is not None and ev.is_set():
                 # Stop was pressed: not a failure
                 state = "skipped"
-                self.db.execute("UPDATE jobs SET state='skipped', message='stopped by you', finished_utc=? WHERE id=?",
-                                (time.time(), job["id"]))
+                self.db.execute("UPDATE jobs SET state='skipped', message=?, finished_utc=? WHERE id=?",
+                                (msg("server.job.stopped", "stopped by you")["message"], time.time(), job["id"]))
                 logger.info("[Jobs] stopped stage=%s rec=%s", job["stage"], job["rec_id"])
                 self.bus.publish("job", action="skipped", job={"id": job["id"], "rec_id": job["rec_id"], "stage": job["stage"]})
             elif self._stop.is_set():
                 # the app is shutting down mid-job: back in the queue, resumed on the next start
                 state = "queued"
-                self.db.execute("UPDATE jobs SET state='queued', progress=0, message='interrupted by shutdown',"
-                                " started_utc=NULL WHERE id=?", (job["id"],))
+                self.db.execute("UPDATE jobs SET state='queued', progress=0, message=?, started_utc=NULL WHERE id=?",
+                                (msg("server.job.interrupted", "Interrupted when WardogClips closed; it goes on at "
+                                     "the next start.")["message"], job["id"]))
                 logger.info("[Jobs] interrupted by shutdown stage=%s rec=%s -> queued", job["stage"], job["rec_id"])
             else:
                 err = f"{type(e).__name__}: {e}"
@@ -695,14 +754,20 @@ class JobQueue:
                 logger.debug("[Jobs] traceback\n%s", traceback.format_exc())
                 self.db.execute("UPDATE jobs SET state='failed', error=?, finished_utc=? WHERE id=?",
                                 (err[:500], time.time(), job["id"]))
-                self.bus.publish("job", action="failed", job={"id": job["id"], "rec_id": job["rec_id"], "stage": job["stage"],
-                                                              "error": err[:200]})
+                self.bus.publish("job", action="failed", job=annotate({"id": job["id"], "rec_id": job["rec_id"],
+                                                                       "stage": job["stage"], "error": err[:200]}, "error"))
         finally:
             self._running.pop(job["id"], None)
             self._cancel.pop(job["id"], None)
             self._tls.slot = prev_slot
             self._tls.gpu = prev_gpu
+            gpus_mod.bind(prev_card)
             self._release(token)
+            if job.get("rec_id") is not None and state != "queued":
+                try:
+                    queue_order.prune(self.db, job["rec_id"])      # the recording's work is over: its boost ends
+                except Exception:  # noqa: BLE001 - bookkeeping only
+                    logger.debug("[Jobs] boost prune failed rec=%s", job["rec_id"], exc_info=True)
             with self._stats_lock:
                 self.finished[(job["stage"], state)] += 1
             set_context("")

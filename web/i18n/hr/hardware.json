@@ -1,0 +1,16 @@
+{
+  "@": "Hrvatski (hr). Postavke > Hardver.",
+  "can.nvidia": "Dekodira video, čita tekst HUD-a i pretvara govor u tekst.",
+  "can.integrated": "Ugrađena grafika: dekodira video samo kad nijedna druga grafička kartica nije postavljena na Koristi za WardogClips. Tekst HUD-a i govor obrađuju se na drugoj kartici ili na procesoru.",
+  "can.other": "Dekodira video i čita tekst HUD-a. Govor se pretvara u tekst na procesoru jer je za to potrebna NVIDIA kartica.",
+  "none_found": "Nije pronađena nijedna grafička kartica. WardogClips sav posao obavlja na procesoru.",
+  "role.use": "Koristi za WardogClips",
+  "role.leave": "Ne diraj",
+  "all_left_alone": "Sve su kartice postavljene na Ne diraj, pa WardogClips sav posao obavlja na procesoru.",
+  "shared_hint": "Kartica na kojoj radi tvoja igra je dijeljena: dok igraš, rad WardogClipsa na njoj može igri oduzeti nekoliko sličica. Postavi tu karticu na Ne diraj ako ti to smeta.",
+  "apply_hint": "Promjena vrijedi od sljedećeg zadatka. Kad dodaš karticu, nakon ponovnog pokretanja istodobno radi više video zadataka.",
+  "load_failed": "Popis grafičkih kartica nije moguće učitati.",
+  "saved": "Spremljeno: {keys}",
+  "saved_none": "Spremljeno: bez promjena",
+  "error": "Pogreška: {error}"
+}

@@ -1,0 +1,90 @@
+{
+  "title.none": "ndaipóri clip",
+  "title.rendering": "{kind} {time}-pe · renderiza {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · grabación tuichakue",
+  "title.no_proxy": "Ndaipóri gueteri proxy",
+  "tip.event": "{kind} {time}-pe: {render}",
+  "tip.around": "{time} rupi: {render}",
+  "tip.cached": "{height}p clip caché-gui",
+  "tip.rendered": "{height}p oñerenderiza {seconds} s-pe",
+  "tip.rendered_enc": "{height}p oñerenderiza {seconds} s-pe ({encoder})",
+  "tip.proxy": "{name}: grabación tuichakue proxy",
+  "tip.no_proxy": "{name}: ndaipóri gueteri grabación proxy",
+  "busy.clip": "clip oñerenderizahína ({height}p)...",
+  "busy.at": "{time} oñerenderizahína ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Ndaikatúi oñerenderiza ko clip",
+  "err.at": "Ndaikatúi oñerenderiza {time}",
+  "err.retry": "Eha'ãjey",
+  "err.encoding": "Codificación ñemboheko",
+  "err.play_clip": "Ko clip ndaikatúi oñembopu.",
+  "err.play_proxy": "Proxy ndaikatúi oñembopu.",
+  "pick.title": "Eiporavo peteĩ evento",
+  "pick.text": "Eiporavo peteĩ Evento-kuéragui (térã ejopy N): iclip oñembopu ko'ápe pre-roll guive.",
+  "pick.more": "Térã ejapo clic timeline iguýpe rehecha hag̃ua ko grabación oimeraẽ momento.",
+  "pick.short": "Eiporavo peteĩ Evento-kuéragui (térã ejopy N), térã ejapo clic timeline iguýpe.",
+  "proxy.card_title": "Ndaipóri gueteri proxy ko grabación-pe",
+  "proxy.card_text": "Proxy {height}p ha'e marandurenda {duration} kópia tuichakue, reike hag̃ua ñepyrũ guive paha peve (ojejapo heta jey pya'eve tiempo real-gui).",
+  "proxy.building": "ojejapohína",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "fila-pe",
+  "proxy.build": "Japo proxy",
+  "proxy.all": "Proxy opavavépe evento ndive",
+  "proxy.all_tip": "Emoĩ fila-pe proxy opaite grabación evento oguerekóvape",
+  "proxy.queued_toast": "proxy oĩma fila-pe",
+  "proxy.all_toast": {
+    "other": "{count} proxy fila-pe ({candidates} grabación evento ndive ndoguerekói)"
+  },
+  "mode.full_tip": "Grabación tuichakue, oñembopu iproxy-gui",
+  "mode.full_noproxy_tip": "Grabación tuichakue: ndaipóri gueteri proxy (ejapo ko'águi)",
+  "bound.wait": "eha'arõ ko evento clip ojehupi peve",
+  "bound.in_before_out": "In oĩ va'erã Out mboyve",
+  "bound.out_after_in": "Out oĩ va'erã In rire",
+  "bound.reset": "clip ojevy pre-roll / post-roll-pe",
+  "bound.in_set": "In = {time} (clip {length} s)",
+  "bound.out_set": "Out = {time} (clip {length} s)",
+  "mark.nothing": "ndaipóri mba'eve oñembopúva",
+  "mark.done": "marca manual {time}-pe",
+  "play_aria": "Mbopu",
+  "pause_aria": "Mombyta",
+  "time.pos": "{pos} / {total}",
+  "time.rel": "{offset} s evento guive",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Loop In → Out",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · puntaje {score}",
+  "tl.tip_status": "{kind} · {time} · puntaje {score} · {status}",
+  "tl.status_kept": "ojeguereko",
+  "tl.status_false": "japu",
+  "tl.whole": "Grabación tuichakue",
+  "tl.no_events": "ndaipóri evento",
+  "tl.not_detected": "ojedetecta'ỹ gueteri",
+  "tl.no_proxy": "ndaipóri proxy",
+  "tl.no_proxy_tip": "Grabación tuichakue oikotevẽ proxy (ejapo reproductor-gui)",
+  "tl.kind.kill": {
+    "other": "{count} kill"
+  },
+  "tl.kind.assist": {
+    "other": "{count} asistencia"
+  },
+  "tl.kind.death": {
+    "other": "{count} ñemano"
+  },
+  "tl.kind.spotted": {
+    "other": "{count} ojehecha"
+  },
+  "tl.kind.revive": {
+    "other": "{count} oikovejey"
+  },
+  "tl.kind.squad": {
+    "other": "{count} squad"
+  },
+  "tl.kind.voice": {
+    "other": "{count} ñe'ẽ"
+  },
+  "tl.kind.manual": {
+    "other": "{count} manual"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

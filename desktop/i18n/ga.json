@@ -1,0 +1,19 @@
+{
+  "tray.open": "Oscail WardogClips",
+  "tray.update": "Nuashonrú ar fáil...",
+  "tray.pause": "Sos fad is a imrím",
+  "tray.speed": "Luas",
+  "tray.mode_full": "Lánluas",
+  "tray.mode_balanced": "Cothromaithe",
+  "tray.mode_background": "Sa chúlra",
+  "tray.open_data": "Oscail an fillteán sonraí",
+  "tray.open_log": "Oscail an logchomhad",
+  "tray.quit": "Scoir",
+  "tray.balloon": "Tá WardogClips ag rith. Deaschliceáil deilbhín an tráidire chun scor.",
+  "tray.update_notify": "Tá WardogClips {version} ar fáil. Roghnaigh Nuashonrú ar fáil... i roghchlár an tráidire chun é a fheiceáil.",
+  "launcher.could_not_start": "Níorbh fhéidir WardogClips a thosú:\n\n{error}",
+  "launcher.scan_running": "Tá scanadh WardogClips (scan.bat / --scan) ag úsáid an fhillteáin sonraí seo:\n\n{dir}\n\nFan go gcríochnóidh sé (nó stop é ina fhuinneog), ansin tosaigh WardogClips arís.",
+  "launcher.not_answering": "Tá WardogClips ag rith cheana ach níl sé ag freagairt.\n\nScoir é ó dheilbhín an tráidire (nó fan nóiméad) agus bain triail eile as.\n\nLogchomhad: {log}",
+  "launcher.damaged": "Tá WardogClips damáistithe (tá an timpeallacht rite nó comhaid an aip ar iarraidh).\n\nAthshuiteáil é, le do thoil.\n\nCuardaíodh:\n{python}\n{main}",
+  "launcher.stopped": "Stop WardogClips díreach tar éis dó tosú (cód scoir {code}).\n\nB'fhéidir go ndeir an logchomhad cén fáth:\n{log}"
+}

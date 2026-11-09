@@ -1,0 +1,162 @@
+{
+  "@": "Eesti (et). VOD-ide sirvija.",
+  "title": "Striimide VOD-id",
+  "paste": "Kleebi link",
+  "paste_tip": "Impordi üks VOD selle lingi kaudu (otsib selle esmalt üles)",
+  "close_tip": "Sulge (Esc)",
+  "search.box_ph": "Striimeri nimi või VOD-i / profiili link",
+  "search.go": "Otsi",
+  "search.go_tip": "Otsi nime järgi või ava kleebitud lingi striimer (Enter)",
+  "search.need_input": "sisesta striimeri nimi või kleebi VOD-i / profiili link",
+  "search.need_name": "sisesta striimeri nimi",
+  "search.busy": "Küsin {sites} käest „{name}“ -- kõiki saite korraga, paar sekundit",
+  "search.found": {
+    "one": "leiti {count} striimer",
+    "other": "leiti {count} striimerit"
+  },
+  "search.none": "striimerit nimega „{name}“ pole saidil {sites}",
+  "sites.one_on": "vähemalt üks sait jääb sisse",
+  "link.busy": "Lingi lugemine -- VOD-i lingi puhul küsitakse saidilt, kelle VOD see on, umbes 3 s",
+  "link.unsupported": "See pole toetatud saidi link. Töötavad saitide {sites} lingid (VOD või striimeri leht).",
+  "favs.title": "Lemmikud",
+  "favs.check": "Otsi uusi",
+  "favs.check_tip": "Loetle kõik lemmikud uuesti ja loe kokku VOD-id, mis on pärast viimast kontrolli lisandunud",
+  "favs.checking": "Kontrollin...",
+  "favs.none_yet": "lemmikuid veel pole: ava striimer ja klõpsa tärnil",
+  "favs.checking_note": {
+    "one": "kontrollin {count} lemmikut uute VOD-ide suhtes ...",
+    "other": "kontrollin {count} lemmikut uute VOD-ide suhtes ..."
+  },
+  "favs.result_new": {
+    "one": "lemmikutel on kokku {count} uus VOD",
+    "other": "lemmikutel on kokku {count} uut VOD-i"
+  },
+  "favs.result_nothing": "pärast viimast kontrolli pole midagi uut",
+  "favs.result_failed": {
+    "one": "{result} ({count} lemmikut ei saanud kontrollida)",
+    "other": "{result} ({count} lemmikut ei saanud kontrollida)"
+  },
+  "favs.removed": "{name} eemaldati lemmikutest",
+  "favs.added": "{name} lisati lemmikutesse",
+  "favs.empty_title": "Lemmikuid veel pole",
+  "favs.empty_text": "Ava striimer ja klõpsa tärnil, et ta siia jätta.",
+  "favs.new_badge": {
+    "one": "{count} uus",
+    "other": "{count} uut"
+  },
+  "favs.new_badge_title": "VOD-id, mis on lisandunud pärast eelmist kontrolli",
+  "favs.remove_title": "Eemalda lemmikutest",
+  "favs.remove_aria": "Eemalda {name} lemmikutest",
+  "favs.add_title": "Lisa lemmikutesse",
+  "favs.checked": "kontrollitud {ago}",
+  "pre.error_extra": "{error} -- kuvatud loendi alguses, seda ei saa praegu importida",
+  "pre.in_library": "see VOD on juba teegis",
+  "pre.older": "see VOD on hiljutisest loendist vanem: see kuvatakse alguses",
+  "import.label": "Impordi",
+  "import.label_n": {
+    "one": "Impordi {count}",
+    "other": "Impordi {count}"
+  },
+  "import.busy": "Importimine...",
+  "import.queue_title": {
+    "one": "lisa järjekorda {count} allalaadimine",
+    "other": "lisa järjekorda {count} allalaadimist"
+  },
+  "import.select_title": "vali imporditavad VOD-id",
+  "import.queuing": {
+    "one": "lisan järjekorda {count} VOD-i -- iga linki kontrollitakse esmalt saidiga ...",
+    "other": "lisan järjekorda {count} VOD-i -- iga linki kontrollitakse esmalt saidiga ..."
+  },
+  "import.no_answer": "sellele lingile vastust pole",
+  "import.sum_queued": {
+    "one": "{count} järjekorras",
+    "other": "{count} järjekorras"
+  },
+  "import.sum_already": {
+    "one": "{count} juba olemas",
+    "other": "{count} juba olemas"
+  },
+  "import.sum_failed": {
+    "one": "{count} ebaõnnestus (vii hiir punasele sildile)",
+    "other": "{count} ebaõnnestus (vii hiir punasele sildile)"
+  },
+  "import.sum_jobs": "{summary} -- Tööd näitab allalaadimisi",
+  "import.toast": "VOD-id: {summary}",
+  "row.in_library": "teegis",
+  "row.imported_before": "varem imporditud",
+  "row.already_queued": "juba järjekorras",
+  "row.queued": "järjekorras",
+  "row.failed": "ebaõnnestus",
+  "row.job": "töö {id}",
+  "row.download_job": "allalaadimistöö {id}",
+  "row.your_link": "sinu link",
+  "row.your_link_title": "sinu kleebitud link",
+  "row.open_rec_title": "ava salvestis",
+  "row.live": "praegu otse",
+  "row.upcoming": "tulekul",
+  "row.live_title": "saab importida, kui striim on lõppenud",
+  "row.unavailable": "pole saadaval",
+  "row.not_ready": "pole valmis",
+  "row.not_ready_title": "veel ei saa importida",
+  "row.processing_title": "striim just lõppes ja sait alles töötleb seda",
+  "row.new": "uus",
+  "row.new_title": "lisandunud pärast üleeelmist kontrolli",
+  "row.older": "loendist vanem",
+  "row.open_on": "ava saidil {site}",
+  "ch.back_results": "Tagasi tulemuste juurde",
+  "ch.back_favs": "Tagasi lemmikute juurde",
+  "ch.back_aria": "Tagasi",
+  "ch.star_wait": "oota loendit (see ütleb striimeri enda võtme)",
+  "ch.listing_title": "Loetlemine...",
+  "ch.refresh_title": "Loetle saidilt uuesti (loend on 5 minutit vahemälus)",
+  "ch.refresh_aria": "Värskenda",
+  "ch.page_title": "tema leht: {url}",
+  "ch.page_aria": "tema leht",
+  "ch.listing": "loetlemine ...",
+  "ch.count_listed": {
+    "one": "{count} loetletud",
+    "other": "{count} loetletud"
+  },
+  "ch.count_new": {
+    "one": "{count} uus",
+    "other": "{count} uut"
+  },
+  "ch.count_lib": {
+    "one": "{count} teegis",
+    "other": "{count} teegis"
+  },
+  "ch.select_new": "Vali uued",
+  "ch.select_new_title": "vali kõik VOD-id, mis pole veel teegis ega järjekorras",
+  "ch.none": "Mitte ühtegi",
+  "ch.none_title": "tühjenda valik",
+  "ch.listing_busy": "Loetlen kasutaja {name} VOD-e saidil {site} ...",
+  "ch.relisting": "loetlen uuesti ...",
+  "ch.empty_title": "VOD-e pole loetletud",
+  "ch.empty_text": "Striimer ei pruugi varasemaid ülekandeid alles hoida või on need ainult tellijatele.",
+  "ch.load_older": "Laadi vanemad ({count})",
+  "ch.max_listed": "Loetletakse ainult {count} uusimat -- vanema VOD-i importimiseks kleebi selle link.",
+  "home.short": "Sisesta nimi ja vajuta Enter või kleebi VOD-i / profiili link.",
+  "home.find_html": "<b>Leia striimer</b> -- sisesta tema nimi ja vajuta Enter; kõigilt sisselülitatud saitidelt küsitakse korraga.",
+  "home.paste_html": "<b>Või kleebi link</b> -- striimeri leht loetleb tema hiljutised VOD-id; VOD-i link avab selle striimeri, VOD valitud.",
+  "home.import_html": "Vali VOD-id ja klõpsa <b>Impordi</b>: need laaditakse alla üksteise järel (Tööd), seejärel transkribeeritakse ja skannitakse nagu salvestist.",
+  "res.head": "Tulemused päringule „{query}“",
+  "res.clear": "Tühjenda tulemused",
+  "res.empty_title": "Midagi ei leitud",
+  "res.empty_text": "Kontrolli õigekirja, lülita sisse rohkem saite või kleebi tema lehe link.",
+  "res.no_hits": "Sisselülitatud saitidel pole sellise nimega striimerit.",
+  "res.not_found": "ei leitud",
+  "res.fav_title": "lemmik",
+  "res.recent": {
+    "one": "{count} hiljutine",
+    "other": "{count} hiljutist"
+  },
+  "res.recent_more": "{count}+ hiljutist",
+  "res.no_recent": "hiljutisi VOD-e pole loetletud",
+  "single.title": "Üks VOD",
+  "single.clear": "Tühjenda",
+  "single.site": "Sait",
+  "single.link": "Link",
+  "single.recheck": "Importimine kontrollib linki saidiga uuesti.",
+  "single.no_channel": "Sait ei öelnud, kelle VOD see on, seega pole striimerit, keda loetleda. Selle ühe VOD-i saab siiski importida.",
+  "single.import": "Impordi see VOD"
+}

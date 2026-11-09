@@ -1,0 +1,19 @@
+/* Queue moves (js/queue.js): Jobs panel row tools, selection, grouping, "Next up"; the Recording tab button. */
+.sect-t .qm-grp { text-transform: none; letter-spacing: 0; font-weight: 500; height: 24px; }
+.sect-t .qm-grp.on { border-color: var(--accent-line); color: var(--accent-2); background: var(--accent-bg); }
+.jrow .jact { display: flex; align-items: center; gap: 4px; }
+/* over the row's second line, right side: shown on hover / for selected rows, takes no width from the text */
+.jrow .qm-tools { position: absolute; right: 56px; bottom: 4px; z-index: 1; display: inline-flex; gap: 0; padding: 1px;
+  border-radius: var(--r-s); background: var(--raised); border: 1px solid var(--line2); visibility: hidden; }
+.jrow:hover .qm-tools, .jrow.jsel .qm-tools, .jrow:focus-within .qm-tools { visibility: visible; }
+.jrow .qm-tools .ib { width: 24px; height: 22px; }
+.jrow.jsel { background: var(--accent-bg); border-color: var(--accent-line); }
+.jrow.jq.nodrag { cursor: pointer; }
+.jrow.jq.nodrag .grip { visibility: hidden; }
+.jrow .qm-next { flex: none; }
+#jlist:focus { outline: none; }
+#jlist:focus-visible { outline: 2px solid var(--accent-line); outline-offset: -2px; }
+.qm-ghd { display: flex; align-items: center; gap: 6px; padding: 6px 8px 2px; margin-top: 4px; border-top: 1px solid var(--line); min-width: 0; }
+.qm-ghd .qm-gname { font-size: var(--fs-s); font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.qm-recact { margin: 0 0 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+@media (hover: none) { .jrow.jq { padding-bottom: 32px; } .jrow .qm-tools { visibility: visible; } }

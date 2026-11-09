@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekóduje video, čte text HUD a převádí řeč na text.",
+  "can.integrated": "Integrovaná grafika: dekóduje video jen tehdy, když žádná jiná grafická karta není nastavená na Použít pro WardogClips. Text HUD a řeč běží na jiné kartě nebo na procesoru.",
+  "can.other": "Dekóduje video a čte text HUD. Řeč se převádí na text na procesoru, protože to vyžaduje kartu NVIDIA.",
+  "none_found": "Nebyla nalezena žádná grafická karta. WardogClips vše zpracuje na procesoru.",
+  "role.use": "Použít pro WardogClips",
+  "role.leave": "Nechat být",
+  "all_left_alone": "Všechny karty jsou nastavené na Nechat být, takže WardogClips vše zpracuje na procesoru.",
+  "shared_hint": "Karta, na které běží vaše hra, je sdílená: když hrajete, práce WardogClips na ní může hru stát pár snímků. Pokud vám to vadí, nastavte ji na Nechat být.",
+  "apply_hint": "Změna platí pro další úlohu. Po přidání karty poběží po restartu víc video úloh najednou.",
+  "load_failed": "Seznam grafických karet se nepodařilo načíst.",
+  "saved": "Uloženo: {keys}",
+  "saved_none": "Uloženo: beze změny",
+  "error": "Chyba: {error}"
+}

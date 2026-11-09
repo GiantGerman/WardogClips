@@ -1,0 +1,19 @@
+{
+  "tray.open": "Otwórz WardogClips",
+  "tray.update": "Dostępna aktualizacja...",
+  "tray.pause": "Wstrzymaj, gdy gram",
+  "tray.speed": "Szybkość",
+  "tray.mode_full": "Pełna szybkość",
+  "tray.mode_balanced": "Zrównoważony",
+  "tray.mode_background": "W tle",
+  "tray.open_data": "Otwórz folder danych",
+  "tray.open_log": "Otwórz log",
+  "tray.quit": "Zakończ",
+  "tray.balloon": "WardogClips działa. Kliknij ikonę w zasobniku prawym przyciskiem, aby zakończyć.",
+  "tray.update_notify": "Dostępny jest WardogClips {version}. Wybierz Dostępna aktualizacja... w menu zasobnika, aby ją zobaczyć.",
+  "launcher.could_not_start": "Nie udało się uruchomić WardogClips:\n\n{error}",
+  "launcher.scan_running": "Skanowanie WardogClips (scan.bat / --scan) używa tego folderu danych:\n\n{dir}\n\nPoczekaj, aż się zakończy (lub zatrzymaj je w jego oknie), a potem uruchom WardogClips ponownie.",
+  "launcher.not_answering": "WardogClips już działa, ale nie odpowiada.\n\nZakończ go z ikony w zasobniku (lub poczekaj minutę) i spróbuj ponownie.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips jest uszkodzony (brakuje środowiska uruchomieniowego lub plików aplikacji).\n\nZainstaluj go ponownie.\n\nSzukano:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips zatrzymał się zaraz po uruchomieniu (kod wyjścia {code}).\n\nLog może wyjaśnić dlaczego:\n{log}"
+}

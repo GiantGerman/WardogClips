@@ -1,0 +1,99 @@
+{
+  "title.none": "ei klippiä",
+  "title.rendering": "{kind} kohdassa {time} · renderöidään {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · koko tallenne",
+  "title.no_proxy": "Ei vielä proxya",
+  "tip.event": "{kind} kohdassa {time}: {render}",
+  "tip.around": "noin kohdassa {time}: {render}",
+  "tip.cached": "{height}p klippivälimuistista",
+  "tip.rendered": "{height}p renderöity {seconds} s:ssa",
+  "tip.rendered_enc": "{height}p renderöity {seconds} s:ssa ({encoder})",
+  "tip.proxy": "{name}: koko tallenteen proxy",
+  "tip.no_proxy": "{name}: ei vielä koko tallenteen proxya",
+  "busy.clip": "renderöidään klippiä ({height}p)...",
+  "busy.at": "renderöidään kohtaa {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Tätä klippiä ei voitu renderöidä",
+  "err.at": "Kohtaa {time} ei voitu renderöidä",
+  "err.retry": "Yritä uudelleen",
+  "err.encoding": "Koodausasetukset",
+  "err.play_clip": "Tätä klippiä ei voitu toistaa.",
+  "err.play_proxy": "Proxya ei voitu toistaa.",
+  "pick.title": "Valitse tapahtuma",
+  "pick.text": "Valitse yksi kohdasta Tapahtumat (tai paina N): sen klippi toistuu tässä esivarasta alkaen.",
+  "pick.more": "Tai napsauta alla olevaa aikajanaa katsoaksesi mitä tahansa tämän tallenteen kohtaa.",
+  "pick.short": "Valitse yksi kohdasta Tapahtumat (tai paina N), tai napsauta alla olevaa aikajanaa.",
+  "proxy.card_title": "Tälle tallenteelle ei ole vielä proxya",
+  "proxy.card_text": "{height}p-proxy on kopio koko {duration} pituisesta tiedostosta, jotta sitä voi selata alusta loppuun (se tehdään monta kertaa reaaliaikaa nopeammin).",
+  "proxy.building": "tehdään",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "jonossa",
+  "proxy.build": "Tee proxy",
+  "proxy.all": "Proxyt kaikille, joissa tapahtumia",
+  "proxy.all_tip": "Laita proxyt jonoon jokaiselle tallenteelle, jossa on tapahtumia",
+  "proxy.queued_toast": "proxy jonossa",
+  "proxy.all_toast": {
+    "one": "{count} proxy jonossa ({candidates} tallenteelta, joissa on tapahtumia, puuttuu proxy)",
+    "other": "{count} proxya jonossa ({candidates} tallenteelta, joissa on tapahtumia, puuttuu proxy)"
+  },
+  "mode.full_tip": "Koko tallenne proxysta toistettuna",
+  "mode.full_noproxy_tip": "Koko tallenne: ei vielä proxya (tee se tästä)",
+  "bound.wait": "odota, että tämän tapahtuman klippi latautuu",
+  "bound.in_before_out": "alun on oltava ennen loppua",
+  "bound.out_after_in": "lopun on oltava alun jälkeen",
+  "bound.reset": "klippi palautettu esi- / jälkivaraan",
+  "bound.in_set": "alku = {time} (klippi {length} s)",
+  "bound.out_set": "loppu = {time} (klippi {length} s)",
+  "mark.nothing": "mitään ei toisteta",
+  "mark.done": "manuaalinen merkintä kohdassa {time}",
+  "play_aria": "Toista",
+  "pause_aria": "Tauko",
+  "time.pos": "{pos} / {total}",
+  "time.rel": "{offset} s tapahtumasta",
+  "time.clip": "klippi {in} – {out} = {length} s",
+  "pip.loop": "Silmukka alku → loppu",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · pisteet {score}",
+  "tl.tip_status": "{kind} · {time} · pisteet {score} · {status}",
+  "tl.status_kept": "pidetty",
+  "tl.status_false": "väärä osuma",
+  "tl.whole": "Koko tallenne",
+  "tl.no_events": "ei tapahtumia",
+  "tl.not_detected": "ei vielä tunnistettu",
+  "tl.no_proxy": "ei proxya",
+  "tl.no_proxy_tip": "Koko tallenne -tila vaatii proxyn (tee se soittimesta)",
+  "tl.kind.kill": {
+    "one": "{count} tappo",
+    "other": "{count} tappoa"
+  },
+  "tl.kind.assist": {
+    "one": "{count} avustus",
+    "other": "{count} avustusta"
+  },
+  "tl.kind.death": {
+    "one": "{count} kuolema",
+    "other": "{count} kuolemaa"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} havaittu",
+    "other": "{count} havaittua"
+  },
+  "tl.kind.revive": {
+    "one": "{count} elvytys",
+    "other": "{count} elvytystä"
+  },
+  "tl.kind.squad": {
+    "one": "{count} tiimi",
+    "other": "{count} tiimi"
+  },
+  "tl.kind.voice": {
+    "one": "{count} ääni",
+    "other": "{count} ääntä"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manuaalinen",
+    "other": "{count} manuaalista"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

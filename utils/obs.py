@@ -79,7 +79,7 @@ def track_names(base: Path | None = None) -> list[str]:
 def recording_paths(base: Path | None = None) -> list[str]:
     """The folder(s) the active OBS profile records to (the replay buffer saves into the same one): [AdvOut]
     RecFilePath, [SimpleOutput] FilePath, and [AdvOut] FFFilePath when RecType is FFmpeg. The output mode in use
-    ([Output] Mode) comes first. Only folders that exist, de-duplicated (case-insensitive, normalised). The setup
+    ([Output] Mode) comes first. Only folders that exist, de-duplicated (case-insensitive, normalized). The setup
     wizard proposes these as library roots; nothing is scanned until the user confirms."""
     prof = active_profile_dir(base)
     if prof is None:

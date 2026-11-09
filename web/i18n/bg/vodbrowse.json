@@ -1,0 +1,161 @@
+{
+  "title": "VOD от стриймове",
+  "paste": "Постави линк",
+  "paste_tip": "Внеси един VOD по линка му (първо го проверява)",
+  "close_tip": "Затвори (Esc)",
+  "search.box_ph": "Име на стриймър или линк към VOD / профил",
+  "search.go": "Търси",
+  "search.go_tip": "Търси по име или отвори стриймъра от поставен линк (Enter)",
+  "search.need_input": "въведи име на стриймър или постави линк към VOD / профил",
+  "search.need_name": "въведи име на стриймър",
+  "search.busy": "Питам {sites} за „{name}“ -- всички сайтове наведнъж, няколко секунди",
+  "search.found": {
+    "one": "Намерен е {count} стриймър",
+    "other": "Намерени са {count} стриймъра"
+  },
+  "search.none": "няма стриймър „{name}“ в {sites}",
+  "sites.one_on": "поне един сайт остава включен",
+  "link.busy": "Чета линка -- за линк към VOD сайтът се пита чий е, около 3 с",
+  "link.unsupported": "Това не е линк от поддържан сайт. Работят линкове от {sites} (VOD или страницата на стриймъра).",
+  "favs.title": "Любими",
+  "favs.check": "Провери за нови",
+  "favs.check_tip": "Изреди пак всички любими и преброй VOD-овете, появили се след последната проверка",
+  "favs.checking": "Проверка...",
+  "favs.none_yet": "още няма любими: отвори стриймър и кликни звездата",
+  "favs.checking_note": {
+    "one": "проверявам {count} любим за нови VOD ...",
+    "other": "проверявам {count} любими за нови VOD ..."
+  },
+  "favs.result_new": {
+    "one": "{count} нов VOD сред любимите ти",
+    "other": "{count} нови VOD сред любимите ти"
+  },
+  "favs.result_nothing": "нищо ново след последната проверка",
+  "favs.result_failed": {
+    "one": "{result} ({count} любим не можа да бъде проверен)",
+    "other": "{result} ({count} любими не можаха да бъдат проверени)"
+  },
+  "favs.removed": "{name} е премахнат от любимите",
+  "favs.added": "{name} е добавен в любимите",
+  "favs.empty_title": "Още няма любими",
+  "favs.empty_text": "Отвори стриймър и кликни звездата, за да го държиш тук.",
+  "favs.new_badge": {
+    "one": "{count} нов",
+    "other": "{count} нови"
+  },
+  "favs.new_badge_title": "VOD-ове, появили се след предишната проверка",
+  "favs.remove_title": "Премахни от любимите",
+  "favs.remove_aria": "Премахни {name} от любимите",
+  "favs.add_title": "Добави в любимите",
+  "favs.checked": "проверено {ago}",
+  "pre.error_extra": "{error} -- показан е най-горе в списъка, сега не може да се внесе",
+  "pre.in_library": "този VOD вече е в библиотеката",
+  "pre.older": "този VOD е по-стар от списъка с последните: показан е най-горе",
+  "import.label": "Внеси",
+  "import.label_n": {
+    "one": "Внеси {count}",
+    "other": "Внеси {count}"
+  },
+  "import.busy": "Внасяне...",
+  "import.queue_title": {
+    "one": "сложи {count} изтегляне в опашката",
+    "other": "сложи {count} изтегляния в опашката"
+  },
+  "import.select_title": "избери VOD-овете за внос",
+  "import.queuing": {
+    "one": "{count} VOD влиза в опашката -- всеки линк първо се проверява със сайта ...",
+    "other": "{count} VOD влизат в опашката -- всеки линк първо се проверява със сайта ..."
+  },
+  "import.no_answer": "няма отговор за този линк",
+  "import.sum_queued": {
+    "one": "{count} в опашката",
+    "other": "{count} в опашката"
+  },
+  "import.sum_already": {
+    "one": "{count} вече е тук",
+    "other": "{count} вече са тук"
+  },
+  "import.sum_failed": {
+    "one": "{count} неуспешен (посочи червения етикет)",
+    "other": "{count} неуспешни (посочи червения етикет)"
+  },
+  "import.sum_jobs": "{summary} -- изтеглянията са в Задачи",
+  "import.toast": "VOD: {summary}",
+  "row.in_library": "в библиотеката",
+  "row.imported_before": "внесен преди",
+  "row.already_queued": "вече в опашката",
+  "row.queued": "в опашката",
+  "row.failed": "неуспешно",
+  "row.job": "задача {id}",
+  "row.download_job": "задача за изтегляне {id}",
+  "row.your_link": "твоят линк",
+  "row.your_link_title": "линкът, който постави",
+  "row.open_rec_title": "отвори записа",
+  "row.live": "на живо",
+  "row.upcoming": "предстои",
+  "row.live_title": "може да се внесе, щом стриймът свърши",
+  "row.unavailable": "недостъпен",
+  "row.not_ready": "не е готов",
+  "row.not_ready_title": "още не може да се внесе",
+  "row.processing_title": "стриймът току-що свърши и сайтът още го обработва",
+  "row.new": "нов",
+  "row.new_title": "появил се след проверката преди последната",
+  "row.older": "по-стар от списъка",
+  "row.open_on": "отвори в {site}",
+  "ch.back_results": "Обратно към резултатите",
+  "ch.back_favs": "Обратно към любимите",
+  "ch.back_aria": "Назад",
+  "ch.star_wait": "изчакай списъка (той казва собствения ключ на стриймъра)",
+  "ch.listing_title": "Зареждане на списъка...",
+  "ch.refresh_title": "Зареди пак от сайта (списъкът се кешира за 5 минути)",
+  "ch.refresh_aria": "Обнови",
+  "ch.page_title": "страницата му: {url}",
+  "ch.page_aria": "страницата му",
+  "ch.listing": "зареждане ...",
+  "ch.count_listed": {
+    "one": "{count} в списъка",
+    "other": "{count} в списъка"
+  },
+  "ch.count_new": {
+    "one": "{count} нов",
+    "other": "{count} нови"
+  },
+  "ch.count_lib": {
+    "one": "{count} в библиотеката",
+    "other": "{count} в библиотеката"
+  },
+  "ch.select_new": "Избери новите",
+  "ch.select_new_title": "избери всеки VOD, който още не е в библиотеката или в опашката",
+  "ch.none": "Нищо",
+  "ch.none_title": "изчисти избора",
+  "ch.listing_busy": "Зареждат се VOD-овете на {name} в {site} ...",
+  "ch.relisting": "зареждане отново ...",
+  "ch.empty_title": "Няма VOD-ове в списъка",
+  "ch.empty_text": "Стриймърът може да не пази минали излъчвания или те са само за абонати.",
+  "ch.load_older": "Зареди по-стари ({count})",
+  "ch.max_listed": "Показани са само последните {count} -- постави линка на по-стар VOD, за да го внесеш.",
+  "home.short": "Въведи име и натисни Enter или постави линк към VOD / профил.",
+  "home.find_html": "<b>Намери стриймър</b> -- въведи името му и натисни Enter; всички включени сайтове се питат наведнъж.",
+  "home.paste_html": "<b>Или постави линк</b> -- страницата на стриймър показва последните му VOD-ове; линк към VOD отваря стриймъра с избран този VOD.",
+  "home.import_html": "Избери VOD-ове и кликни <b>Внеси</b>: изтеглят се един след друг (Задачи), после се транскрибират и сканират като запис.",
+  "res.head": "Резултати за „{query}“",
+  "res.clear": "Изчисти резултатите",
+  "res.empty_title": "Нищо не е намерено",
+  "res.empty_text": "Провери правописа, включи повече сайтове или постави линка към страницата му.",
+  "res.no_hits": "Няма стриймър с това име във включените сайтове.",
+  "res.not_found": "не е намерен",
+  "res.fav_title": "любим",
+  "res.recent": {
+    "one": "{count} скорошен",
+    "other": "{count} скорошни"
+  },
+  "res.recent_more": "{count}+ скорошни",
+  "res.no_recent": "няма скорошни VOD-ове",
+  "single.title": "Един VOD",
+  "single.clear": "Изчисти",
+  "single.site": "Сайт",
+  "single.link": "Линк",
+  "single.recheck": "Вносът проверява линка със сайта отново.",
+  "single.no_channel": "Сайтът не каза чий е този VOD, затова няма стриймър за показване. Този VOD все пак може да се внесе.",
+  "single.import": "Внеси този VOD"
+}

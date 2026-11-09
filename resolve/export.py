@@ -10,7 +10,7 @@ bounds ``clip_in`` / ``clip_out`` in seconds. ``status`` never includes ``false`
 ``event_ids`` is given without a ``status`` the status filter is "any" (they were picked explicitly).
 
 Everything here works with Resolve closed; files go to ``paths.OUT_DIR`` (looked up at call
-time so the test fixture's temp dir is honoured).
+time so the test fixture's temp dir is honored).
 """
 
 import csv
@@ -351,11 +351,15 @@ def write_edl(clips: list[dict], path: Path, title: str) -> int:
     return len(clips)
 
 
+FORMATS = ("csv", "edl", "both", "premiere", "otio")
+
+
 def export(db, cfg, body: dict | None, fmt: str = "both") -> dict:
-    """Write the CSV and / or EDL of the selection; returns {files: [{name, path, kind, rows}], ...}."""
+    """Write the selection as CSV / EDL ("both" = the two), Premiere XML ("premiere", FCP 7 xmeml)
+    or OpenTimelineIO ("otio"); returns {files: [{name, path, kind, rows}], ...}."""
     fmt = (fmt or "both").lower()
-    if fmt not in ("csv", "edl", "both"):
-        raise SelectionError("format must be csv | edl | both")
+    if fmt not in FORMATS:
+        raise SelectionError("format must be " + " | ".join(FORMATS))
     body = body or {}
     order = str(body.get("order") or "score").lower()
     events = select(db, cfg, body)
@@ -374,6 +378,12 @@ def export(db, cfg, body: dict | None, fmt: str = "both") -> dict:
         title = f"WardogClips Selects {datetime.now().strftime('%Y-%m-%d')}"
         n = write_edl(clips, p, title)
         files.append({"name": p.name, "path": str(p), "kind": "edl", "rows": n})
+    if fmt in ("premiere", "otio"):
+        from resolve import editors
+        ext, write = ("xml", editors.write_xmeml) if fmt == "premiere" else ("otio", editors.write_otio)
+        p = _out_path(ext, stamp)
+        n = write(db, clips, p, f"WardogClips Selects {datetime.now().strftime('%Y-%m-%d')}")
+        files.append({"name": p.name, "path": str(p), "kind": fmt, "rows": n})
     logger.info("[Export] wrote format=%s events=%d clips=%d files=%s ms=%.0f", fmt, len(events), len(clips),
                 ",".join(f["name"] for f in files), (time.monotonic() - t0) * 1000)
     return {"ok": True, "events": len(events), "clips": len(clips), "files": files, "out_dir": str(paths.OUT_DIR)}

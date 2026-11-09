@@ -1,0 +1,90 @@
+{
+  "title.none": "pa gen klip",
+  "title.rendering": "{kind} a {time} · n ap rann {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · tout anrejistreman an",
+  "title.no_proxy": "Poko gen proxy",
+  "tip.event": "{kind} a {time}: {render}",
+  "tip.around": "anviwon {time}: {render}",
+  "tip.cached": "{height}p soti nan kach klip yo",
+  "tip.rendered": "{height}p rann an {seconds} s",
+  "tip.rendered_enc": "{height}p rann an {seconds} s ({encoder})",
+  "tip.proxy": "{name}: proxy tout anrejistreman an",
+  "tip.no_proxy": "{name}: poko gen proxy pou tout anrejistreman an",
+  "busy.clip": "n ap rann klip la ({height}p)...",
+  "busy.at": "n ap rann {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Nou pa t ka rann klip sa a",
+  "err.at": "Nou pa t ka rann {time}",
+  "err.retry": "Eseye ankò",
+  "err.encoding": "Paramèt ankodaj",
+  "err.play_clip": "Nou pa t ka jwe klip sa a.",
+  "err.play_proxy": "Nou pa t ka jwe proxy a.",
+  "pick.title": "Chwazi yon evènman",
+  "pick.text": "Chwazi youn nan Evènman (oswa peze N): klip li jwe la a depi pre-roll la.",
+  "pick.more": "Oswa klike sou liy tan anba a pou gade nenpòt moman nan anrejistreman sa a.",
+  "pick.short": "Chwazi youn nan Evènman (oswa peze N), oswa klike sou liy tan anba a.",
+  "proxy.card_title": "Poko gen proxy pou anrejistreman sa a",
+  "proxy.card_text": "Yon proxy {height}p se yon kopi tout fichye {duration} la pou w ka deplase ladan l depi kòmansman rive nan fen (li fèt plizyè fwa pi vit pase tan reyèl).",
+  "proxy.building": "n ap fè l",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "nan fil datant",
+  "proxy.build": "Fè proxy",
+  "proxy.all": "Proxy pou tout ki gen evènman",
+  "proxy.all_tip": "Mete proxy nan fil datant pou chak anrejistreman ki gen evènman",
+  "proxy.queued_toast": "proxy nan fil datant",
+  "proxy.all_toast": {
+    "other": "{count} proxy nan fil datant ({candidates} anrejistreman ki gen evènman pa t genyen youn)"
+  },
+  "mode.full_tip": "Tout anrejistreman an, jwe apati proxy li",
+  "mode.full_noproxy_tip": "Tout anrejistreman an: poko gen proxy (fè youn la a)",
+  "bound.wait": "tann klip evènman sa a fin chaje",
+  "bound.in_before_out": "kòmansman an dwe anvan fen an",
+  "bound.out_after_in": "fen an dwe apre kòmansman an",
+  "bound.reset": "klip la retounen sou pre-roll / post-roll",
+  "bound.in_set": "kòmansman = {time} (klip {length} s)",
+  "bound.out_set": "fen = {time} (klip {length} s)",
+  "mark.nothing": "anyen p ap jwe",
+  "mark.done": "mak manyèl a {time}",
+  "play_aria": "Jwe",
+  "pause_aria": "Poz",
+  "time.pos": "{pos} sou {total}",
+  "time.rel": "{offset} s apati evènman an",
+  "time.clip": "klip {in} – {out} = {length} s",
+  "pip.loop": "Bouk kòmansman → fen",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · nòt {score}",
+  "tl.tip_status": "{kind} · {time} · nòt {score} · {status}",
+  "tl.status_kept": "kenbe",
+  "tl.status_false": "fo pozitif",
+  "tl.whole": "Tout anrejistreman an",
+  "tl.no_events": "pa gen evènman",
+  "tl.not_detected": "poko detekte",
+  "tl.no_proxy": "pa gen proxy",
+  "tl.no_proxy_tip": "Mòd tout anrejistreman an bezwen yon proxy (fè l nan lektè a)",
+  "tl.kind.kill": {
+    "other": "{count} kill"
+  },
+  "tl.kind.assist": {
+    "other": "{count} asistans"
+  },
+  "tl.kind.death": {
+    "other": "{count} lanmò"
+  },
+  "tl.kind.spotted": {
+    "other": "{count} repere"
+  },
+  "tl.kind.revive": {
+    "other": "{count} reviv"
+  },
+  "tl.kind.squad": {
+    "other": "{count} eskwad"
+  },
+  "tl.kind.voice": {
+    "other": "{count} vwa"
+  },
+  "tl.kind.manual": {
+    "other": "{count} manyèl"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

@@ -2,9 +2,10 @@
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 from core import settings as settings_mod
+from utils.i18n import app_error
 
 logger = logging.getLogger("wclips.settings")
 
@@ -30,7 +31,7 @@ def build(ctx) -> APIRouter:
     @r.post("/api/settings")
     def post_settings(body: dict):
         if not isinstance(body, dict):
-            raise HTTPException(400, "object expected")
+            raise app_error(400, "server.bad_request", "The request was not understood.")
         changed = settings_mod.apply_patch(ctx.cfg, body)
         ctx.save_settings()
         if changed:
@@ -40,8 +41,13 @@ def build(ctx) -> APIRouter:
             set_console_verbose(bool(ctx.cfg.server.verbose_console))
         if "jobs.paused" in changed:
             ctx.jobs.set_paused(ctx.cfg.jobs.paused)
+        if any(c.startswith("performance.") or c == "jobs.paused" for c in changed) and getattr(ctx, "workmode", None):
+            ctx.workmode.tick(force_publish=True, read=False)       # the status-bar chip follows at once
         if any(c.startswith("library.") for c in changed):
             ctx.bus.publish("library", action="settings")
+        if "ui.language" in changed:
+            from utils import i18n
+            i18n.notify_change(i18n.active_language(ctx.cfg))     # the tray menu follows
         if any(c in ("stt.model", "stt.compute") for c in changed):
             from stt import whisper as stt
             stt.engine.unload()         # the next transcribe job loads the new model

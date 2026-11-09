@@ -164,14 +164,35 @@ def _find(tokens: list[str], kw: list[str]) -> int:
     return -1
 
 
-def keyword_events(segments: list[dict], keywords: list[str]) -> list[dict]:
-    """One event per segment that holds any keyword; t = the first keyword's word timestamp."""
-    kws = [(k, norm_tokens(k)) for k in keywords]
-    kws = [(k, toks) for k, toks in kws if toks]
-    if not kws:
-        return []
+def _keywords_for(keywords, lang: str | None) -> list[str]:
+    """A plain list is used for every line; a per-language map {lang: [...]} gives a line its own language's
+    keywords plus the English ones (a line with no language: every language's)."""
+    if not isinstance(keywords, dict):
+        return list(keywords or [])
+    langs = list(keywords) if not lang else [lang, "en"]
+    out: list[str] = []
+    for code in langs:
+        for k in keywords.get(code) or []:
+            if k not in out:
+                out.append(k)
+    return out
+
+
+def keyword_events(segments: list[dict], keywords) -> list[dict]:
+    """One event per segment that holds any keyword; t = the first keyword's word timestamp. `keywords` = a list,
+    or a per-language map matched against each line's `lang`."""
+    cache: dict = {}
+
+    def kws_for(lang):
+        if lang not in cache:
+            ks = [(k, norm_tokens(k)) for k in _keywords_for(keywords, lang)]
+            cache[lang] = [(k, toks) for k, toks in ks if toks]
+        return cache[lang]
     out = []
     for seg in segments:
+        kws = kws_for(seg.get("lang") or None)
+        if not kws:
+            continue
         toks = norm_tokens(seg.get("text") or "")
         hits = [(k, ktoks) for k, ktoks in kws if _find(toks, ktoks) >= 0]
         if not hits:
@@ -277,7 +298,7 @@ def build_and_write(db, cfg, rec_id: int, segments: list[dict], excitement: list
     written in one transaction."""
     from core import learning
     from core import settings as settings_mod
-    events = keyword_events(segments, settings_mod.keywords(cfg)) + [dict(e, source=dict(e["source"])) for e in excitement]
+    events = keyword_events(segments, settings_mod.keyword_map(cfg)) + [dict(e, source=dict(e["source"])) for e in excitement]
     score_events(events, _context(db, rec_id), learning.factors(db))
     res = write_voice_events(db, rec_id, events)
     res["keyword"] = sum(1 for e in events if e["subkind"] == "keyword")

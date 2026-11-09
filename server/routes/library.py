@@ -4,8 +4,10 @@ import logging
 import os
 import subprocess
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from starlette.concurrency import run_in_threadpool
+
+from utils.i18n import app_error
 
 logger = logging.getLogger("wclips.library")
 
@@ -29,14 +31,14 @@ def build(ctx) -> APIRouter:
     def recording(rec_id: int):
         rec = ctx.library.get(rec_id)
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         return rec
 
     @r.post("/api/recordings/{rec_id}/probe")
     def reprobe(rec_id: int):
         rec = ctx.library.get(rec_id)
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         ctx.db.execute("UPDATE recordings SET status='new', error=NULL WHERE id=?", (rec_id,))
         jid = ctx.jobs.enqueue(rec_id, "probe", priority=5)
         return {"ok": True, "job": jid}
@@ -46,13 +48,15 @@ def build(ctx) -> APIRouter:
         """Open Explorer with the file selected (local tool; the footage is never modified)."""
         rec = ctx.library.get(rec_id)
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         if not os.path.exists(rec["path"]):
-            raise HTTPException(404, "file is missing")
+            raise app_error(404, "server.file_missing", "The file is not in its folder anymore.")
+        from core.workmode import normal_priority
         try:
-            subprocess.Popen(["explorer.exe", "/select,", rec["path"]])
+            with normal_priority():            # Explorer never inherits the work mode's low priority
+                subprocess.Popen(["explorer.exe", "/select,", rec["path"]])
         except OSError as e:
-            raise HTTPException(500, str(e))
+            raise app_error(500, "server.explorer_failed", "Could not open File Explorer: {error}", error=str(e))
         return {"ok": True}
 
     @r.post("/api/recordings/probe-all")

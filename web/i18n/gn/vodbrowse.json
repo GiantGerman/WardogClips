@@ -1,0 +1,146 @@
+{
+  "title": "Stream VOD",
+  "paste": "Emoĩ joajuha",
+  "paste_tip": "Gueru peteĩ VOD ijoajuhágui (ohecha raẽ)",
+  "close_tip": "Mboty (Esc)",
+  "search.box_ph": "Streamer réra térã VOD / perfil joajuha",
+  "search.go": "Eheka",
+  "search.go_tip": "Eheka téra rupi, térã embojuruja joajuha oñemoĩva streamer (Enter)",
+  "search.need_input": "ehai streamer réra térã emoĩ VOD / perfil joajuha",
+  "search.need_name": "ehai streamer réra",
+  "search.busy": "Oñeporandu {sites}-pe “{name}” rehe -- opaite tenda oñondive, mbovy segundo",
+  "search.found": {
+    "other": "{count} streamer ojejuhu"
+  },
+  "search.none": "ndaipóri streamer hérava “{name}” {sites}-pe",
+  "sites.one_on": "peteĩ tenda opyta hendy va'erã",
+  "link.busy": "Joajuha oñemoñe'ẽhína -- VOD joajuhápe tenda-pe oñeporandu mávapa mba'e VOD, ha'etévo 3 s",
+  "link.unsupported": "Ko joajuha ndaha'éi tenda oñemoneĩvagua. {sites} joajuha omba'apo (VOD térã streamer kuatiarogue).",
+  "favs.title": "Favorito",
+  "favs.check": "Eheka ipyahúva",
+  "favs.check_tip": "Ehechajey opaite favorito ha eipapa VOD osẽva jehecha ipahaguégui",
+  "favs.checking": "Ojehechahína...",
+  "favs.none_yet": "ndaipóri gueteri favorito: embojuruja peteĩ streamer ha ejapo clic mbyja-re",
+  "favs.checking_note": {
+    "other": "ojehechahína {count} favorito VOD pyahúre ..."
+  },
+  "favs.result_new": {
+    "other": "{count} VOD pyahu nde favorito-kuérape"
+  },
+  "favs.result_nothing": "mba'eve ipyahúva jehecha ipahaguégui",
+  "favs.result_failed": {
+    "other": "{result} ({count} favorito ndaikatúi ojehecha)"
+  },
+  "favs.removed": "{name} oñenohẽ favorito-gui",
+  "favs.added": "{name} oñembojuaju favorito-pe",
+  "favs.empty_title": "Ndaipóri gueteri favorito",
+  "favs.empty_text": "Embojuruja peteĩ streamer ha ejapo clic mbyja-re reguereko hag̃ua ko'ápe.",
+  "favs.new_badge": {
+    "other": "{count} ipyahu"
+  },
+  "favs.new_badge_title": "VOD osẽva jehecha mboyveguágui",
+  "favs.remove_title": "Nohẽ favorito-gui",
+  "favs.remove_aria": "Nohẽ {name} favorito-gui",
+  "favs.add_title": "Mbojuaju favorito-pe",
+  "favs.checked": "ojehecha {ago}",
+  "pre.error_extra": "{error} -- ojehechauka lista ñepyrũme, ndaikatúi ojegueru ko'ág̃a",
+  "pre.in_library": "upe VOD oĩma biblioteca-pe",
+  "pre.older": "upe VOD itujave lista ipyahúvagui: ojehechauka ñepyrũme",
+  "import.label": "Gueru",
+  "import.label_n": {
+    "other": "Gueru {count}"
+  },
+  "import.busy": "Ojeguerúhína...",
+  "import.queue_title": {
+    "other": "emoĩ fila-pe {count} ñemboguejy"
+  },
+  "import.select_title": "eiporavo VOD regueru hag̃ua",
+  "import.queuing": {
+    "other": "oñemoĩhína fila-pe {count} VOD -- peteĩteĩ joajuha ojehecha raẽ tenda ndive ..."
+  },
+  "import.no_answer": "ndaipóri mbohovái ko joajuhápe",
+  "import.sum_queued": {
+    "other": "{count} fila-pe"
+  },
+  "import.sum_already": {
+    "other": "{count} oĩma"
+  },
+  "import.sum_failed": {
+    "other": "{count} ojavy (emoĩ mouse chip pytã ári)"
+  },
+  "import.sum_jobs": "{summary} -- Tembiapo ohechauka ñemboguejy",
+  "import.toast": "VOD: {summary}",
+  "row.in_library": "biblioteca-pe",
+  "row.imported_before": "ojegueruva'ekue",
+  "row.already_queued": "oĩma fila-pe",
+  "row.queued": "fila-pe",
+  "row.failed": "ojavy",
+  "row.job": "tembiapo {id}",
+  "row.download_job": "ñemboguejy tembiapo {id}",
+  "row.your_link": "nde joajuha",
+  "row.your_link_title": "joajuha remoĩva'ekue",
+  "row.open_rec_title": "embojuruja grabación",
+  "row.live": "en vivo ko'ág̃a",
+  "row.upcoming": "oútava",
+  "row.live_title": "ikatu ojegueru stream opa rire",
+  "row.unavailable": "ndaipóri",
+  "row.not_ready": "ndoĩri gueteri",
+  "row.not_ready_title": "ndaikatúi gueteri ojegueru",
+  "row.processing_title": "stream opa ramo ha tenda oprocesahína gueteri",
+  "row.new": "ipyahu",
+  "row.new_title": "osẽ jehecha ipahague mboyveguágui",
+  "row.older": "itujave listagui",
+  "row.open_on": "embojuruja {site}-pe",
+  "ch.back_results": "Ejevy jeheka-pe",
+  "ch.back_favs": "Ejevy favorito-pe",
+  "ch.back_aria": "Tapykue",
+  "ch.star_wait": "eha'arõ lista (ohechauka streamer clave)",
+  "ch.listing_title": "Oñemoĩhína lista-pe...",
+  "ch.refresh_title": "Ehechajey tenda-gui (lista oñeñongatu 5 aravo'i)",
+  "ch.refresh_aria": "Mbopyahu",
+  "ch.page_title": "ikuatiarogue: {url}",
+  "ch.page_aria": "ikuatiarogue",
+  "ch.listing": "oñemoĩhína lista-pe ...",
+  "ch.count_listed": {
+    "other": "{count} lista-pe"
+  },
+  "ch.count_new": {
+    "other": "{count} ipyahu"
+  },
+  "ch.count_lib": {
+    "other": "{count} biblioteca-pe"
+  },
+  "ch.select_new": "Eiporavo ipyahúva",
+  "ch.select_new_title": "eiporavo opaite VOD noĩriva biblioteca-pe térã fila-pe",
+  "ch.none": "Mba'eve",
+  "ch.none_title": "mopotĩ jeporavo",
+  "ch.listing_busy": "Oñemoĩhína lista-pe {name} VOD {site}-pe ...",
+  "ch.relisting": "oñemoĩjeyhína lista-pe ...",
+  "ch.empty_title": "Ndaipóri VOD lista-pe",
+  "ch.empty_text": "Streamer ikatu ndoñongatúi transmisión ohasava'ekue, térã suscriptor-pe g̃uarãnte.",
+  "ch.load_older": "Hupi itujavéva ({count})",
+  "ch.max_listed": "{count} ipyahuvéva añoite oĩ lista-pe -- emoĩ VOD itujavéva joajuha regueru hag̃ua.",
+  "home.short": "Ehai peteĩ téra ha ejopy Enter, térã emoĩ VOD / perfil joajuha.",
+  "home.find_html": "<b>Eheka peteĩ streamer</b> -- ehai héra ha ejopy Enter; opaite tenda hendýva oñeporandu oñondive.",
+  "home.paste_html": "<b>Térã emoĩ joajuha</b> -- streamer kuatiarogue ohechauka iVOD ipyahúva; VOD joajuha ombojuruja istreamer upe VOD oñeiporavóva ndive.",
+  "home.import_html": "Eiporavo VOD ha ejapo clic <b>Gueru</b>-re: oñemboguejy peteĩ peteĩ (Tembiapo), upéi oñetranscribi ha ojeheka grabación-icha.",
+  "res.head": "Jeheka “{query}”",
+  "res.clear": "Mopotĩ jeheka",
+  "res.empty_title": "Mba'eve ndojejuhúi",
+  "res.empty_text": "Ehecha jehai, emyendy hetave tenda, térã emoĩ ikuatiarogue joajuha.",
+  "res.no_hits": "Ndaipóri streamer upe téra reheve tenda hendývape.",
+  "res.not_found": "ndojejuhúi",
+  "res.fav_title": "favorito",
+  "res.recent": {
+    "other": "{count} ipyahu"
+  },
+  "res.recent_more": "{count}+ ipyahu",
+  "res.no_recent": "ndaipóri VOD ipyahúva lista-pe",
+  "single.title": "Peteĩ VOD",
+  "single.clear": "Mopotĩ",
+  "single.site": "Tenda",
+  "single.link": "Joajuha",
+  "single.recheck": "Gueru ohechajey joajuha tenda ndive.",
+  "single.no_channel": "Tenda nomombe'úi mávapa mba'e ko VOD, upévare ndaipóri streamer oñemoĩ hag̃ua lista-pe. Ko VOD ikatu gueteri ojegueru.",
+  "single.import": "Gueru ko VOD"
+}

@@ -1,0 +1,20 @@
+{
+  "@": "Menú del ícono de la bandeja y mensajes del lanzador, en español de Latinoamérica (es-419).",
+  "tray.open": "Abrir WardogClips",
+  "tray.update": "Actualización disponible...",
+  "tray.pause": "Pausar mientras juego",
+  "tray.speed": "Velocidad",
+  "tray.mode_full": "Máxima velocidad",
+  "tray.mode_balanced": "Equilibrado",
+  "tray.mode_background": "Segundo plano",
+  "tray.open_data": "Abrir carpeta de datos",
+  "tray.open_log": "Abrir registro",
+  "tray.quit": "Salir",
+  "tray.balloon": "WardogClips está en ejecución. Haz clic derecho en el ícono de la bandeja para salir.",
+  "tray.update_notify": "WardogClips {version} está disponible. Elige Actualización disponible... en el menú de la bandeja para verla.",
+  "launcher.could_not_start": "WardogClips no pudo iniciar:\n\n{error}",
+  "launcher.scan_running": "Un escaneo de WardogClips (scan.bat / --scan) está usando esta carpeta de datos:\n\n{dir}\n\nEspera a que termine (o detenlo en su ventana) y luego vuelve a abrir WardogClips.",
+  "launcher.not_answering": "WardogClips ya está abierto pero no responde.\n\nCiérralo desde su ícono de la bandeja (o espera un minuto) e inténtalo de nuevo.\n\nRegistro: {log}",
+  "launcher.damaged": "WardogClips está dañado (faltan el entorno de ejecución o los archivos de la app).\n\nVuelve a instalarlo.\n\nSe buscó:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips se detuvo justo después de iniciar (código de salida {code}).\n\nEl registro puede decir por qué:\n{log}"
+}

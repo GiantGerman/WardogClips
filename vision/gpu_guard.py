@@ -8,7 +8,8 @@ utilization from `nvidia-smi --query-gpu=utilization.gpu` (a GPU-level number, l
 count). Our own GPU OCR shows up in that number too, so every CHECK_S the guard hands out the CPU for a short PROBE_S
 window (all detects together: one guard per process), samples the utilization meanwhile, and decides: busy (>=
 BUSY_PCT) -> CPU until the next check, else GPU. While our own whisper is transcribing, a sample says nothing about a
-game, so the last decision stands. No nvidia-smi -> the GPU (the driver could not say; DirectML runs on any card).
+game, so the last decision stands. No nvidia-smi (an AMD / Intel card) -> the 3D load from Windows' own GPU counters
+(utils/gpuload.py, machine-wide, no process names); neither answering -> the CPU (nothing says the GPU is free).
 """
 
 import logging
@@ -29,11 +30,16 @@ _sleep = time.sleep          # (tests replace it)
 
 
 def gpu_utilization() -> int | None:
-    """Current GPU utilization in % (first GPU), None when nvidia-smi cannot say."""
+    """Current GPU utilization in % (first GPU), None when nobody can say. Without nvidia-smi: the busiest
+    adapter's 3D load from Windows' performance counters (utils/gpuload.py)."""
     from media.encoder import _smi
     exe = _smi()
     if not exe:
-        return None
+        try:
+            from utils import gpuload
+            return gpuload.utilization()
+        except Exception:  # noqa: BLE001 - no reading is an answer too
+            return None
     try:
         cp = subprocess.run([exe, "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
                             capture_output=True, text=True, timeout=5, creationflags=_NO_WINDOW)
@@ -105,7 +111,8 @@ class GpuGuard:
             with self._lock:
                 old = self._use
                 if not vals and not have_smi:
-                    self._use, why = True, "no nvidia-smi -- GPU"
+                    # neither nvidia-smi nor the Windows GPU counters answered: nothing says the GPU is free
+                    self._use, why = False, "GPU load unknown (no nvidia-smi, no GPU counters) -- CPU"
                 elif not vals:
                     # nvidia-smi is there but did not answer -- most likely while a game loads the driver
                     self._use = old if old is not None else False

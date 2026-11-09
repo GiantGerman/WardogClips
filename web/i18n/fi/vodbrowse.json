@@ -1,0 +1,161 @@
+{
+  "title": "Striimien VODit",
+  "paste": "Liitä linkki",
+  "paste_tip": "Tuo yksi VOD linkistä (tarkistetaan ensin)",
+  "close_tip": "Sulje (Esc)",
+  "search.box_ph": "Striimaajan nimi tai VOD- / profiililinkki",
+  "search.go": "Hae",
+  "search.go_tip": "Hae nimellä tai avaa liitetyn linkin striimaaja (Enter)",
+  "search.need_input": "kirjoita striimaajan nimi tai liitä VOD- / profiililinkki",
+  "search.need_name": "kirjoita striimaajan nimi",
+  "search.busy": "Kysytään ”{name}” palveluilta {sites} -- kaikilta kerralla, muutama sekunti",
+  "search.found": {
+    "one": "{count} striimaaja löytyi",
+    "other": "{count} striimaajaa löytyi"
+  },
+  "search.none": "ei striimaajaa nimeltä ”{name}” palveluissa {sites}",
+  "sites.one_on": "vähintään yksi sivusto pysyy päällä",
+  "link.busy": "Luetaan linkkiä -- VOD-linkistä kysytään sivustolta, kenen VOD se on, noin 3 s",
+  "link.unsupported": "Tämä ei ole tuetun sivuston linkki. Linkit palveluista {sites} toimivat (VOD tai striimaajan sivu).",
+  "favs.title": "Suosikit",
+  "favs.check": "Tarkista uudet",
+  "favs.check_tip": "Listaa jokainen suosikki uudelleen ja laske edellisen tarkistuksen jälkeen ilmestyneet VODit",
+  "favs.checking": "Tarkistetaan...",
+  "favs.none_yet": "ei vielä suosikkeja: avaa striimaaja ja napsauta tähteä",
+  "favs.checking_note": {
+    "one": "tarkistetaan {count} suosikin uudet VODit ...",
+    "other": "tarkistetaan {count} suosikin uudet VODit ..."
+  },
+  "favs.result_new": {
+    "one": "{count} uusi VOD suosikeillasi",
+    "other": "{count} uutta VODia suosikeillasi"
+  },
+  "favs.result_nothing": "ei mitään uutta edellisen tarkistuksen jälkeen",
+  "favs.result_failed": {
+    "one": "{result} ({count} suosikkia ei voitu tarkistaa)",
+    "other": "{result} ({count} suosikkia ei voitu tarkistaa)"
+  },
+  "favs.removed": "{name} poistettu suosikeista",
+  "favs.added": "{name} lisätty suosikkeihin",
+  "favs.empty_title": "Ei vielä suosikkeja",
+  "favs.empty_text": "Avaa striimaaja ja napsauta tähteä pitääksesi hänet täällä.",
+  "favs.new_badge": {
+    "one": "{count} uusi",
+    "other": "{count} uutta"
+  },
+  "favs.new_badge_title": "Edellistä tarkistusta edeltäneen tarkistuksen jälkeen ilmestyneet VODit",
+  "favs.remove_title": "Poista suosikeista",
+  "favs.remove_aria": "Poista {name} suosikeista",
+  "favs.add_title": "Lisää suosikkeihin",
+  "favs.checked": "tarkistettu {ago}",
+  "pre.error_extra": "{error} -- näytetään luettelon alussa, sitä ei voi tuoda nyt",
+  "pre.in_library": "tämä VOD on jo kirjastossa",
+  "pre.older": "tämä VOD on vanhempi kuin uusimpien luettelo: se näytetään alussa",
+  "import.label": "Tuo",
+  "import.label_n": {
+    "one": "Tuo {count}",
+    "other": "Tuo {count}"
+  },
+  "import.busy": "Tuodaan...",
+  "import.queue_title": {
+    "one": "laita {count} lataus jonoon",
+    "other": "laita {count} latausta jonoon"
+  },
+  "import.select_title": "valitse tuotavat VODit",
+  "import.queuing": {
+    "one": "laitetaan {count} VOD jonoon -- jokainen linkki tarkistetaan ensin sivustolta ...",
+    "other": "laitetaan {count} VODia jonoon -- jokainen linkki tarkistetaan ensin sivustolta ..."
+  },
+  "import.no_answer": "ei vastausta tälle linkille",
+  "import.sum_queued": {
+    "one": "{count} jonossa",
+    "other": "{count} jonossa"
+  },
+  "import.sum_already": {
+    "one": "{count} oli jo",
+    "other": "{count} oli jo"
+  },
+  "import.sum_failed": {
+    "one": "{count} epäonnistui (vie hiiri punaisen merkin päälle)",
+    "other": "{count} epäonnistui (vie hiiri punaisen merkin päälle)"
+  },
+  "import.sum_jobs": "{summary} -- Työt näyttää lataukset",
+  "import.toast": "VODit: {summary}",
+  "row.in_library": "kirjastossa",
+  "row.imported_before": "tuotu aiemmin",
+  "row.already_queued": "jo jonossa",
+  "row.queued": "jonossa",
+  "row.failed": "epäonnistui",
+  "row.job": "työ {id}",
+  "row.download_job": "lataustyö {id}",
+  "row.your_link": "linkkisi",
+  "row.your_link_title": "liittämäsi linkki",
+  "row.open_rec_title": "avaa tallenne",
+  "row.live": "live nyt",
+  "row.upcoming": "tulossa",
+  "row.live_title": "voidaan tuoda, kun striimi on päättynyt",
+  "row.unavailable": "ei saatavilla",
+  "row.not_ready": "ei valmis",
+  "row.not_ready_title": "ei vielä tuotavissa",
+  "row.processing_title": "striimi päättyi juuri, ja sivusto käsittelee sitä vielä",
+  "row.new": "uusi",
+  "row.new_title": "ilmestynyt toiseksi viimeisimmän tarkistuksen jälkeen",
+  "row.older": "vanhempi kuin luettelo",
+  "row.open_on": "avaa: {site}",
+  "ch.back_results": "Takaisin tuloksiin",
+  "ch.back_favs": "Takaisin suosikkeihin",
+  "ch.back_aria": "Takaisin",
+  "ch.star_wait": "odota listausta (se kertoo striimaajan oman tunnisteen)",
+  "ch.listing_title": "Listataan...",
+  "ch.refresh_title": "Listaa uudelleen sivustolta (luettelo on välimuistissa 5 minuuttia)",
+  "ch.refresh_aria": "Päivitä",
+  "ch.page_title": "striimaajan sivu: {url}",
+  "ch.page_aria": "striimaajan sivu",
+  "ch.listing": "listataan ...",
+  "ch.count_listed": {
+    "one": "{count} listattu",
+    "other": "{count} listattu"
+  },
+  "ch.count_new": {
+    "one": "{count} uusi",
+    "other": "{count} uutta"
+  },
+  "ch.count_lib": {
+    "one": "{count} kirjastossa",
+    "other": "{count} kirjastossa"
+  },
+  "ch.select_new": "Valitse uudet",
+  "ch.select_new_title": "valitse jokainen VOD, joka ei ole vielä kirjastossa tai jonossa",
+  "ch.none": "Ei mitään",
+  "ch.none_title": "tyhjennä valinta",
+  "ch.listing_busy": "Listataan striimaajan {name} VODeja palvelussa {site} ...",
+  "ch.relisting": "listataan uudelleen ...",
+  "ch.empty_title": "VODeja ei listattu",
+  "ch.empty_text": "Striimaaja ei ehkä säilytä vanhoja lähetyksiä, tai ne ovat vain tilaajille.",
+  "ch.load_older": "Lataa vanhempia ({count})",
+  "ch.max_listed": "Vain {count} uusinta listataan -- liitä vanhemman VODin linkki tuodaksesi sen.",
+  "home.short": "Kirjoita nimi ja paina Enter, tai liitä VOD- / profiililinkki.",
+  "home.find_html": "<b>Etsi striimaaja</b> -- kirjoita nimi ja paina Enter; kaikilta päällä olevilta sivustoilta kysytään kerralla.",
+  "home.paste_html": "<b>Tai liitä linkki</b> -- striimaajan sivu listaa uusimmat VODit; VOD-linkki avaa striimaajan se VOD valittuna.",
+  "home.import_html": "Valitse VODit ja napsauta <b>Tuo</b>: ne ladataan yksi kerrallaan (Työt), sitten ne litteroidaan ja skannataan kuten tallenne.",
+  "res.head": "Tulokset haulle ”{query}”",
+  "res.clear": "Tyhjennä tulokset",
+  "res.empty_title": "Mitään ei löytynyt",
+  "res.empty_text": "Tarkista kirjoitusasu, ota useampi sivusto käyttöön tai liitä striimaajan sivun linkki.",
+  "res.no_hits": "Tällä nimellä ei ole striimaajaa päällä olevilla sivustoilla.",
+  "res.not_found": "ei löytynyt",
+  "res.fav_title": "suosikki",
+  "res.recent": {
+    "one": "{count} uusi",
+    "other": "{count} uutta"
+  },
+  "res.recent_more": "{count}+ uutta",
+  "res.no_recent": "ei uusia VODeja listattuna",
+  "single.title": "Yksi VOD",
+  "single.clear": "Tyhjennä",
+  "single.site": "Sivusto",
+  "single.link": "Linkki",
+  "single.recheck": "Tuonti tarkistaa linkin sivustolta uudelleen.",
+  "single.no_channel": "Sivusto ei kertonut, kenen VOD tämä on, joten listattavaa striimaajaa ei ole. Tämän yhden VODin voi silti tuoda.",
+  "single.import": "Tuo tämä VOD"
+}

@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Avkodar video, läser HUD-texten och gör tal till text.",
+  "can.integrated": "Inbyggd grafik: avkodar video bara när inget annat grafikkort är inställt på Använd för WardogClips. HUD-text och tal körs på ett annat kort eller på processorn.",
+  "can.other": "Avkodar video och läser HUD-texten. Tal blir text på processorn, eftersom det kräver ett NVIDIA-kort.",
+  "none_found": "Inget grafikkort hittades. WardogClips gör allt arbete på processorn.",
+  "role.use": "Använd för WardogClips",
+  "role.leave": "Lämna orört",
+  "all_left_alone": "Alla kort är inställda på Lämna orört, så WardogClips gör allt arbete på processorn.",
+  "shared_hint": "Kortet som kör ditt spel delas: medan du spelar kan WardogClips arbete på det kosta spelet några bildrutor. Ställ in kortet på Lämna orört om det stör dig.",
+  "apply_hint": "En ändring gäller från nästa jobb. Lägger du till ett kort körs fler videojobb samtidigt efter en omstart.",
+  "load_failed": "Listan över grafikkort kunde inte läsas in.",
+  "saved": "Sparat: {keys}",
+  "saved_none": "Sparat: ingen ändring",
+  "error": "Fel: {error}"
+}

@@ -1,0 +1,7 @@
+/* Work modes: the status-bar chip #sb-work and Settings > Performance (web/js/workmode.js) */
+#sb-work .wm-n { color: var(--warn-text); }
+#sb-work .wm-n[hidden] { display: none; }
+.wm-note { color: var(--warn-text); }
+.wm-explain { padding: 4px 12px 8px; line-height: 1.5; }
+#wm-now { flex-direction: column; align-items: flex-start; gap: 4px; }
+#wm-now .wm-now-row { display: flex; align-items: center; gap: 8px; }

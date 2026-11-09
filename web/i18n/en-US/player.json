@@ -1,0 +1,108 @@
+{
+  "@": "The clip player (web/js/player.js): the video, its header title, the overlay cards on the video, the scrub bar and transport tooltips, the clip in / out toasts and the timeline strip under the player. {time}, {t0}, {t1}, {pos} and similar are timecodes such as 1:02:03 or 0:56.50. \"In\" and \"out\" are the clip's start and end points, as in a video editor. A proxy is a smaller copy of the whole recording made for scrubbing.",
+  "title.none": "no clip",
+  "@title.rendering": "{kind} is an event type such as Kill; {height} is a number of video lines (720 for 720p).",
+  "title.rendering": "{kind} at {time} · rendering {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · whole recording",
+  "title.no_proxy": "No proxy yet",
+  "tip.event": "{kind} at {time}: {render}",
+  "tip.around": "around {time}: {render}",
+  "tip.cached": "{height}p from the clip cache",
+  "tip.rendered": "{height}p rendered in {seconds} s",
+  "@tip.rendered_enc": "{encoder} is an encoder name: x264 or NVENC.",
+  "tip.rendered_enc": "{height}p rendered in {seconds} s ({encoder})",
+  "tip.proxy": "{name}: the whole-recording proxy",
+  "tip.no_proxy": "{name}: no whole-recording proxy yet",
+  "busy.clip": "rendering the clip ({height}p)...",
+  "busy.at": "rendering {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Could not render this clip",
+  "err.at": "Could not render {time}",
+  "err.retry": "Try again",
+  "err.encoding": "Encoding settings",
+  "err.play_clip": "This clip could not be played.",
+  "err.play_proxy": "The proxy could not be played.",
+  "pick.title": "Pick an event",
+  "pick.text": "Choose one in Events (or press N): its clip plays here from the pre-roll.",
+  "pick.more": "Or click the timeline below to look at any moment of this recording.",
+  "pick.short": "Choose one in Events (or press N), or click the timeline below.",
+  "proxy.card_title": "No proxy for this recording yet",
+  "@proxy.card_text": "{duration} is a length such as 1:02:03.",
+  "proxy.card_text": "A {height}p proxy is a copy of the whole {duration} file for scrubbing it from end to end (it is made several times faster than real time).",
+  "proxy.building": "building",
+  "@proxy.progress": "{message} is the job's own progress text, {percent} a percentage such as 42%.",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "queued",
+  "proxy.build": "Build proxy",
+  "proxy.all": "Proxies for all with events",
+  "proxy.all_tip": "Queue proxies for every recording with events",
+  "proxy.queued_toast": "proxy queued",
+  "proxy.all_toast": {
+    "one": "queued {count} proxy ({candidates} recordings with events lack one)",
+    "other": "queued {count} proxies ({candidates} recordings with events lack one)"
+  },
+  "mode.full_tip": "The whole recording, played from its proxy",
+  "mode.full_noproxy_tip": "The whole recording: no proxy yet (build one from here)",
+  "bound.wait": "wait for this event's clip to load",
+  "bound.in_before_out": "in must be before out",
+  "bound.out_after_in": "out must be after in",
+  "bound.reset": "clip back to the pre-roll / post-roll",
+  "bound.in_set": "in = {time} (clip {length} s)",
+  "bound.out_set": "out = {time} (clip {length} s)",
+  "mark.nothing": "nothing playing",
+  "mark.done": "manual mark at {time}",
+  "play_aria": "Play",
+  "pause_aria": "Pause",
+  "time.pos": "{pos} of {total}",
+  "time.rel": "{offset} s from the event",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Loop in → out",
+  "evt.title": "{kind} {time}",
+  "@tl.tip": "{score} is a detection confidence between 0 and 1.",
+  "tl.tip": "{kind} · {time} · score {score}",
+  "@tl.tip_status": "{status} is tl.status_kept or tl.status_false.",
+  "tl.tip_status": "{kind} · {time} · score {score} · {status}",
+  "tl.status_kept": "kept",
+  "tl.status_false": "false positive",
+  "tl.whole": "Whole recording",
+  "tl.no_events": "no events",
+  "tl.not_detected": "not detected yet",
+  "tl.no_proxy": "no proxy",
+  "tl.no_proxy_tip": "Full recording mode needs a proxy (build it from the player)",
+  "@tl.kind.kill": "Event counts on the line above the timeline, e.g. \"3 kills\".",
+  "tl.kind.kill": {
+    "one": "{count} kill",
+    "other": "{count} kills"
+  },
+  "tl.kind.assist": {
+    "one": "{count} assist",
+    "other": "{count} assists"
+  },
+  "tl.kind.death": {
+    "one": "{count} death",
+    "other": "{count} deaths"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} spotted",
+    "other": "{count} spotted"
+  },
+  "tl.kind.revive": {
+    "one": "{count} revive",
+    "other": "{count} revives"
+  },
+  "tl.kind.squad": {
+    "one": "{count} squad",
+    "other": "{count} squad"
+  },
+  "tl.kind.voice": {
+    "one": "{count} voice",
+    "other": "{count} voice"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manual",
+    "other": "{count} manual"
+  },
+  "@tl.kind_other": "An event type without its own text; {kind} is its lower-case name.",
+  "tl.kind_other": "{count} {kind}"
+}

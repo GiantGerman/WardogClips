@@ -1,16 +1,16 @@
 """False-positive learning: the user's Keep / False positive verdicts re-weight the
 scores of events that look the same.
 
-An event's *signature* is coarse on purpose so it generalises across recordings: kind +
+An event's *signature* is coarse on purpose so it generalizes across recordings: kind +
 subkind + which signals backed it (kill-feed row, respawn text, refined, xp / cash on the
 ticker, dark-stretch bucket, kill / death context for voice events). Per signature the
-verdicts give a Bayesian kept-rate (kept + A) / (kept + false + A + B), normalised by the
+verdicts give a Bayesian kept-rate (kept + A) / (kept + false + A + B), normalized by the
 prior A / (A + B) so an unseen signature is 1.0, clamped to [0.25, 1.5] and only applied
 once MIN_N verdicts exist. The detect stage and the voice events multiply their score by it;
 `source.base_score` keeps the unlearned score so rescoring never compounds, and
 `source.learned = {sig, factor}` says what was applied.
 
-Ticker noise: when >= 3 events whose ticker texts normalise to the same pattern were all
+Ticker noise: when >= 3 events whose ticker texts normalize to the same pattern were all
 marked false, the pattern is reported as a suggestion (label it 'other' on the calibration
 page); nothing is hidden automatically.
 """
@@ -18,6 +18,8 @@ page); nothing is hidden automatically.
 import json
 import logging
 import re
+
+from core.messages import msg
 
 logger = logging.getLogger("wclips.learning")
 
@@ -180,11 +182,11 @@ def on_status_change(db, event_id: int) -> int:
 # ---- ticker noise -----------------------------------------------------------------------
 def _pattern(text: str) -> str:
     try:
-        from vision.ticker import normalise
+        from vision.ticker import normalize
     except Exception:  # noqa: BLE001 - the suggestion must not depend on the vision stack
-        def normalise(t):
+        def normalize(t):
             return re.sub(r"\s+", " ", t.upper().strip())
-    return re.sub(r"\s+", " ", re.sub(r"\d[\d,.]*", "#", normalise(text))).strip()
+    return re.sub(r"\s+", " ", re.sub(r"\d[\d,.]*", "#", normalize(text))).strip()
 
 
 def ticker_suggestions(db, min_false: int = MIN_FALSE_PATTERN) -> list[dict]:
@@ -208,10 +210,16 @@ def ticker_suggestions(db, min_false: int = MIN_FALSE_PATTERN) -> list[dict]:
         if g["false"] >= min_false and g["kept"] == 0:
             out.append({"pattern": g["pattern"], "n_false": g["false"], "n_new": g["new"], "kinds": sorted(g["kinds"]),
                         "examples": g["examples"], "suggest_label": "other",
-                        "message": f"{g['false']} events from '{g['pattern']}' were all marked false:"
-                                   f" label it 'other' on the calibration page to stop detecting it"})
+                        **_message(msg("server.learning.noise",
+                                       "{count} events from \u201c{pattern}\u201d were all marked false. Label it as "
+                                       "\u201cother\u201d on the calibration page to stop detecting it.",
+                                       count=g["false"], pattern=g["pattern"]))})
     out.sort(key=lambda s: -s["n_false"])
     return out
+
+
+def _message(m: dict) -> dict:
+    return {"message": m["message"], "message_i18n": {"code": m["code"], "params": m["params"]}}
 
 
 def summary(db) -> dict:

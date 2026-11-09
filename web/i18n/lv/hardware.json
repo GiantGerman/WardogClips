@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekodē video, nolasa HUD tekstu un pārvērš runu tekstā.",
+  "can.integrated": "Iebūvētā grafika: dekodē video tikai tad, ja neviena cita videokarte nav iestatīta uz Lietot WardogClips. HUD teksts un runa darbojas uz citas kartes vai procesora.",
+  "can.other": "Dekodē video un nolasa HUD tekstu. Runa tekstā tiek pārvērsta uz procesora, jo tam vajag NVIDIA karti.",
+  "none_found": "Videokarte netika atrasta. WardogClips visu darbu veic uz procesora.",
+  "role.use": "Lietot WardogClips",
+  "role.leave": "Neaiztikt",
+  "all_left_alone": "Visas kartes ir iestatītas uz Neaiztikt, tāpēc WardogClips visu darbu veic uz procesora.",
+  "shared_hint": "Karte, uz kuras darbojas tava spēle, ir koplietota: kamēr tu spēlē, WardogClips darbs uz tās var spēlei atņemt dažus kadrus. Ja tas traucē, iestati šo karti uz Neaiztikt.",
+  "apply_hint": "Izmaiņas stājas spēkā nākamajam uzdevumam. Pievienojot karti, pēc restartēšanas vienlaikus darbojas vairāk video uzdevumu.",
+  "load_failed": "Videokaršu sarakstu neizdevās ielādēt.",
+  "saved": "Saglabāts: {keys}",
+  "saved_none": "Saglabāts: bez izmaiņām",
+  "error": "Kļūda: {error}"
+}

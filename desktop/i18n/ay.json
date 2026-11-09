@@ -1,0 +1,20 @@
+{
+  "@": "Aymara (ay), machine-translated (beta).",
+  "tray.open": "WardogClips jist'araña",
+  "tray.update": "Machaqtayäw utjiwa...",
+  "tray.pause": "Anatkasax sayt'aña",
+  "tray.speed": "Jank'aki",
+  "tray.mode_full": "Taqi ch'amampi",
+  "tray.mode_balanced": "Chikachata",
+  "tray.mode_background": "Qhipäxan",
+  "tray.open_data": "Data carpeta jist'araña",
+  "tray.open_log": "Log jist'araña",
+  "tray.quit": "Mistuña",
+  "tray.balloon": "WardogClips sarantaskiwa. Mistuñatakix bandeja íconor kupi clic lurma.",
+  "tray.update_notify": "WardogClips {version} utjiwa. Uñjañatakix bandeja menún Machaqtayäw utjiwa... ajllima.",
+  "launcher.could_not_start": "WardogClips janiw qalltkaspati:\n\n{error}",
+  "launcher.scan_running": "Mä WardogClips escaneo (scan.bat / --scan) aka data carpeta apnaqaski:\n\n{dir}\n\nTukuyañap suyt'ma (jan ukax ventanapan sayt'ayma), ukat WardogClips wasitat qalltma.",
+  "launcher.not_answering": "WardogClips sarantaskxiwa ukampis janiw jayskiti.\n\nBandeja íconopat mistuyma (jan ukax mä minuto suyt'ma), ukat wasitat yant'ma.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips q'añuchatawa (runtime jan ukax app archivonakaw faltaski).\n\nWasitat instalma.\n\nThaqhata:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips qalltasinsti sayt'iwa (mistuñ código {code}).\n\nLog ukax kunatsa uk sispawa:\n{log}"
+}

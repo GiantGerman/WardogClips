@@ -336,7 +336,7 @@ class Runner:
         # propagate to our file handler, capped at WARNING by logging_config
         kw = {"log_config": None} if tray else {}
         # an open page holds the SSE stream (/api/stream) forever: without a graceful-shutdown limit uvicorn waits
-        # for it and Quit takes ~20 s; after GRACEFUL_S the remaining connections are cancelled
+        # for it and Quit takes ~20 s; after GRACEFUL_S the remaining connections are canceled
         self.server = uvicorn.Server(uvicorn.Config(app, host=host, port=port, log_level="warning",
                                                     timeout_graceful_shutdown=GRACEFUL_S, **kw))
         self.thread = threading.Thread(target=self._serve, name="uvicorn", daemon=True)
@@ -356,7 +356,7 @@ class Runner:
             return True
         msg = record.getMessage()
         if msg.startswith("Cancel ") and "graceful shutdown" in msg:
-            logger.info("[Main] open connections cancelled after %ds (the page's live stream)", GRACEFUL_S)
+            logger.info("[Main] open connections canceled after %ds (the page's live stream)", GRACEFUL_S)
             return False
         exc = record.exc_info[1] if record.exc_info else None
         import asyncio
@@ -592,7 +592,7 @@ def main(argv=None) -> int:
     icon = None
     if tray:
         from desktop import tray as tray_mod
-        icon = tray_mod.Tray(url=lambda: url, on_quit=lambda: runner.shutdown("tray quit"))
+        icon = tray_mod.Tray(url=lambda: url, on_quit=lambda: runner.shutdown("tray quit"), work=ctx)
         runner.on_stopped = icon.stop
     if not tray and not no_console:
         runner.install_console_close_handler()      # closing the window = a (time-boxed) clean stop
@@ -604,8 +604,13 @@ def main(argv=None) -> int:
         runner.shutdown("start failed")
         return 1
     _banner(ctx, host, port, tray=tray)
+    if icon is not None:
+        ctx.updater.listeners.append(icon.set_update)  # "Update available..." in the tray menu + a notification
+    ctx.updater.start()                                 # automatic update check (server runs only, never --scan)
     if not args.no_browser and cfg.server.open_browser:
-        webbrowser.open(url)
+        from core.workmode import normal_priority
+        with normal_priority():                     # a browser we start never inherits the work mode's low priority
+            webbrowser.open(url)
 
     if icon is not None:
         def _watch():                    # the server dying on its own must take the icon with it
@@ -765,6 +770,13 @@ def _banner(ctx, host: str, port: int, tray: bool = False) -> None:
              s["total"]["bytes"] / 1e9, s["total"]["probed"], s["total"]["missing"])
     log.info("ffmpeg: %s | cuda=%s hevc_cuvid=%s h264_nvenc=%s", hw.get("version") or "MISSING", hw["cuda"],
              hw["hevc_cuvid"], hw["h264_nvenc"])
+    try:
+        from utils import gpus
+        use = {a["key"] for a in gpus.usable(ctx.cfg)}
+        log.info("Graphics: %s", "; ".join(f"{gpus.label(a)} ({'in use' if a['key'] in use else 'left alone'})"
+                                           for a in gpus.hardware()) or "none found -- video work on the CPU")
+    except Exception:  # noqa: BLE001 - the banner never stops a start
+        log.warning("Graphics: the card list could not be read", exc_info=True)
     log.info("Player: %s | squad: %s", ", ".join(ctx.cfg.player.aliases) or "-", ", ".join(ctx.cfg.player.squad) or "-")
     log.info("Jobs: %s", ctx.jobs.counts())
     log.info("UI: http://%s:%d/", host, port)

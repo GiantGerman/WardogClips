@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Dekoduje wideo, odczytuje tekst z HUD i zamienia mowę na tekst.",
+  "can.integrated": "Grafika zintegrowana: dekoduje wideo tylko wtedy, gdy żadna inna karta nie ma ustawienia Używaj dla WardogClips. Tekst z HUD i mowa są przetwarzane na innej karcie lub na procesorze.",
+  "can.other": "Dekoduje wideo i odczytuje tekst z HUD. Mowa zamieniana jest na tekst na procesorze, bo to wymaga karty NVIDIA.",
+  "none_found": "Nie znaleziono karty graficznej. WardogClips wykonuje całą pracę na procesorze.",
+  "role.use": "Używaj dla WardogClips",
+  "role.leave": "Nie używaj",
+  "all_left_alone": "Każda karta ma ustawienie Nie używaj, więc WardogClips wykonuje całą pracę na procesorze.",
+  "shared_hint": "Karta, na której działa gra, jest współdzielona: podczas gry praca WardogClips na niej może kosztować grę kilka klatek. Jeśli to przeszkadza, ustaw dla tej karty Nie używaj.",
+  "apply_hint": "Zmiana obowiązuje od następnego zadania. Po dodaniu karty więcej zadań wideo działa naraz po ponownym uruchomieniu.",
+  "load_failed": "Nie udało się wczytać listy kart graficznych.",
+  "saved": "Zapisano: {keys}",
+  "saved_none": "Zapisano: bez zmian",
+  "error": "Błąd: {error}"
+}

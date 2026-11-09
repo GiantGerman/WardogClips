@@ -1,0 +1,12 @@
+{
+  "pick_first": "Nayraqat mä evento ajllima jan ukax mä grabación uñjma.",
+  "already": "Aka clipax lurasiskiwa.",
+  "making_exact": "Clip lurasiski, frame chiqapa. Juk'amp pachaw munasi, uñacht'äwix wasitat codificasitap layku.",
+  "making_copy": "Clip lurasiski. In chimpum nayrqat jak'an keyframe ukat qalltani.",
+  "open_folder": "Carpeta jist'araña",
+  "saved": "Clip imatawa: {name}",
+  "saved_early": "Clip imatawa: {name}\nIn chimpum {seconds} nayraqat qallti (jak'an keyframe).",
+  "check_mismatch": "Clipax janiw grabación ukamp taqpach kikipäkiti. Apnaqkasax nayraqat uñakipma.",
+  "failed": "Clipax janiw luratäkaspati: {error}",
+  "unknown_error": "jan uñt'at pantja"
+}

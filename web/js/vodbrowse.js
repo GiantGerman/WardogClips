@@ -1,11 +1,13 @@
 /* VOD browser + favorites (server side = server/routes/vodbrowse.py).
    Lives in the VODs side panel (#vb-panel, mounted by app.js through VB.mountPanel each time
    the panel is shown). Two faces in that one panel: the LIST face (search box, site chips, search results, favorites
-   + Check for new) and the STREAMER face (one streamer's recent VODs: tick, Import selected, Load older). Without a
-   panel mount (an older index.html) the same markup opens in a modal <dialog id="dlg-vb">.
+   + Check for new) and the STREAMER face (one streamer's recent VODs: check boxes, Import selected, Load older).
+   Without a panel mount (an older index.html) the same markup opens in a modal <dialog id="dlg-vb">.
    A listing is a yt-dlp run on the server (1-5 s, longer when a site is slow), so every answer carries a request
-   token: a slow older answer never paints over a newer view, and a channel's ticks / import results live on that
+   token: a slow older answer never paints over a newer view, and a channel's selection / import results live on that
    channel's own state object, so an import that finishes after you moved on cannot mark rows of another streamer.
+   Every visible text comes from the "vodbrowse" catalog (t / te / tHtml); texts that stay on screen are kept as
+   functions (or catalog keys) and drawn again when the UI language changes.
    Only window.VB is global. */
 (function () {
   "use strict";
@@ -16,11 +18,13 @@
 
   const S = {
     host: null,                             // the element holding the markup (#vb-panel, or the dialog's body)
+    inDialog: false,
     sites: new Set(SITES), sitesLoaded: false,
     favs: [], favErr: "", favBusy: false, favTok: 0, refreshTok: 0, newCounts: {}, favErrors: {}, newIds: {},
     favLoaded: 0,
     view: "home",                           // home | busy | error | search | channel | single
-    viewTok: 0, inflight: "", busyMsg: "", errMsg: "",
+    viewTok: 0, inflight: "", busyMsg: "", errMsg: "",   // busyMsg / errMsg: text, or a function giving the text
+    noteMsg: "", noteKind: "",              // the footer note (text or function), redrawn on a language switch
     q: "", results: [],                     // the last search (the streamer face's back arrow returns to it)
     ch: null,                               // the streamer on screen, see openChannel()
     single: null,                           // a VOD link whose streamer could not be told
@@ -41,6 +45,10 @@
   const isCh = (ch, provider, key) => !!ch && chKeys(ch).some(k => chKey(ch.provider, k) === chKey(provider, key));
   const chFav = (ch) => { for (const k of chKeys(ch)) { const f = favOf(ch.provider, k); if (f) return f; } return null; };
   const chNewIds = (ch) => { for (const k of chKeys(ch)) { const s = S.newIds[chKey(ch.provider, k)]; if (s) return s; } return null; };
+  // a text kept for later drawing: a function (translated when drawn) or a plain string (server / user text)
+  const val = (x) => typeof x === "function" ? String(x() ?? "") : String(x ?? "");
+  // a server text field: its translation when the server sent a catalog code with it, else as sent
+  const srvField = (o, field) => (o && o[field] ? srvText(o, field) : "");
   // a comparable form of a VOD link, as media/vodbrowse.url_key: no fragment, no query except YouTube's v=,
   // host lower case without www. / m., no trailing slash, path lower case except on YouTube (ids are case-sensitive)
   function urlKey(u) {
@@ -56,17 +64,19 @@
     const v = yt ? p.searchParams.get("v") : null;
     return host + (yt ? path : path.toLowerCase()) + (v ? "?v=" + v : "");
   }
-  // the site's badge (same look as the Recordings rows: .prov.p-<site>)
+  // the site's badge (same look as the Recordings rows: .prov.p-<site>); the site name is data, not translated
   const badge = (p) => `<span class="prov p-${esc(lc(p) || "vod")}">${esc(String(p || "VOD").toUpperCase())}</span>`;
   const ic = (name) => typeof icon === "function" ? icon(name) : "";
   // a link of any site goes through /resolve (which says vod / channel / name / unknown); plain words are a name
-  const isLink = (t) => !/\s/.test(t) && /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(:\d+)?(\/\S*)?$/i.test(t);
-  const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+  const isLink = (s) => !/\s/.test(s) && /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(:\d+)?(\/\S*)?$/i.test(s);
 
+  // msg: a function giving the text (drawn again on a language switch) or a plain string (server text)
   function note(msg, kind) {
+    S.noteMsg = msg || ""; S.noteKind = kind || "";
     const n = $("vb-note"); if (!n) return;
-    n.textContent = msg || ""; n.className = "vbnote" + (kind ? " " + kind : "");
-    n.title = msg || "";
+    const s = val(msg);
+    n.textContent = s; n.className = "vbnote" + (kind ? " " + kind : "");
+    n.title = s;
   }
   function loadSites() {
     if (S.sitesLoaded) return; S.sitesLoaded = true;
@@ -78,10 +88,10 @@
   function saveSites() { try { localStorage.setItem(LS_KEY, JSON.stringify({ sites: [...S.sites] })); } catch (e) { } }
 
   // a date the site gave only as a day (upload_date, YouTube's 'N days ago') arrives as 00:00 UTC and
-  // date_approx: show the day, not a made-up time
+  // date_approx: show the day (in UTC, so it stays that day), not a made-up time
   function vodDate(v) {
     const ts = v.start_utc; if (!ts) return "";
-    if (v.date_approx || ts % 86400 === 0) return new Date(ts * 1000).toISOString().slice(0, 10);
+    if (v.date_approx || ts % 86400 === 0) return fmtDateTime(ts, { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" });
     return fmtDate(ts);
   }
   const isLive = (v) => !!v.live || v.live_status === "is_live" || v.live_status === "is_upcoming";
@@ -91,19 +101,19 @@
   /* ---------------- the markup (panel or dialog) ---------------- */
   function skeleton(inDialog) {
     const paste = typeof openVod === "function"
-      ? `<button type="button" class="btn sm ghost" id="vb-paste" data-tip="Import one VOD from its link (looks it up first)">${ic("link")}Paste link</button>` : "";
-    const close = inDialog ? `<button type="button" class="ib sm" id="vb-x" data-tip="Close (Esc)">${ic("x")}</button>` : "";
+      ? `<button type="button" class="btn sm ghost" id="vb-paste" data-tip="${te("vodbrowse.paste_tip")}">${ic("link")}${te("vodbrowse.paste")}</button>` : "";
+    const close = inDialog ? `<button type="button" class="ib sm" id="vb-x" data-tip="${te("vodbrowse.close_tip")}">${ic("x")}</button>` : "";
     return `<div class="vbp">
       <section class="vbface" id="vb-list">
-        <div class="phd"><h2>Stream VODs</h2><span class="sp"></span>${paste}${close}</div>
+        <div class="phd"><h2>${te("vodbrowse.title")}</h2><span class="sp"></span>${paste}${close}</div>
         <div class="psub vbq">
-          <div class="vbsearch">${ic("search")}<input type="text" class="inp sm" id="vb-q" placeholder="Streamer name or a VOD / profile link" autocomplete="off" spellcheck="false"></div>
-          <button type="button" class="btn sm" id="vb-go" data-tip="Search by name, or open the streamer of a pasted link (Enter)">Search</button>
+          <div class="vbsearch">${ic("search")}<input type="text" class="inp sm" id="vb-q" placeholder="${te("vodbrowse.search.box_ph")}" autocomplete="off" spellcheck="false"></div>
+          <button type="button" class="btn sm" id="vb-go" data-tip="${te("vodbrowse.search.go_tip")}">${te("vodbrowse.search.go")}</button>
         </div>
         <div class="psub"><div class="chips" id="vb-sites">${SITES.map(s => `<button type="button" class="chip" data-site="${s}">${s}</button>`).join("")}</div></div>
         <div class="pbody vbl">
           <div id="vb-res"></div>
-          <div class="sect-t vbfh">Favorites<span class="sp"></span><button type="button" class="btn ghost sm" id="vb-check" data-tip="List every favorite again and count the VODs that appeared since the last check">${ic("refresh")}<span>Check for new</span></button></div>
+          <div class="sect-t vbfh">${te("vodbrowse.favs.title")}<span class="sp"></span><button type="button" class="btn ghost sm" id="vb-check" data-tip="${te("vodbrowse.favs.check_tip")}">${ic("refresh")}<span>${te("vodbrowse.favs.check")}</span></button></div>
           <div id="vb-favs"></div>
         </div>
       </section>
@@ -112,17 +122,27 @@
     </div>`;
   }
 
-  function mount(host, inDialog) {
+  function mount(host, inDialog, force) {
     loadSites();
-    if (S.host === host && host.querySelector(".vbp")) return false;     // idempotent: already built here
+    if (!force && S.host === host && host.querySelector(".vbp")) return false;     // idempotent: already built here
     // moving between panel and dialog: the old markup goes, the state stays
     if (S.host && S.host !== host) S.host.innerHTML = "";
-    S.host = host;
+    S.host = host; S.inDialog = !!inDialog;
     host.innerHTML = skeleton(inDialog);
     wire(host);
     renderSites(); renderFavs(); renderMain();
+    note(S.noteMsg, S.noteKind);
     return true;
   }
+
+  // a UI language switch: build the markup again in the new language (search text, view and state stay)
+  I18N.onChange(() => {
+    const host = S.host; if (!host || !host.isConnected || !host.querySelector(".vbp")) return;
+    const q = $("vb-q"); const text = q ? q.value : "";
+    mount(host, S.inDialog, true);
+    const q2 = $("vb-q"); if (q2) q2.value = text;
+    syncGo();
+  });
 
   function wire(host) {
     const q = $("vb-q");
@@ -139,7 +159,7 @@
     $("vb-sites").addEventListener("click", (e) => {
       const c = e.target.closest(".chip"); if (!c) return;
       const s = c.dataset.site;
-      if (S.sites.has(s)) { if (S.sites.size === 1) { note("at least one site stays on"); return; } S.sites.delete(s); } else S.sites.add(s);
+      if (S.sites.has(s)) { if (S.sites.size === 1) { note(() => t("vodbrowse.sites.one_on")); return; } S.sites.delete(s); } else S.sites.add(s);
       saveSites(); renderSites();
     });
     $("vb-favs").addEventListener("click", (e) => {
@@ -185,17 +205,17 @@
 
   /* ---------------- search / links ---------------- */
   function go(text) {
-    const t = String(text ?? $("vb-q").value).trim();
-    if (!t) { note("type a streamer name or paste a VOD / profile link"); $("vb-q").focus(); return; }
-    if (S.inflight && t === S.inflight) return;
-    return isLink(t) ? resolveLink(t) : search(t);
+    const s = String(text ?? $("vb-q").value).trim();
+    if (!s) { note(() => t("vodbrowse.search.need_input")); $("vb-q").focus(); return; }
+    if (S.inflight && s === S.inflight) return;
+    return isLink(s) ? resolveLink(s) : search(s);
   }
 
   async function search(q) {
     const name = q.replace(/^@+/, "").trim();          // '@examplestreamer' is a handle: the server adds the '@' per site
     const sites = SITES.filter(s => S.sites.has(s));
-    if (!name) { note("type a streamer name"); return; }
-    const tok = begin(q, `Asking ${sites.join(", ")} for "${name}" -- every site at once, a few seconds`);
+    if (!name) { note(() => t("vodbrowse.search.need_name")); return; }
+    const tok = begin(q, () => t("vodbrowse.search.busy", { sites: fmtList(sites, "conjunction"), name }));
     note("");
     try {
       const r = await api(`/api/vodbrowse/search?q=${encodeURIComponent(name)}&providers=${encodeURIComponent(sites.join(","))}`);
@@ -205,36 +225,38 @@
       S.results = rows.filter(x => x && x.ok !== false).concat(rows.filter(x => x && x.ok === false));
       S.q = name; S.view = "search"; renderMain();
       const hits = S.results.filter(x => x.ok !== false).length;
-      note(hits ? `${plural(hits, "streamer")} found` : `no streamer called "${name}" on ${sites.join(", ")}`);
+      note(hits ? () => t("vodbrowse.search.found", { count: hits })
+        : () => t("vodbrowse.search.none", { name, sites: fmtList(sites, "disjunction") }));
     } catch (err) { fail(tok, err.message); }
     finally { end(tok); }
   }
 
-  async function resolveLink(t) {
-    const tok = begin(t, "Reading the link -- a VOD link asks the site whose it is, ~3 s");
+  async function resolveLink(text) {
+    const tok = begin(text, () => t("vodbrowse.link.busy"));
     note("");
     let r;
-    try { r = await post("/api/vodbrowse/resolve", { text: t }); }
+    try { r = await post("/api/vodbrowse/resolve", { text }); }
     catch (err) { fail(tok, err.message); end(tok); return; }
     end(tok);
     if (tok !== S.viewTok) return;
     const kind = r && r.kind;
-    if (kind === "name") return search(t);
+    if (kind === "name") return search(text);
     if (kind === "channel" && r.provider && r.key) return openChannel({ provider: r.provider, key: r.key, name: r.name, url: r.url });
     if (kind === "vod") {
       const m = r.meta || r.info || {};
       const al = r.already || m.already;
-      // r.error = the site's inspect failed (live now, members only, removed): say so and never tick it
-      const pre = { url: r.url || t, pasted: t, id: r.id ?? r.vod_id ?? m.id ?? null, title: r.title || m.title || "",
-        imported: !!al, rec_id: (al && typeof al === "object") ? (al.rec_id ?? null) : null, error: r.error || "" };
+      // r.error = the site's inspect failed (live now, members only, removed): say so and never select it
+      const rerr = srvField(r, "error");
+      const pre = { url: r.url || text, pasted: text, id: r.id ?? r.vod_id ?? m.id ?? null, title: r.title || m.title || "",
+        imported: !!al, rec_id: (al && typeof al === "object") ? (al.rec_id ?? null) : null, error: rerr };
       const ch = r.channel;
       if (pre.error) note(pre.error, "warn");
       if (ch && ch.provider && ch.key) return openChannel(ch, { preselect: pre });
-      S.single = { provider: r.provider || m.provider || "", url: pre.url, title: pre.title, error: r.error || "", state: null, busy: false };
+      S.single = { provider: r.provider || m.provider || "", url: pre.url, title: pre.title, error: rerr, state: null, busy: false };
       S.view = "single"; renderMain();
       return;
     }
-    fail(tok, (r && r.error) || "Not a link of a supported site -- YouTube, Twitch, Kick, TikTok and Rumble links work (a VOD or the streamer's page).");
+    fail(tok, (r && r.error) ? srvField(r, "error") : () => t("vodbrowse.link.unsupported", { sites: fmtList(SITES, "conjunction") }));
   }
 
   /* ---------------- favorites ---------------- */
@@ -251,10 +273,11 @@
 
   async function refreshFavs() {
     if (S.favBusy) return;
-    if (!S.favs.length) { note("no favorites yet: open a streamer and click the star"); return; }
+    if (!S.favs.length) { note(() => t("vodbrowse.favs.none_yet")); return; }
     S.favBusy = true; renderFavs();
     const tok = ++S.refreshTok;
-    note(`checking ${plural(S.favs.length, "favorite")} for new VODs ...`);
+    const nFavs = S.favs.length;
+    note(() => t("vodbrowse.favs.checking_note", { count: nFavs }));
     try {
       const r = await post("/api/vodbrowse/favorites/refresh");
       if (tok !== S.refreshTok) return;
@@ -264,7 +287,7 @@
       list.forEach(f => {
         const k = chKey(f.provider, favKey(f));
         S.newCounts[k] = +f.new_count || 0;
-        if (f.error) S.favErrors[k] = f.error;
+        if (f.error) S.favErrors[k] = srvField(f, "error");
         if (Array.isArray(f.new_ids) && f.new_ids.length) S.newIds[k] = new Set(f.new_ids.map(String));
       });
       // the list itself is NOT taken from this answer: it is the favorites as they were when the check began
@@ -272,9 +295,12 @@
       // above stay keyed by streamer
       const n = list.reduce((a, f) => a + (+f.new_count || 0), 0);
       const bad = list.filter(f => f.error).length;
-      const msg = (n ? `${plural(n, "new VOD")} across your favorites` : "nothing new since the last check") + (bad ? ` (${bad} could not be checked)` : "");
+      const msg = () => {
+        const result = n ? t("vodbrowse.favs.result_new", { count: n }) : t("vodbrowse.favs.result_nothing");
+        return bad ? t("vodbrowse.favs.result_failed", { result, count: bad }) : result;
+      };
       note(msg, bad ? "warn" : "");
-      toast(msg, 3000);
+      toast(msg(), 3000);
     } catch (err) { if (tok === S.refreshTok) note(err.message, "bad"); }
     finally { S.favBusy = false; renderFavs(); }
     await loadFavs();                             // names / last_checked_utc the check wrote
@@ -286,7 +312,8 @@
     btn.disabled = true;
     try {
       await del(`/api/vodbrowse/favorites/${encodeURIComponent(f.id)}`);
-      note(`${favName(f)} removed from favorites`);
+      const name = favName(f);
+      note(() => t("vodbrowse.favs.removed", { name }));
     } catch (err) { note(err.message, "bad"); btn.disabled = false; return; }
     await loadFavs();
     if (S.view === "channel") renderMain();
@@ -306,12 +333,13 @@
     try {
       const f = chFav(ch);
       const id = f ? f.id : ch.favorite_id;
+      const name = ch.name;
       if (ch.favorite && id != null) {
         await del(`/api/vodbrowse/favorites/${encodeURIComponent(id)}`);
-        note(`${ch.name} removed from favorites`);
+        note(() => t("vodbrowse.favs.removed", { name }));
       } else {
         await post("/api/vodbrowse/favorites", { provider: ch.provider, key: ch.key, name: ch.name || ch.key, url: ch.url || "" });
-        note(`${ch.name} added to favorites`);
+        note(() => t("vodbrowse.favs.added", { name }));
       }
     } catch (err) { note(err.message, "bad"); }   // e.g. 409: it was a favorite already -- the reload below shows it
     ch.starBusy = false;
@@ -322,29 +350,33 @@
   function renderFavs() {
     const el = $("vb-favs"); if (!el) return;
     const b = $("vb-check");
-    if (b) { b.disabled = S.favBusy; const t = b.querySelector("span"); if (t) t.textContent = S.favBusy ? "Checking..." : "Check for new"; b.classList.toggle("busy", S.favBusy); }
+    if (b) {
+      b.disabled = S.favBusy;
+      const lbl = b.querySelector("span"); if (lbl) lbl.textContent = S.favBusy ? t("vodbrowse.favs.checking") : t("vodbrowse.favs.check");
+      b.classList.toggle("busy", S.favBusy);
+    }
     if (S.favErr && !S.favs.length) { el.innerHTML = `<div class="vberr">${esc(S.favErr)}</div>`; }
-    else if (!S.favs.length) { el.innerHTML = `<div class="empty vbempty"><b>No favorites yet</b>Open a streamer and click the star to keep them here.</div>`; }
+    else if (!S.favs.length) { el.innerHTML = `<div class="empty vbempty"><b>${te("vodbrowse.favs.empty_title")}</b>${te("vodbrowse.favs.empty_text")}</div>`; }
     else {
       const cur = S.view === "channel" ? S.ch : null;
       el.innerHTML = S.favs.map((f, i) => {
         const k = chKey(f.provider, favKey(f));
         const n = f.new_count != null ? +f.new_count : (S.newCounts[k] || 0);
-        const er = f.error || S.favErrors[k];
+        const er = srvField(f, "error") || S.favErrors[k];
         const sub = er ? `<span class="err">${esc(er)}</span>` : f.note ? `<span class="fnote">${esc(f.note)}</span>` : lc(favKey(f)) !== lc(favName(f)) ? `<span class="mono faint">${esc(favKey(f))}</span>` : "";
         return `<div class="row vbf${isCh(cur, f.provider, favKey(f)) ? " sel" : ""}" data-fi="${i}" tabindex="0" title="${esc(favUrl(f) || favKey(f))}">
           <div class="main"><div class="l1">${badge(f.provider)}<span class="t">${esc(favName(f))}</span></div>${sub ? `<div class="l2">${sub}</div>` : ""}</div>
-          ${n ? `<span class="badge acc" title="VODs that appeared since the check before">${n} new</span>` : ""}
-          <button type="button" class="ib sm vbrm" data-rm="${i}" title="Remove from favorites" aria-label="Remove ${esc(favName(f))} from favorites">${ic("x")}</button></div>`;
+          ${n ? `<span class="badge acc" title="${te("vodbrowse.favs.new_badge_title")}">${te("vodbrowse.favs.new_badge", { count: n })}</span>` : ""}
+          <button type="button" class="ib sm vbrm" data-rm="${i}" title="${te("vodbrowse.favs.remove_title")}" aria-label="${te("vodbrowse.favs.remove_aria", { name: favName(f) })}">${ic("x")}</button></div>`;
       }).join("") + (S.favErr ? `<div class="vberr">${esc(S.favErr)}</div>` : "");
     }
     const last = S.favs.reduce((a, f) => Math.max(a, +f.last_checked_utc || 0), 0);
-    const foot = $("vb-favfoot"); if (foot) foot.textContent = last ? `checked ${fmtAgo(last)}` : "";
+    const foot = $("vb-favfoot"); if (foot) foot.textContent = last ? t("vodbrowse.favs.checked", { ago: fmtAgo(last) }) : "";
   }
 
   /* ---------------- one streamer ---------------- */
   // ch = {provider, key (canonical once listed), alias: Set(keys it was opened by), answered, name, url, vods, error,
-  //       loading, limit, favorite, favorite_id, fromSearch, checked: Set(url), rows: {url: {cls, text, title, done}},
+  //       loading, limit, favorite, favorite_id, fromSearch, checked: Set(url), rows: {url: {cls, key, title, done}},
   //       pre, importing, starBusy}
   async function openChannel(c, opts = {}) {
     if (!c || !c.provider || !c.key) return;
@@ -375,7 +407,7 @@
       ch.answered = true;
       ch.name = info.name || ch.name; ch.url = httpUrl(info.url) || ch.url;
       ch.vods = asList(r, "vods").filter(v => v && v.url);
-      ch.error = (r && r.error) || "";
+      ch.error = srvField(r, "error");
       if (r && r.favorite != null) { ch.favorite = !!r.favorite; ch.favorite_id = r.favorite_id ?? ch.favorite_id; }
       syncStar();
       applyPreselect(ch);
@@ -389,7 +421,7 @@
     }
   }
 
-  // a pasted VOD link: tick it in the list, or -- older than the listing reaches -- show it on top of it
+  // a pasted VOD link: select it in the list, or -- older than the listing reaches -- show it at the top
   function applyPreselect(ch) {
     const p = ch.pre; if (!p) return;
     const pid = p.id != null && p.id !== "" ? String(p.id) : "";
@@ -410,9 +442,10 @@
     if (!p.applied) {
       p.applied = true;
       if (!p.error && !p.imported && importable(ch, v)) ch.checked.add(v.url);
-      if (p.error) note(p.error + (hit ? "" : " -- shown on top of the list, it cannot be imported now"), "warn");
-      else if (v.imported) note("that VOD is in the library already");
-      else if (!hit) note("that VOD is older than the recent list: it is shown on top");
+      const error = p.error;
+      if (error) note(hit ? error : () => t("vodbrowse.pre.error_extra", { error }), "warn");
+      else if (v.imported) note(() => t("vodbrowse.pre.in_library"));
+      else if (!hit) note(() => t("vodbrowse.pre.older"));
     }
   }
 
@@ -429,41 +462,52 @@
   function syncImportBtn() {
     const ch = S.ch; const b = $("vb-import"); if (!ch || !b) return;
     const n = selected(ch).length;
-    const t = b.querySelector("span");
-    const label = ch.importing ? "Importing..." : n ? `Import ${n}` : "Import";
-    if (t) t.textContent = label; else b.textContent = label;
-    b.title = ch.importing ? "" : n ? `queue ${plural(n, "download")}` : "tick the VODs to import";
+    const lbl = b.querySelector("span");
+    const label = ch.importing ? t("vodbrowse.import.busy") : n ? t("vodbrowse.import.label_n", { count: n }) : t("vodbrowse.import.label");
+    if (lbl) lbl.textContent = label; else b.textContent = label;
+    b.title = ch.importing ? "" : n ? t("vodbrowse.import.queue_title", { count: n }) : t("vodbrowse.import.select_title");
     b.disabled = ch.importing || !n;
     const none = $("vb-none"); if (none) none.disabled = !ch.checked.size || ch.importing;
   }
 
+  // a result chip: {cls, key (catalog key of its text), title (text or function), done, lib (= "in library")}
+  const chipText = (st) => st.key ? t(st.key) : val(st.text);
+
   async function doImport(items, ch) {
     // ch = the streamer view the items belong to (null for a lone VOD link); its rows get the result chips
     if (!items.length) return null;
-    note(`queueing ${plural(items.length, "VOD")} -- each link is checked with the site first ...`);
+    const nItems = items.length;
+    note(() => t("vodbrowse.import.queuing", { count: nItems }));
     let res;
     try { res = asList(await post("/api/vodbrowse/import", { items: items.map(v => ({ url: v.url })) }), "results"); }
     catch (err) { note(err.message, "bad"); toast(err.message, 5000); return null; }
     let queued = 0, already = 0, failed = 0;
     const out = items.map((v, i) => {
-      const x = res.find(z => z && z.url === v.url) || res[i] || { ok: false, error: "no answer for this link" };
+      const x = res.find(z => z && z.url === v.url) || res[i] || { ok: false };
       let st;
       if (x.already) {
-        already++; st = { cls: "ok", text: "in library", title: typeof x.already === "object" && x.already.name ? x.already.name : "imported before", done: true };
+        const named = typeof x.already === "object" && x.already.name ? String(x.already.name) : "";
+        already++; st = { cls: "ok", key: "vodbrowse.row.in_library", lib: true, title: named || (() => t("vodbrowse.row.imported_before")), done: true };
         v.imported = true; if (typeof x.already === "object" && x.already.rec_id != null) v.rec_id = x.already.rec_id;
       } else if (x.ok && x.already_queued) {
-        already++; st = { cls: "warn", text: "already queued", title: x.job != null ? `job ${x.job}` : "", done: true }; v.queued = true;
+        const job = x.job;
+        already++; st = { cls: "warn", key: "vodbrowse.row.already_queued", title: job != null ? () => t("vodbrowse.row.job", { id: job }) : "", done: true }; v.queued = true;
       } else if (x.ok) {
-        queued++; st = { cls: "acc", text: "queued", title: x.job != null ? `download job ${x.job}` : "", done: true }; v.queued = true;
+        const job = x.job;
+        queued++; st = { cls: "acc", key: "vodbrowse.row.queued", title: job != null ? () => t("vodbrowse.row.download_job", { id: job }) : "", done: true }; v.queued = true;
       } else {
-        failed++; st = { cls: "bad", text: "failed", title: x.error || "failed", done: false };
+        const er = srvField(x, "error");
+        failed++; st = { cls: "bad", key: "vodbrowse.row.failed", title: er || (() => t("vodbrowse.import.no_answer")), done: false };
       }
       if (ch) { ch.rows[v.url] = st; if (st.done) ch.checked.delete(v.url); }
       return st;
     });
-    const msg = [queued && `${queued} queued`, already && `${already} already there`, failed && `${failed} failed (hover the red chip)`].filter(Boolean).join(", ");
-    note(msg + (queued ? " -- Jobs shows the downloads" : ""), failed ? "bad" : "");
-    toast(`VODs: ${msg}`, 4000);
+    const summary = () => fmtList([
+      queued && t("vodbrowse.import.sum_queued", { count: queued }),
+      already && t("vodbrowse.import.sum_already", { count: already }),
+      failed && t("vodbrowse.import.sum_failed", { count: failed })].filter(Boolean), "conjunction");
+    note(queued ? () => t("vodbrowse.import.sum_jobs", { summary: summary() }) : summary, failed ? "bad" : "");
+    toast(t("vodbrowse.import.toast", { summary: summary() }), 4000);
     if (queued && typeof ST === "object" && ST && ST.tab === "jobs" && typeof loadJobs === "function") loadJobs();
     return out;
   }
@@ -530,8 +574,8 @@
     } else {
       chFace.innerHTML = ""; chFace.dataset.ch = "";
       const el = $("vb-res");
-      if (S.view === "busy") el.innerHTML = `<div class="vbwait"><span class="spin sm"></span><span>${esc(S.busyMsg)}</span></div>`;
-      else if (S.view === "error") el.innerHTML = `<div class="vberr">${esc(S.errMsg)}</div>`;
+      if (S.view === "busy") el.innerHTML = `<div class="vbwait"><span class="spin sm"></span><span>${esc(val(S.busyMsg))}</span></div>`;
+      else if (S.view === "error") el.innerHTML = `<div class="vberr">${esc(val(S.errMsg))}</div>`;
       else if (S.view === "search") el.innerHTML = searchHtml();
       else if (S.view === "single" && S.single) el.innerHTML = singleHtml(S.single);
       else el.innerHTML = homeHtml();
@@ -542,30 +586,31 @@
 
   function homeHtml() {
     // a short how-to while there is nothing else to look at; it shrinks to one line once favorites exist
-    if (S.favs.length) return `<p class="hint vbhow">Type a name and press Enter, or paste a VOD / profile link.</p>`;
+    if (S.favs.length) return `<p class="hint vbhow">${te("vodbrowse.home.short")}</p>`;
     return `<div class="vbhow">
-      <p><b>Find a streamer</b> -- type their name and press Enter; every site that is on is asked at once.</p>
-      <p><b>Or paste a link</b> -- a streamer's page lists their recent VODs; a VOD link opens its streamer with that VOD ticked.</p>
-      <p>Tick VODs and <b>Import</b>: they download one after the other (Jobs), then get transcribed and scanned like a recording.</p>
+      <p>${tHtml("vodbrowse.home.find_html")}</p>
+      <p>${tHtml("vodbrowse.home.paste_html")}</p>
+      <p>${tHtml("vodbrowse.home.import_html")}</p>
     </div>`;
   }
 
   function searchHtml() {
     const rows = S.results;
     const hits = rows.filter(r => r.ok !== false).length;
-    const head = `<div class="sect-t">Results for "${esc(S.q)}"<span class="sp"></span><button type="button" class="ib sm" data-act="clear" title="Clear the results" aria-label="Clear the results">${ic("x")}</button></div>`;
-    if (!rows.length) return head + `<div class="empty vbempty"><b>Nothing found</b>Check the spelling, turn more sites on, or paste their page's link.</div>`;
-    return head + (hits ? "" : `<p class="hint vbhow">No streamer by that name on the sites that are on.</p>`) + rows.map((r, i) => {
+    const head = `<div class="sect-t">${te("vodbrowse.res.head", { query: S.q })}<span class="sp"></span><button type="button" class="ib sm" data-act="clear" title="${te("vodbrowse.res.clear")}" aria-label="${te("vodbrowse.res.clear")}">${ic("x")}</button></div>`;
+    if (!rows.length) return head + `<div class="empty vbempty"><b>${te("vodbrowse.res.empty_title")}</b>${te("vodbrowse.res.empty_text")}</div>`;
+    return head + (hits ? "" : `<p class="hint vbhow">${te("vodbrowse.res.no_hits")}</p>`) + rows.map((r, i) => {
       const fav = r.key && favOf(r.provider, r.key);
       if (r.ok === false) {
-        return `<div class="row vbres off">${badge(r.provider)}<div class="main"><div class="l2">${esc(r.error || "not found")}</div></div></div>`;
+        return `<div class="row vbres off">${badge(r.provider)}<div class="main"><div class="l2">${esc(srvField(r, "error") || t("vodbrowse.res.not_found"))}</div></div></div>`;
       }
       const titles = asList(r.sample, "titles").slice(0, 3);
       const n = r.n != null ? +r.n : titles.length;
+      const recent = n >= 3 ? te("vodbrowse.res.recent_more", { count: fmtNum(n) }) : te("vodbrowse.res.recent", { count: n });
       return `<div class="row vbres" data-act="res" data-i="${i}" tabindex="0" title="${esc(r.url || r.key || "")}">
-        <div class="main"><div class="l1">${badge(r.provider)}<span class="t">${esc(r.name || r.key)}</span>${fav ? `<span class="vbfavmark" title="a favorite">${ic("star")}</span>` : ""}</div>
-          <div class="l2"><span class="mono faint vbkey">${esc(r.key || "")}</span>${n ? `<span class="faint">${n}${n >= 3 ? "+" : ""} recent</span>` : ""}</div>
-          ${titles.length ? `<div class="vbsamples">${titles.slice(0, 2).map(t => `<span>${esc(t)}</span>`).join("")}</div>` : `<div class="vbsamples"><span class="faint">no recent VODs listed</span></div>`}</div>
+        <div class="main"><div class="l1">${badge(r.provider)}<span class="t">${esc(r.name || r.key)}</span>${fav ? `<span class="vbfavmark" title="${te("vodbrowse.res.fav_title")}">${ic("star")}</span>` : ""}</div>
+          <div class="l2"><span class="mono faint vbkey">${esc(r.key || "")}</span>${n ? `<span class="faint">${recent}</span>` : ""}</div>
+          ${titles.length ? `<div class="vbsamples">${titles.slice(0, 2).map(x => `<span>${esc(x)}</span>`).join("")}</div>` : `<div class="vbsamples"><span class="faint">${te("vodbrowse.res.no_recent")}</span></div>`}</div>
         <span class="vbgo">${ic("chev")}</span></div>`;
     }).join("");
   }
@@ -575,18 +620,18 @@
     const dis = !importable(ch, v) || ch.importing;
     const on = ch.checked.has(url) && importable(ch, v);
     const chips = [];
-    if (v._pre) chips.push(`<span class="badge acc" title="the link you pasted">your link</span>`);
+    if (v._pre) chips.push(`<span class="badge acc" title="${te("vodbrowse.row.your_link_title")}">${te("vodbrowse.row.your_link")}</span>`);
     if (v.imported) chips.push(v.rec_id != null
-      ? `<button type="button" class="badge ok vbopen" data-act="openrec" data-rec="${esc(v.rec_id)}" title="open the recording">in library</button>`
-      : `<span class="badge ok">in library</span>`);
-    else if (v.queued && !st) chips.push(`<span class="badge warn" title="${v.job_id != null ? `job ${esc(v.job_id)}` : ""}">queued</span>`);
-    if (live) chips.push(`<span class="badge bad" title="can be imported once the stream has ended">${v.live_status === "is_upcoming" ? "upcoming" : "live now"}</span>`);
-    else if (v.error && !v.imported && !v.queued) chips.push(`<span class="badge bad" title="${esc(v.error)}">unavailable</span>`);
-    else if (v.importable === false && !v.imported && !v.queued) chips.push(`<span class="badge warn" title="${esc(v.live_status === "post_live" ? "the stream just ended and the site is still processing it" : "not importable yet")}">not ready</span>`);
+      ? `<button type="button" class="badge ok vbopen" data-act="openrec" data-rec="${esc(v.rec_id)}" title="${te("vodbrowse.row.open_rec_title")}">${te("vodbrowse.row.in_library")}</button>`
+      : `<span class="badge ok">${te("vodbrowse.row.in_library")}</span>`);
+    else if (v.queued && !st) chips.push(`<span class="badge warn" title="${v.job_id != null ? te("vodbrowse.row.job", { id: v.job_id }) : ""}">${te("vodbrowse.row.queued")}</span>`);
+    if (live) chips.push(`<span class="badge bad" title="${te("vodbrowse.row.live_title")}">${v.live_status === "is_upcoming" ? te("vodbrowse.row.upcoming") : te("vodbrowse.row.live")}</span>`);
+    else if (v.error && !v.imported && !v.queued) chips.push(`<span class="badge bad" title="${esc(v.error)}">${te("vodbrowse.row.unavailable")}</span>`);
+    else if (v.importable === false && !v.imported && !v.queued) chips.push(`<span class="badge warn" title="${v.live_status === "post_live" ? te("vodbrowse.row.processing_title") : te("vodbrowse.row.not_ready_title")}">${te("vodbrowse.row.not_ready")}</span>`);
     const fresh = chNewIds(ch);
-    if (fresh && v.id != null && fresh.has(String(v.id)) && importable(ch, v)) chips.push(`<span class="badge acc" title="appeared since the check before the last one">new</span>`);
-    if (st && !(v.imported && st.text === "in library")) chips.push(`<span class="badge ${st.cls}" title="${esc(st.title)}">${esc(st.text)}</span>`);
-    const meta = [vodDate(v), v.duration_s ? fmtDur(v.duration_s) : "", v._extra ? "older than the list" : ""].filter(Boolean);
+    if (fresh && v.id != null && fresh.has(String(v.id)) && importable(ch, v)) chips.push(`<span class="badge acc" title="${te("vodbrowse.row.new_title")}">${te("vodbrowse.row.new")}</span>`);
+    if (st && !(v.imported && st.lib)) chips.push(`<span class="badge ${st.cls}" title="${esc(val(st.title))}">${esc(chipText(st))}</span>`);
+    const meta = [vodDate(v), v.duration_s ? fmtDur(v.duration_s) : "", v._extra ? t("vodbrowse.row.older") : ""].filter(Boolean);
     const thumb = httpUrl(v.thumbnail);
     const link = httpUrl(url);
     return `<label class="vbv${on ? " on" : ""}${dis ? " dis" : ""}${v._pre ? " pre" : ""}">
@@ -594,7 +639,7 @@
       <span class="th">${thumb ? `<img src="${esc(thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}</span>
       <span class="tx"><span class="t" title="${esc(v.error || v.title || url)}">${esc(v.title || v.id || url)}</span>
         <span class="m"><span class="num">${meta.map(esc).join(" &middot; ") || "&nbsp;"}</span>${chips.join("")}
-          ${link ? `<a class="lk" href="${esc(link)}" target="_blank" rel="noopener noreferrer" title="open on ${esc(ch.provider)}">${ic("ext")}</a>` : ""}</span></span>
+          ${link ? `<a class="lk" href="${esc(link)}" target="_blank" rel="noopener noreferrer" title="${te("vodbrowse.row.open_on", { site: ch.provider })}">${ic("ext")}</a>` : ""}</span></span>
     </label>`;
   }
 
@@ -603,31 +648,34 @@
     const nLib = ch.vods.filter(v => v.imported).length;
     const page = httpUrl(ch.url);
     const starOff = ch.starBusy || (ch.loading && !ch.answered);
+    const starTitle = ch.loading && !ch.answered ? te("vodbrowse.ch.star_wait") : ch.favorite ? te("vodbrowse.favs.remove_title") : te("vodbrowse.favs.add_title");
     const head = `<div class="phd vbchh">
-      <button type="button" class="ib sm vbback" data-act="back" title="${S.results.length ? "Back to the results" : "Back to favorites"}" aria-label="Back">${ic("chev")}</button>
+      <button type="button" class="ib sm vbback" data-act="back" title="${S.results.length ? te("vodbrowse.ch.back_results") : te("vodbrowse.ch.back_favs")}" aria-label="${te("vodbrowse.ch.back_aria")}">${ic("chev")}</button>
       ${badge(ch.provider)}<h2 class="vbname" title="${esc(ch.name || ch.key)}">${esc(ch.name || ch.key)}</h2><span class="sp"></span>
-      <button type="button" class="ib sm vbstar${ch.favorite ? " on" : ""}" data-act="star"${starOff ? " disabled" : ""} title="${ch.loading && !ch.answered ? "wait for the listing (it tells the streamer's own key)" : ch.favorite ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${ch.favorite ? "true" : "false"}">${ic("star")}</button>
-      <button type="button" class="ib sm${ch.loading ? " busy" : ""}" data-act="refresh"${ch.loading ? " disabled" : ""} title="${ch.loading ? "Listing..." : "List again from the site (the list is cached 5 minutes)"}" aria-label="Refresh">${ic("refresh")}</button>
-      ${page ? `<a class="ib sm" href="${esc(page)}" target="_blank" rel="noopener noreferrer" title="their page: ${esc(page)}" aria-label="their page">${ic("ext")}</a>` : ""}
+      <button type="button" class="ib sm vbstar${ch.favorite ? " on" : ""}" data-act="star"${starOff ? " disabled" : ""} title="${starTitle}" aria-label="${starTitle}" aria-pressed="${ch.favorite ? "true" : "false"}">${ic("star")}</button>
+      <button type="button" class="ib sm${ch.loading ? " busy" : ""}" data-act="refresh"${ch.loading ? " disabled" : ""} title="${ch.loading ? te("vodbrowse.ch.listing_title") : te("vodbrowse.ch.refresh_title")}" aria-label="${te("vodbrowse.ch.refresh_aria")}">${ic("refresh")}</button>
+      ${page ? `<a class="ib sm" href="${esc(page)}" target="_blank" rel="noopener noreferrer" title="${te("vodbrowse.ch.page_title", { url: page })}" aria-label="${te("vodbrowse.ch.page_aria")}">${ic("ext")}</a>` : ""}
     </div>`;
-    const counts = ch.loading && !ch.vods.length ? "listing ..." : `${ch.vods.length} listed &middot; ${nNew} new${nLib ? ` &middot; ${nLib} in library` : ""}`;
+    const counts = ch.loading && !ch.vods.length ? te("vodbrowse.ch.listing")
+      : [te("vodbrowse.ch.count_listed", { count: ch.vods.length }), te("vodbrowse.ch.count_new", { count: nNew }),
+        nLib ? te("vodbrowse.ch.count_lib", { count: nLib }) : ""].filter(Boolean).join(" &middot; ");
     const sub = `<div class="psub vbchsub"><span class="mono faint vbkey" title="${esc(ch.key)}">${esc(ch.key)}</span><span class="sp"></span><span class="faint">${counts}</span></div>`;
     const tools = `<div class="psub vbtools">
-      <button type="button" class="btn ghost sm" data-act="allnew"${!nNew || ch.importing ? " disabled" : ""} title="tick every VOD that is not in the library or queued yet">Select new</button>
-      <button type="button" class="btn ghost sm" id="vb-none" data-act="none"${!ch.checked.size || ch.importing ? " disabled" : ""}>None</button>
+      <button type="button" class="btn ghost sm" data-act="allnew"${!nNew || ch.importing ? " disabled" : ""} title="${te("vodbrowse.ch.select_new_title")}">${te("vodbrowse.ch.select_new")}</button>
+      <button type="button" class="btn ghost sm" id="vb-none" data-act="none"${!ch.checked.size || ch.importing ? " disabled" : ""} title="${te("vodbrowse.ch.none_title")}">${te("vodbrowse.ch.none")}</button>
       <span class="sp"></span>
-      <button type="button" class="btn pri sm" id="vb-import" data-act="import" disabled>${ic("download")}<span>Import</span></button>
+      <button type="button" class="btn pri sm" id="vb-import" data-act="import" disabled>${ic("download")}<span>${te("vodbrowse.import.label")}</span></button>
     </div>`;
     const err = ch.error ? `<div class="vberr">${esc(ch.error)}</div>` : "";
     let body;
-    if (ch.loading && !ch.vods.length) body = `<div class="vbwait"><span class="spin sm"></span><span>Listing ${esc(ch.name || ch.key)}'s VODs on ${esc(ch.provider)} ...</span></div>`;
-    else if (!ch.vods.length) body = ch.error ? "" : `<div class="empty vbempty"><b>No VODs listed</b>The streamer may keep no past broadcasts, or they are for subscribers only.</div>`;
+    if (ch.loading && !ch.vods.length) body = `<div class="vbwait"><span class="spin sm"></span><span>${te("vodbrowse.ch.listing_busy", { name: ch.name || ch.key, site: ch.provider })}</span></div>`;
+    else if (!ch.vods.length) body = ch.error ? "" : `<div class="empty vbempty"><b>${te("vodbrowse.ch.empty_title")}</b>${te("vodbrowse.ch.empty_text")}</div>`;
     else body = ch.vods.map(v => vodRow(ch, v)).join("")
-      + (ch.loading ? `<div class="vbwait"><span class="spin sm"></span><span>listing again ...</span></div>` : "")
+      + (ch.loading ? `<div class="vbwait"><span class="spin sm"></span><span>${te("vodbrowse.ch.relisting")}</span></div>` : "")
       + (!ch.loading && ch.vods.filter(v => !v._extra).length >= ch.limit
         ? (ch.limit < MAX_LIST
-          ? `<div class="vbmore"><button type="button" class="btn ghost sm" data-act="more">Load older (${Math.min(ch.limit + PAGE, MAX_LIST)})</button></div>`
-          : `<div class="vbmore hint">Only the newest ${MAX_LIST} are listed -- paste an older VOD's link to import it.</div>`)
+          ? `<div class="vbmore"><button type="button" class="btn ghost sm" data-act="more">${te("vodbrowse.ch.load_older", { count: Math.min(ch.limit + PAGE, MAX_LIST) })}</button></div>`
+          : `<div class="vbmore hint">${te("vodbrowse.ch.max_listed", { count: MAX_LIST })}</div>`)
         : "");
     // a site whose listing has no thumbnails (Kick): no column of empty boxes
     const noThumb = !(ch.vods || []).some(v => httpUrl(v.thumbnail));
@@ -636,14 +684,14 @@
 
   function singleHtml(s) {
     const link = httpUrl(s.url);
-    return `<div class="sect-t">One VOD<span class="sp"></span><button type="button" class="ib sm" data-act="clear" title="Clear" aria-label="Clear">${ic("x")}</button></div>
+    return `<div class="sect-t">${te("vodbrowse.single.title")}<span class="sp"></span><button type="button" class="ib sm" data-act="clear" title="${te("vodbrowse.single.clear")}" aria-label="${te("vodbrowse.single.clear")}">${ic("x")}</button></div>
       <div class="vbsingle">
       <div class="t">${esc(s.title || s.url)}</div>
-      <dl class="kv"><dt>Site</dt><dd>${badge(s.provider)}</dd>
-        <dt>Link</dt><dd class="mono">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.url)}</a>` : esc(s.url)}</dd></dl>
-      <p class="hint">${s.error ? `<span class="bad">${esc(s.error)}</span> Import checks the link with the site again.` : "The site did not say whose VOD this is, so there is no streamer to list. This one VOD can still be imported."}</p>
-      <div class="vbsrow"><button type="button" class="btn pri sm" data-act="import1"${s.busy || (s.state && s.state.done) ? " disabled" : ""}>${ic("download")}${s.busy ? "Importing..." : "Import this VOD"}</button>
-        ${s.state ? `<span class="badge ${s.state.cls}" title="${esc(s.state.title)}">${esc(s.state.text)}</span>` : ""}</div>
+      <dl class="kv"><dt>${te("vodbrowse.single.site")}</dt><dd>${badge(s.provider)}</dd>
+        <dt>${te("vodbrowse.single.link")}</dt><dd class="mono">${link ? `<a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(s.url)}</a>` : esc(s.url)}</dd></dl>
+      <p class="hint">${s.error ? `<span class="bad">${esc(s.error)}</span> ${te("vodbrowse.single.recheck")}` : te("vodbrowse.single.no_channel")}</p>
+      <div class="vbsrow"><button type="button" class="btn pri sm" data-act="import1"${s.busy || (s.state && s.state.done) ? " disabled" : ""}>${ic("download")}${s.busy ? te("vodbrowse.import.busy") : te("vodbrowse.single.import")}</button>
+        ${s.state ? `<span class="badge ${s.state.cls}" title="${esc(val(s.state.title))}">${esc(chipText(s.state))}</span>` : ""}</div>
     </div>`;
   }
 
@@ -703,9 +751,9 @@
   }
 
   function resolveAndOpen(text) {
-    const t = String(text ?? "").trim();
+    const s = String(text ?? "").trim();
     open({});
-    if (t) { $("vb-q").value = t; go(t); }
+    if (s) { $("vb-q").value = s; go(s); }
   }
 
   window.VB = { open, resolveAndOpen, mountPanel };

@@ -1,0 +1,12 @@
+{
+  "pick_first": "Chwazi yon evènman oswa jwe yon anrejistreman anvan.",
+  "already": "Klip sa a deja ap fèt.",
+  "making_exact": "N ap fè klip la, egzak a frame pre. Sa pran yon ti tan anplis paske imaj la re-ankode.",
+  "making_copy": "N ap fè klip la. L ap kòmanse sou keyframe ki pi pre anvan pwen kòmansman ou.",
+  "open_folder": "Louvri dosye",
+  "saved": "Klip sove: {name}",
+  "saved_early": "Klip sove: {name}\nLi kòmanse {seconds} anvan pwen kòmansman ou (keyframe ki pi pre).",
+  "check_mismatch": "Klip la pa koresponn nèt ak anrejistreman an. Tcheke l anvan w itilize l.",
+  "failed": "Nou pa t ka fè klip la: {error}",
+  "unknown_error": "erè enkoni"
+}

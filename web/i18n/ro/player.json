@@ -1,0 +1,108 @@
+{
+  "title.none": "niciun clip",
+  "title.rendering": "{kind} la {time} · se randează {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · toată înregistrarea",
+  "title.no_proxy": "Încă niciun proxy",
+  "tip.event": "{kind} la {time}: {render}",
+  "tip.around": "în jur de {time}: {render}",
+  "tip.cached": "{height}p din cache-ul de clipuri",
+  "tip.rendered": "{height}p randat în {seconds} s",
+  "tip.rendered_enc": "{height}p randat în {seconds} s ({encoder})",
+  "tip.proxy": "{name}: proxy-ul întregii înregistrări",
+  "tip.no_proxy": "{name}: încă niciun proxy al întregii înregistrări",
+  "busy.clip": "se randează clipul ({height}p)...",
+  "busy.at": "se randează {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "Clipul nu a putut fi randat",
+  "err.at": "Nu s-a putut randa {time}",
+  "err.retry": "Încearcă din nou",
+  "err.encoding": "Setări de encodare",
+  "err.play_clip": "Acest clip nu a putut fi redat.",
+  "err.play_proxy": "Proxy-ul nu a putut fi redat.",
+  "pick.title": "Alege un eveniment",
+  "pick.text": "Alege unul din Evenimente (sau apasă N): clipul lui se redă aici de la pre-roll.",
+  "pick.more": "Sau dă clic pe timeline-ul de mai jos ca să vezi orice moment al înregistrării.",
+  "pick.short": "Alege unul din Evenimente (sau apasă N) ori dă clic pe timeline-ul de mai jos.",
+  "proxy.card_title": "Încă niciun proxy pentru această înregistrare",
+  "proxy.card_text": "Un proxy {height}p este o copie a întregului fișier de {duration} pentru a-l parcurge de la un capăt la altul (se creează de câteva ori mai repede decât timpul real).",
+  "proxy.building": "se creează",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "în coadă",
+  "proxy.build": "Creează proxy",
+  "proxy.all": "Proxy-uri pentru toate cu evenimente",
+  "proxy.all_tip": "Pune în coadă proxy-uri pentru toate înregistrările cu evenimente",
+  "proxy.queued_toast": "proxy în coadă",
+  "proxy.all_toast": {
+    "one": "{count} proxy în coadă ({candidates} înregistrări cu evenimente nu au unul)",
+    "few": "{count} proxy-uri în coadă ({candidates} înregistrări cu evenimente nu au unul)",
+    "other": "{count} de proxy-uri în coadă ({candidates} înregistrări cu evenimente nu au unul)"
+  },
+  "mode.full_tip": "Toată înregistrarea, redată din proxy-ul ei",
+  "mode.full_noproxy_tip": "Toată înregistrarea: încă niciun proxy (creează unul de aici)",
+  "bound.wait": "așteaptă să se încarce clipul acestui eveniment",
+  "bound.in_before_out": "intrarea trebuie să fie înaintea ieșirii",
+  "bound.out_after_in": "ieșirea trebuie să fie după intrare",
+  "bound.reset": "clip readus la pre-roll / post-roll",
+  "bound.in_set": "intrare = {time} (clip {length} s)",
+  "bound.out_set": "ieșire = {time} (clip {length} s)",
+  "mark.nothing": "nu se redă nimic",
+  "mark.done": "marcaj manual la {time}",
+  "play_aria": "Redă",
+  "pause_aria": "Pauză",
+  "time.pos": "{pos} din {total}",
+  "time.rel": "{offset} s de la eveniment",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Buclă intrare → ieșire",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · scor {score}",
+  "tl.tip_status": "{kind} · {time} · scor {score} · {status}",
+  "tl.status_kept": "păstrat",
+  "tl.status_false": "fals pozitiv",
+  "tl.whole": "Toată înregistrarea",
+  "tl.no_events": "niciun eveniment",
+  "tl.not_detected": "nedetectat încă",
+  "tl.no_proxy": "niciun proxy",
+  "tl.no_proxy_tip": "Modul Toată înregistrarea necesită un proxy (creează-l din player)",
+  "tl.kind.kill": {
+    "one": "{count} eliminare",
+    "few": "{count} eliminări",
+    "other": "{count} de eliminări"
+  },
+  "tl.kind.assist": {
+    "one": "{count} asistență",
+    "few": "{count} asistențe",
+    "other": "{count} de asistențe"
+  },
+  "tl.kind.death": {
+    "one": "{count} moarte",
+    "few": "{count} morți",
+    "other": "{count} de morți"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} reperat",
+    "few": "{count} reperați",
+    "other": "{count} de reperați"
+  },
+  "tl.kind.revive": {
+    "one": "{count} reanimare",
+    "few": "{count} reanimări",
+    "other": "{count} de reanimări"
+  },
+  "tl.kind.squad": {
+    "one": "{count} echipă",
+    "few": "{count} echipă",
+    "other": "{count} echipă"
+  },
+  "tl.kind.voice": {
+    "one": "{count} voce",
+    "few": "{count} voce",
+    "other": "{count} voce"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manual",
+    "few": "{count} manuale",
+    "other": "{count} de manuale"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

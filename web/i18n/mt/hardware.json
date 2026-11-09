@@ -1,0 +1,15 @@
+{
+  "can.nvidia": "Jiddekowdja l-vidjo, jaqra t-test tal-HUD u jbiddel id-diskors f'test.",
+  "can.integrated": "Grafika integrata: jiddekowdja l-vidjo biss meta l-ebda karta grafika oħra ma tkun issettjata fuq Uża għal WardogClips. It-test tal-HUD u d-diskors jaħdmu fuq karta oħra jew fuq il-proċessur.",
+  "can.other": "Jiddekowdja l-vidjo u jaqra t-test tal-HUD. Id-diskors jinbidel f'test fuq il-proċessur, għax dan jeħtieġ karta NVIDIA.",
+  "none_found": "Ma nstabet l-ebda karta grafika. WardogClips jagħmel ix-xogħol kollu fuq il-proċessur.",
+  "role.use": "Uża għal WardogClips",
+  "role.leave": "Ħalliha",
+  "all_left_alone": "Kull karta hi issettjata fuq Ħalliha, allura WardogClips jagħmel ix-xogħol kollu fuq il-proċessur.",
+  "shared_hint": "Il-karta li tħaddem il-logħba tiegħek hi maqsuma: waqt li tilgħab, ix-xogħol ta' WardogClips fuqha jista' jiswa lil-logħba ftit frames. Issettja dik il-karta fuq Ħalliha jekk iddejqek.",
+  "apply_hint": "Bidla tapplika għax-xogħol li jmiss. Meta żżid karta, aktar xogħlijiet tal-vidjo jaħdmu f'daqqa wara restart.",
+  "load_failed": "Il-lista tal-karti grafiċi ma setgħetx titgħabba.",
+  "saved": "Issejvjat: {keys}",
+  "saved_none": "Issejvjat: ebda bidla",
+  "error": "Żball: {error}"
+}

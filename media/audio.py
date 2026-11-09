@@ -32,6 +32,7 @@ from pathlib import Path
 
 import numpy as np
 
+from core import workmode
 from utils import paths
 
 logger = logging.getLogger("wclips.audio")
@@ -110,7 +111,7 @@ def extract_window(path: str, start_s: float, span_s: float, track_idxs, out_dir
         outs[i] = out
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                           timeout=timeout, creationflags=_NO_WINDOW)
+                           timeout=timeout, creationflags=workmode.child_flags(_NO_WINDOW))
     except subprocess.TimeoutExpired:
         raise AudioError(f"ffmpeg timed out extracting a {span_s:.0f}s window")
     if r.returncode != 0:
@@ -273,8 +274,8 @@ def extract_voice(path: str, idx: int, out: Path, duration_s: float, on_progress
     cmd = [exe, "-v", "error", "-nostdin", "-nostats", "-progress", "pipe:1", "-i", path, "-vn",
            "-map", f"0:a:{idx}", "-ac", "1", "-ar", str(SAMPLE_RATE), "-c:a", "pcm_s16le", "-y", str(out)]
     t0 = time.monotonic()
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                            errors="replace", creationflags=_NO_WINDOW)
+    proc = workmode.track(subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
+                                           errors="replace", creationflags=workmode.child_flags(_NO_WINDOW)))
     try:
         for line in proc.stdout:
             if time.monotonic() - t0 > timeout:
@@ -314,8 +315,8 @@ def extract_tracks(path: str, specs: list[tuple[int, Path, bool]], duration_s: f
             cmd += ["-af", MIC_NORM]
         cmd += ["-c:a", "pcm_s16le", "-y", str(out)]
     t0 = time.monotonic()
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                            errors="replace", creationflags=_NO_WINDOW)
+    proc = workmode.track(subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
+                                           errors="replace", creationflags=workmode.child_flags(_NO_WINDOW)))
     try:
         for line in proc.stdout:
             if time.monotonic() - t0 > timeout:

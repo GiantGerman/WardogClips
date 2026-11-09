@@ -6,12 +6,13 @@ import logging
 import threading
 import time
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi.responses import FileResponse
 from starlette.concurrency import run_in_threadpool
 
 from core.library import _priority, parse_name
 from utils import paths
+from utils.i18n import app_error
 
 logger = logging.getLogger("wclips.player")
 
@@ -26,28 +27,28 @@ def build(ctx) -> APIRouter:
     def _rec(rec_id: int) -> dict:
         rec = ctx.db.one("SELECT * FROM recordings WHERE id=?", (rec_id,))
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         if rec["status"] != "probed" or not rec.get("duration_s"):
-            raise HTTPException(409, "probe the recording first")
+            raise app_error(409, "server.probe_first", "This recording has not been read yet. Wait until its probe job is done.")
         return rec
 
     def _event(event_id: int) -> dict:
         ev = ctx.db.one("SELECT * FROM events WHERE id=?", (event_id,))
         if ev is None:
-            raise HTTPException(404, "no such event")
+            raise app_error(404, "server.no_event", "That event does not exist anymore.")
         return ev
 
     async def _render(rec: dict, t0: float, t1: float, h: int) -> dict:
         try:
             out = await run_in_threadpool(clips.render_clip, ctx.db, ctx.cfg, rec, t0, t1, h)
         except clips.ClipError as e:
-            raise HTTPException(503, f"clip render failed: {e}")
+            raise app_error(503, "server.player.clip_failed", "The clip could not be made: {error}", error=str(e))
         out.pop("path", None)
         out["url"] = f"/api/clips/{out['name']}"
         return out
 
     def _prefetch(rec: dict, windows: list[tuple[float, float]], h: int) -> None:
-        """Render the neighbouring events' clips in the background so stepping is instant."""
+        """Render the neighboring events' clips in the background so stepping is instant."""
         def work():
             tracks = clips.audio_plan(ctx.db, rec, ctx.cfg)
             for w0, w1 in windows:
@@ -70,7 +71,7 @@ def build(ctx) -> APIRouter:
         """Any window of a recording (the player's 'look around here')."""
         rec = _rec(rec_id)
         if t1 <= t0:
-            raise HTTPException(400, "t1 must be after t0")
+            raise app_error(400, "server.player.bad_window", "The end time must be after the start time.")
         out = await _render(rec, t0, t1, h)
         return out
 
@@ -84,7 +85,7 @@ def build(ctx) -> APIRouter:
         out.update({"event_id": event_id, "rec_id": rec["id"], "t": w["t"], "in": w["in"], "out": w["out"],
                     "user_bounds": ev.get("clip_in") is not None or ev.get("clip_out") is not None})
         if prefetch > 0:
-            # neighbours by time (the event itself may be a false positive, which this list leaves out)
+            # neighbors by time (the event itself may be a false positive, which this list leaves out)
             evs = ctx.db.query("SELECT * FROM events WHERE rec_id=? AND status != 'false' AND id != ? ORDER BY t_s",
                                (rec["id"], event_id))
             after = [x for x in evs if x["t_s"] >= ev["t_s"]]
@@ -114,13 +115,13 @@ def build(ctx) -> APIRouter:
                     try:
                         vals[k] = round(max(0.0, min(float(v), dur)), 3)
                     except (TypeError, ValueError):
-                        raise HTTPException(400, f"{k} must be seconds or null")
+                        raise app_error(400, "server.player.bad_seconds", "{field} must be a number of seconds or empty.", field=k)
         if not vals:
-            raise HTTPException(400, "clip_in and / or clip_out required")
+            raise app_error(400, "server.player.bounds_required", "Give a clip start, a clip end or both.")
         cin = vals.get("clip_in", ev.get("clip_in"))
         cout = vals.get("clip_out", ev.get("clip_out"))
         if cin is not None and cout is not None and cout <= cin:
-            raise HTTPException(400, "out must be after in")
+            raise app_error(400, "server.player.out_before_in", "The clip end must be after the clip start.")
         sets = ", ".join(f"{k}=?" for k in vals)
         ctx.db.execute(f"UPDATE events SET {sets} WHERE id=?", (*vals.values(), event_id))
         ctx.bus.publish("events", action="updated", rec_id=ev["rec_id"], event_id=event_id)
@@ -130,10 +131,10 @@ def build(ctx) -> APIRouter:
     @r.get("/api/clips/{name}")
     def clip_file(name: str):
         if not clips.valid_name(name):
-            raise HTTPException(404, "no such clip")
+            raise app_error(404, "server.no_clip", "That clip does not exist anymore.")
         p = paths.CLIPS_DIR / name
         if not p.is_file():
-            raise HTTPException(404, "clip expired - reload the event")
+            raise app_error(404, "server.player.clip_expired", "This clip was cleaned up. Open the event again.")
         return FileResponse(p, media_type="video/mp4", headers={"Cache-Control": "private, max-age=3600"})
 
     # ---- whole-recording proxies ----------------------------------------------------------
@@ -159,11 +160,11 @@ def build(ctx) -> APIRouter:
     def proxy_file(rec_id: int):
         rec = ctx.db.one("SELECT proxy_path FROM recordings WHERE id=?", (rec_id,))
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         p = rec.get("proxy_path")
         from pathlib import Path
         if not p or not Path(p).is_file():
-            raise HTTPException(404, "no proxy built yet")
+            raise app_error(404, "server.player.no_proxy", "No preview copy has been made of this recording yet.")
         return FileResponse(p, media_type="video/mp4", headers={"Cache-Control": "private, max-age=600"})
 
     # ---- per-track stems for the track panel (media/stems.py) ------------------------------
@@ -184,24 +185,24 @@ def build(ctx) -> APIRouter:
             key = stems.full_key(rec)
             man = stems.read_manifest(key) if key else None
             if man is None:
-                raise HTTPException(404, "no whole-recording tracks yet - build (or rebuild) the proxy")
+                raise app_error(404, "server.player.no_full_tracks", "The tracks of the whole recording are not ready yet. Make (or remake) the preview copy first.")
             return _manifest_out(key, stems.freshen(man, info))
         if t1 <= t0:
-            raise HTTPException(400, "t1 must be after t0")
+            raise app_error(400, "server.player.bad_window", "The end time must be after the start time.")
         try:
             key, man = await run_in_threadpool(stems.render_window, ctx.db, ctx.cfg, rec, t0, t1)
         except stems.StemError as e:
-            raise HTTPException(503, f"track render failed: {e}")
+            raise app_error(503, "server.player.tracks_failed", "The audio tracks could not be prepared: {error}", error=str(e))
         return _manifest_out(key, man)
 
     @r.get("/api/stems/{key}/{name}")
     def stem_file(key: str, name: str):
         from media import stems
         if not stems.valid_key(key) or not stems.valid_file(name):
-            raise HTTPException(404, "no such track")
+            raise app_error(404, "server.player.no_track", "That audio track does not exist.")
         p = stems.stems_root() / key / name
         if not p.is_file():
-            raise HTTPException(404, "track expired - reload")
+            raise app_error(404, "server.player.track_expired", "This audio track was cleaned up. Load it again.")
         return FileResponse(p, media_type="audio/mp4", headers={"Cache-Control": "private, max-age=3600"})
 
     @r.get("/api/clips-status")

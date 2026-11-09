@@ -1,0 +1,19 @@
+{
+  "tray.open": "WardogClips openen",
+  "tray.update": "Update beschikbaar...",
+  "tray.pause": "Pauzeren terwijl ik speel",
+  "tray.speed": "Snelheid",
+  "tray.mode_full": "Volle snelheid",
+  "tray.mode_balanced": "Gebalanceerd",
+  "tray.mode_background": "Achtergrond",
+  "tray.open_data": "Datamap openen",
+  "tray.open_log": "Log openen",
+  "tray.quit": "Afsluiten",
+  "tray.balloon": "WardogClips draait. Klik met rechts op het pictogram in het systeemvak om af te sluiten.",
+  "tray.update_notify": "WardogClips {version} is beschikbaar. Kies Update beschikbaar... in het systeemvakmenu om hem te bekijken.",
+  "launcher.could_not_start": "WardogClips kon niet starten:\n\n{error}",
+  "launcher.scan_running": "Een WardogClips-scan (scan.bat / --scan) gebruikt deze datamap:\n\n{dir}\n\nWacht tot die klaar is (of stop hem in zijn venster) en start WardogClips dan opnieuw.",
+  "launcher.not_answering": "WardogClips draait al maar reageert niet.\n\nSluit het af via het pictogram in het systeemvak (of wacht een minuut) en probeer het opnieuw.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips is beschadigd (de runtime of de app-bestanden ontbreken).\n\nInstalleer het opnieuw.\n\nGezocht naar:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips stopte direct na het starten (afsluitcode {code}).\n\nIn het log staat misschien waarom:\n{log}"
+}

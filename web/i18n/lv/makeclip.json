@@ -1,0 +1,12 @@
+{
+  "pick_first": "Vispirms izvēlies notikumu vai atskaņo ierakstu.",
+  "already": "Šis klips jau tiek veidots.",
+  "making_exact": "Veido klipu precīzi pēc kadra. Tas aizņem nedaudz ilgāk, jo attēls tiek pārkodēts.",
+  "making_copy": "Veido klipu. Tas sāksies ar tuvāko atslēgkadru pirms tava sākuma punkta.",
+  "open_folder": "Atvērt mapi",
+  "saved": "Klips saglabāts: {name}",
+  "saved_early": "Klips saglabāts: {name}\nTas sākas {seconds} pirms tava sākuma punkta (tuvākais atslēgkadrs).",
+  "check_mismatch": "Klips pilnībā neatbilst ierakstam. Pārbaudi to pirms lietošanas.",
+  "failed": "Klipu neizdevās izveidot: {error}",
+  "unknown_error": "nezināma kļūda"
+}

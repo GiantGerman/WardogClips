@@ -1,0 +1,20 @@
+{
+  "@": "Tray icon menu (desktop/tray.py) and the launcher's message boxes (WardogClips.exe). Flat keys; {name} placeholders; \n is a line break.",
+  "tray.open": "Open WardogClips",
+  "tray.update": "Update available...",
+  "tray.pause": "Pause while I play",
+  "tray.speed": "Speed",
+  "tray.mode_full": "Full speed",
+  "tray.mode_balanced": "Balanced",
+  "tray.mode_background": "Background",
+  "tray.open_data": "Open data folder",
+  "tray.open_log": "Open log",
+  "tray.quit": "Quit",
+  "tray.balloon": "WardogClips is running. Right-click the tray icon to quit.",
+  "tray.update_notify": "WardogClips {version} is available. Choose Update available... in the tray menu to see it.",
+  "launcher.could_not_start": "WardogClips could not start:\n\n{error}",
+  "launcher.scan_running": "A WardogClips scan (scan.bat / --scan) is using this data folder:\n\n{dir}\n\nWait for it to finish (or stop it in its window), then start WardogClips again.",
+  "launcher.not_answering": "WardogClips is already running but does not answer.\n\nQuit it from its tray icon (or wait a minute) and try again.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips is damaged (the runtime or the app files are missing).\n\nPlease reinstall it.\n\nLooked for:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips stopped right after it started (exit code {code}).\n\nThe log may say why:\n{log}"
+}

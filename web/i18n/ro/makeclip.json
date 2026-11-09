@@ -1,0 +1,12 @@
+{
+  "pick_first": "Alege mai întâi un eveniment sau redă o înregistrare.",
+  "already": "Acest clip se creează deja.",
+  "making_exact": "Se creează clipul, exact la cadru. Durează puțin mai mult, pentru că imaginea se re-encodează.",
+  "making_copy": "Se creează clipul. Va începe la cel mai apropiat cadru cheie dinaintea punctului de intrare.",
+  "open_folder": "Deschide folderul",
+  "saved": "Clip salvat: {name}",
+  "saved_early": "Clip salvat: {name}\nÎncepe cu {seconds} înainte de punctul de intrare (cel mai apropiat cadru cheie).",
+  "check_mismatch": "Clipul nu corespunde complet înregistrării. Verifică-l înainte să-l folosești.",
+  "failed": "Clipul nu a putut fi creat: {error}",
+  "unknown_error": "eroare necunoscută"
+}

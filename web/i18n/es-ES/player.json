@@ -1,0 +1,108 @@
+{
+  "title.none": "sin clip",
+  "title.rendering": "{kind} en {time} · renderizando a {height}p",
+  "title.window": "{t0} – {t1} · {height}p",
+  "title.proxy": "Proxy {height}p · grabación completa",
+  "title.no_proxy": "Aún no hay proxy",
+  "tip.event": "{kind} en {time}: {render}",
+  "tip.around": "hacia {time}: {render}",
+  "tip.cached": "{height}p de la caché de clips",
+  "tip.rendered": "{height}p renderizado en {seconds} s",
+  "tip.rendered_enc": "{height}p renderizado en {seconds} s ({encoder})",
+  "tip.proxy": "{name}: el proxy de la grabación completa",
+  "tip.no_proxy": "{name}: aún no hay proxy de la grabación completa",
+  "busy.clip": "renderizando el clip ({height}p)...",
+  "busy.at": "renderizando {time} ({height}p)...",
+  "busy.seconds": "{seconds} s",
+  "err.clip": "No se ha podido renderizar este clip",
+  "err.at": "No se ha podido renderizar {time}",
+  "err.retry": "Reintentar",
+  "err.encoding": "Ajustes de codificación",
+  "err.play_clip": "No se ha podido reproducir este clip.",
+  "err.play_proxy": "No se ha podido reproducir el proxy.",
+  "pick.title": "Elige un evento",
+  "pick.text": "Elige uno en Eventos (o pulsa N): su clip se reproduce aquí desde el pre-roll.",
+  "pick.more": "O haz clic en la línea de tiempo de abajo para ver cualquier momento de esta grabación.",
+  "pick.short": "Elige uno en Eventos (o pulsa N), o haz clic en la línea de tiempo de abajo.",
+  "proxy.card_title": "Esta grabación aún no tiene proxy",
+  "proxy.card_text": "Un proxy de {height}p es una copia de todo el archivo de {duration} para recorrerlo de principio a fin (se crea varias veces más rápido que en tiempo real).",
+  "proxy.building": "creando",
+  "proxy.progress": "{message} {percent}",
+  "proxy.queued": "en cola",
+  "proxy.build": "Crear proxy",
+  "proxy.all": "Proxies para todas con eventos",
+  "proxy.all_tip": "Poner en cola proxies para todas las grabaciones con eventos",
+  "proxy.queued_toast": "proxy en cola",
+  "proxy.all_toast": {
+    "one": "{count} proxy en cola ({candidates} grabaciones con eventos no tienen)",
+    "many": "{count} proxies en cola ({candidates} grabaciones con eventos no tienen)",
+    "other": "{count} proxies en cola ({candidates} grabaciones con eventos no tienen)"
+  },
+  "mode.full_tip": "Toda la grabación, reproducida desde su proxy",
+  "mode.full_noproxy_tip": "Toda la grabación: aún no hay proxy (créalo desde aquí)",
+  "bound.wait": "espera a que cargue el clip de este evento",
+  "bound.in_before_out": "la entrada debe ir antes de la salida",
+  "bound.out_after_in": "la salida debe ir después de la entrada",
+  "bound.reset": "clip de vuelta al pre-roll / post-roll",
+  "bound.in_set": "entrada = {time} (clip de {length} s)",
+  "bound.out_set": "salida = {time} (clip de {length} s)",
+  "mark.nothing": "no se reproduce nada",
+  "mark.done": "marca manual en {time}",
+  "play_aria": "Reproducir",
+  "pause_aria": "Pausa",
+  "time.pos": "{pos} de {total}",
+  "time.rel": "{offset} s desde el evento",
+  "time.clip": "clip {in} – {out} = {length} s",
+  "pip.loop": "Bucle entrada → salida",
+  "evt.title": "{kind} {time}",
+  "tl.tip": "{kind} · {time} · puntuación {score}",
+  "tl.tip_status": "{kind} · {time} · puntuación {score} · {status}",
+  "tl.status_kept": "conservado",
+  "tl.status_false": "falso positivo",
+  "tl.whole": "Grabación completa",
+  "tl.no_events": "sin eventos",
+  "tl.not_detected": "aún sin detectar",
+  "tl.no_proxy": "sin proxy",
+  "tl.no_proxy_tip": "El modo de grabación completa necesita un proxy (créalo desde el reproductor)",
+  "tl.kind.kill": {
+    "one": "{count} baja",
+    "many": "{count} bajas",
+    "other": "{count} bajas"
+  },
+  "tl.kind.assist": {
+    "one": "{count} asistencia",
+    "many": "{count} asistencias",
+    "other": "{count} asistencias"
+  },
+  "tl.kind.death": {
+    "one": "{count} muerte",
+    "many": "{count} muertes",
+    "other": "{count} muertes"
+  },
+  "tl.kind.spotted": {
+    "one": "{count} avistado",
+    "many": "{count} avistados",
+    "other": "{count} avistados"
+  },
+  "tl.kind.revive": {
+    "one": "{count} reanimación",
+    "many": "{count} reanimaciones",
+    "other": "{count} reanimaciones"
+  },
+  "tl.kind.squad": {
+    "one": "{count} de escuadra",
+    "many": "{count} de escuadra",
+    "other": "{count} de escuadra"
+  },
+  "tl.kind.voice": {
+    "one": "{count} de voz",
+    "many": "{count} de voz",
+    "other": "{count} de voz"
+  },
+  "tl.kind.manual": {
+    "one": "{count} manual",
+    "many": "{count} manuales",
+    "other": "{count} manuales"
+  },
+  "tl.kind_other": "{count} {kind}"
+}

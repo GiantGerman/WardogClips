@@ -4,10 +4,12 @@ import json
 import re
 import time
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import FileResponse
 
 from core.library import _priority, parse_name
+from core.messages import http_error
+from utils.i18n import app_error
 from utils import paths
 
 KINDS = ("kill", "assist", "death", "spotted", "revive", "squad", "voice", "manual")
@@ -28,7 +30,7 @@ def build(ctx) -> APIRouter:
     def _rec(rec_id: int) -> dict:
         rec = ctx.db.one("SELECT * FROM recordings WHERE id=?", (rec_id,))
         if rec is None:
-            raise HTTPException(404, "no such recording")
+            raise app_error(404, "server.no_recording", "That recording does not exist anymore.")
         return rec
 
     def _queue(rec: dict, stage: str = "detect", bump: int = 0) -> int | None:
@@ -75,7 +77,7 @@ def build(ctx) -> APIRouter:
         try:
             out = clipsearch.search(ctx.db, dict(request.query_params), ctx.cfg.highlights.multikill_s)
         except ValueError as e:
-            raise HTTPException(400, str(e))
+            raise http_error(400, e)
         out["events"] = [_ev(x) for x in out["events"]]
         return out
 
@@ -83,18 +85,18 @@ def build(ctx) -> APIRouter:
     def one_event(event_id: int):
         row = ctx.db.one("SELECT e.*, r.name rec_name FROM events e JOIN recordings r ON r.id=e.rec_id WHERE e.id=?", (event_id,))
         if row is None:
-            raise HTTPException(404, "no such event")
+            raise app_error(404, "server.no_event", "That event does not exist anymore.")
         return _ev(row)
 
     @r.post("/api/events/{event_id}")
     def update_event(event_id: int, body: dict):
         row = ctx.db.one("SELECT id, status FROM events WHERE id=?", (event_id,))
         if row is None:
-            raise HTTPException(404, "no such event")
+            raise app_error(404, "server.no_event", "That event does not exist anymore.")
         sets, params = [], []
         if "status" in body:
             if body["status"] not in ("new", "kept", "false"):
-                raise HTTPException(400, "status must be new | kept | false")
+                raise app_error(400, "server.event.bad_status", "The status must be new, kept or false.")
             sets.append("status=?")
             params.append(body["status"])
         if "note" in body:
@@ -107,7 +109,7 @@ def build(ctx) -> APIRouter:
             sets.append("t_end_s=?")
             params.append(None if body["t_end_s"] is None else float(body["t_end_s"]))
         if not sets:
-            raise HTTPException(400, "nothing to change")
+            raise app_error(400, "server.event.nothing_to_change", "There is nothing to change.")
         params.append(event_id)
         ctx.db.execute(f"UPDATE events SET {', '.join(sets)} WHERE id=?", params)
         rescored = 0
@@ -131,7 +133,7 @@ def build(ctx) -> APIRouter:
         try:
             t = float(body.get("t_s"))
         except (TypeError, ValueError):
-            raise HTTPException(400, "t_s required")
+            raise app_error(400, "server.event.time_required", "The event needs a time in seconds.")
         note = str(body.get("note") or "")[:500]
         eid = ctx.db.execute(
             "INSERT INTO events (rec_id, t_s, kind, subkind, score, confidence, source, status, note, created_utc)"
@@ -143,9 +145,9 @@ def build(ctx) -> APIRouter:
     def delete_event(event_id: int):
         row = ctx.db.one("SELECT rec_id, kind FROM events WHERE id=?", (event_id,))
         if row is None:
-            raise HTTPException(404, "no such event")
+            raise app_error(404, "server.no_event", "That event does not exist anymore.")
         if row["kind"] != "manual":
-            raise HTTPException(409, "only manual events are deleted; mark detected ones as false")
+            raise app_error(409, "server.event.only_manual_delete", "Only events you added yourself can be deleted. Mark a detected event as false instead.")
         ctx.db.execute("DELETE FROM events WHERE id=?", (event_id,))
         ctx.bus.publish("events", action="updated", rec_id=row["rec_id"], event_id=event_id)
         return {"ok": True}
@@ -154,7 +156,7 @@ def build(ctx) -> APIRouter:
     def detect_one(rec_id: int):
         rec = _rec(rec_id)
         if rec["status"] != "probed":
-            raise HTTPException(409, "probe the recording first")
+            raise app_error(409, "server.probe_first", "This recording has not been read yet. Wait until its probe job is done.")
         jid = _queue(rec, bump=10)
         return {"ok": True, "job": jid, "already_queued": jid is None}
 
@@ -175,7 +177,7 @@ def build(ctx) -> APIRouter:
         try:
             data = frames.grab_frame(rec["path"], max(0.0, t), max_w=max(320, min(int(w), 3440)))
         except frames.FrameError as e:
-            raise HTTPException(500, str(e))
+            raise app_error(500, "server.frame_failed", "Could not read a frame of the recording: {error}", error=str(e))
         return Response(content=data, media_type="image/jpeg", headers={"Cache-Control": "no-store"})
 
     @r.get("/api/recordings/{rec_id}/thumb")
@@ -185,7 +187,7 @@ def build(ctx) -> APIRouter:
         from media import thumbs
         f = thumbs.get(rec)
         if f is None:
-            raise HTTPException(404, "no thumbnail for this recording")
+            raise app_error(404, "server.no_thumbnail", "This recording has no thumbnail yet.")
         return FileResponse(f, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=604800"})
 
     # ---- calibration ------------------------------------------------------------------
@@ -241,7 +243,7 @@ def build(ctx) -> APIRouter:
         if text and not pattern:
             pattern = re.escape(text).replace(r"\#", "#").replace("#", r"[\d,.$+]+").replace("\\ ", r"\s*")
         if not pattern or not label:
-            raise HTTPException(400, "pattern (or text) and label required")
+            raise app_error(400, "server.calibration.label_required", "Enter a pattern (or the text) and a label.")
         try:
             re.compile(pattern)
         except re.error:
@@ -262,7 +264,7 @@ def build(ctx) -> APIRouter:
     def add_alias(body: dict):
         name = str(body.get("name") or "").strip()
         if not name:
-            raise HTTPException(400, "name required")
+            raise app_error(400, "server.calibration.name_required", "Enter a name.")
         kind = body.get("as", "player")
         target = ctx.cfg.player.squad if kind == "squad" else ctx.cfg.player.aliases
         if name not in target:

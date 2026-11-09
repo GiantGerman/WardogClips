@@ -4,6 +4,8 @@ recording type and drive. One SQL query; `params` come straight from the query s
 
 import logging
 
+from core.messages import MsgError, msg
+
 logger = logging.getLogger("wclips.clipsearch")
 
 KINDS = ("kill", "assist", "death", "spotted", "revive", "squad", "voice", "manual")
@@ -33,7 +35,7 @@ def _num(params: dict, key: str, lo: float | None = None, hi: float | None = Non
     try:
         v = float(raw)
     except (TypeError, ValueError):
-        raise ValueError(f"{key} must be a number")
+        raise MsgError(msg("server.search.not_number", "{field} must be a number.", field=key))
     if lo is not None:
         v = max(lo, v)
     if hi is not None:
@@ -49,7 +51,7 @@ def build(params: dict, multikill_s: float = 10.0) -> tuple[str, list, dict]:
     kinds = [k for k in str(params.get("kinds") or "").split(",") if k]
     bad = [k for k in kinds if k not in KINDS]
     if bad:
-        raise ValueError(f"unknown kind(s): {', '.join(bad)}")
+        raise MsgError(msg("server.bad_value", "This value is not valid: {field}", field=", ".join(bad)))
     if kinds:
         where.append("e.kind IN (%s)" % ",".join("?" * len(kinds)))
         args += kinds
@@ -57,7 +59,7 @@ def build(params: dict, multikill_s: float = 10.0) -> tuple[str, list, dict]:
 
     status = str(params.get("status") or "notfalse")
     if status not in STATUSES:
-        raise ValueError(f"status must be one of {', '.join(STATUSES)}")
+        raise MsgError(msg("server.bad_value", "This value is not valid: {field}", field=status))
     if status == "notfalse":
         where.append("e.status != 'false'")
     elif status != "any":
@@ -95,7 +97,7 @@ def build(params: dict, multikill_s: float = 10.0) -> tuple[str, list, dict]:
 
     said = [w for w in str(params.get("said") or "").split() if len(w) >= 2]
     if len(said) > MAX_SAID_WORDS:
-        raise ValueError(f"said: at most {MAX_SAID_WORDS} words")
+        raise MsgError(msg("server.search.said_words", "Search for at most {max} words of speech.", max=MAX_SAID_WORDS))
     said_w = _num(params, "said_window", 1, 120) or 10.0
     said_sql = ""
     if said:
@@ -118,7 +120,7 @@ def build(params: dict, multikill_s: float = 10.0) -> tuple[str, list, dict]:
 
     rec_kind = str(params.get("rec_kind") or "any")
     if rec_kind not in REC_KINDS:
-        raise ValueError(f"rec_kind must be one of {', '.join(REC_KINDS)}")
+        raise MsgError(msg("server.bad_value", "This value is not valid: {field}", field=rec_kind))
     if rec_kind != "any":
         where.append("r.kind = ?")
         args.append(rec_kind)
@@ -131,7 +133,7 @@ def search(db, params: dict, multikill_s: float = 10.0) -> dict:
     where, args, norm = build(params, multikill_s)
     order = str(params.get("order") or "score")
     if order not in ORDERS:
-        raise ValueError(f"order must be one of {', '.join(ORDERS)}")
+        raise MsgError(msg("server.bad_value", "This value is not valid: {field}", field=order))
     limit = int(_num(params, "limit", 1, 1000) or 300)
     base = "FROM events e JOIN recordings r ON r.id = e.rec_id WHERE " + where
     total = db.scalar("SELECT COUNT(*) " + base, args) or 0

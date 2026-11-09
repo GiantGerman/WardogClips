@@ -218,6 +218,23 @@ CREATE TRIGGER IF NOT EXISTS tseg_au AFTER UPDATE ON transcript_segments BEGIN
 END;
 """
 
+# the English translations (transcript_segments.text_en) get their own index; only rows that have one are in it
+_FTS_EN = """
+CREATE VIRTUAL TABLE IF NOT EXISTS transcript_fts_en USING fts5(
+    text_en, content='transcript_segments', content_rowid='id', tokenize='unicode61 remove_diacritics 2');
+CREATE TRIGGER IF NOT EXISTS tseg_en_ai AFTER INSERT ON transcript_segments WHEN COALESCE(new.text_en, '') != '' BEGIN
+    INSERT INTO transcript_fts_en(rowid, text_en) VALUES (new.id, new.text_en);
+END;
+CREATE TRIGGER IF NOT EXISTS tseg_en_ad AFTER DELETE ON transcript_segments WHEN COALESCE(old.text_en, '') != '' BEGIN
+    INSERT INTO transcript_fts_en(transcript_fts_en, rowid, text_en) VALUES ('delete', old.id, old.text_en);
+END;
+CREATE TRIGGER IF NOT EXISTS tseg_en_au AFTER UPDATE OF text_en ON transcript_segments BEGIN
+    INSERT INTO transcript_fts_en(transcript_fts_en, rowid, text_en)
+        SELECT 'delete', old.id, old.text_en WHERE COALESCE(old.text_en, '') != '';
+    INSERT INTO transcript_fts_en(rowid, text_en) SELECT new.id, new.text_en WHERE COALESCE(new.text_en, '') != '';
+END;
+"""
+
 
 class DB:
     def __init__(self, path: Path):
@@ -248,6 +265,12 @@ class DB:
         ("recordings", "channel_key", "TEXT"),  # ... stable key per site (media/vods.channel_identity): '@examplechannel', 'examplestreamer'
         ("recordings", "channel_url", "TEXT"),  # ... their page
         ("recordings", "zone_template_id", "INTEGER"),   # a zone template pinned to this recording (NULL = by streamer)
+        ("transcript_segments", "lang", "TEXT"),       # the speech language of the line ('en', 'es', ...)
+        ("transcript_segments", "text_en", "TEXT"),    # its English translation (stt.translate), NULL = none
+        ("tracks", "lang", "TEXT"),                    # speech language detected on the track
+        ("tracks", "lang_prob", "REAL"),               # ... and how sure the detection was (NULL = fixed by setting)
+        ("recordings", "stt_language", "TEXT"),        # speech language override for this recording (NULL = Settings)
+        ("jobs", "gpu", "TEXT"),            # the graphics card a video job ran on (its name; 'CPU' = none in use)
     )
 
     def _migrate(self, con: sqlite3.Connection) -> None:
@@ -256,6 +279,13 @@ class DB:
             if col not in have:
                 con.execute(f"ALTER TABLE {table} ADD COLUMN {col} {decl}")
                 logger.info("[DB] migrated: %s.%s added", table, col)
+        self.fts_en = False
+        if self.fts:
+            try:
+                con.executescript(_FTS_EN)       # after the columns: its triggers name text_en
+                self.fts_en = True
+            except sqlite3.OperationalError as e:
+                logger.warning("[DB] translation index unavailable (%s)", e)
 
     def connect(self) -> sqlite3.Connection:
         con = getattr(self._local, "con", None)

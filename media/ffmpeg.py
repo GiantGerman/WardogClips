@@ -23,8 +23,9 @@ class ProbeError(RuntimeError):
 
 
 def _run(cmd: list[str], timeout: float) -> subprocess.CompletedProcess:
+    from core import workmode
     return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                          timeout=timeout, creationflags=_NO_WINDOW)
+                          timeout=timeout, creationflags=workmode.child_flags(_NO_WINDOW))
 
 
 def _frac(s: str | None) -> float | None:
@@ -115,10 +116,13 @@ def keyint(path: str, span_s: float = 20.0, timeout: float = 60.0) -> float | No
 
 @functools.lru_cache(maxsize=1)
 def hw_info() -> dict:
-    """What this ffmpeg can do on this machine (cached for the process lifetime)."""
+    """What this ffmpeg can do on this machine (cached for the process lifetime). Hardware decoders: cuda (NVDEC),
+    d3d11va (any Direct3D 11 card: AMD, Intel, NVIDIA); encoders per vendor: NVENC, AMF (AMD), Quick Sync (Intel).
+    Which graphics card each one runs on: utils/gpus.py."""
     exe = paths.ffmpeg_exe()
-    out = {"ffmpeg": exe, "ffprobe": paths.ffprobe_exe(), "version": None, "cuda": False,
-           "hevc_cuvid": False, "h264_nvenc": False, "hevc_nvenc": False}
+    out = {"ffmpeg": exe, "ffprobe": paths.ffprobe_exe(), "version": None, "cuda": False, "d3d11va": False,
+           "hevc_cuvid": False, "h264_nvenc": False, "hevc_nvenc": False, "h264_amf": False, "hevc_amf": False,
+           "h264_qsv": False, "hevc_qsv": False}
     if not exe:
         return out
     try:
@@ -127,11 +131,14 @@ def hw_info() -> dict:
         out["version"] = first.split(" Copyright")[0].strip()[:40]
         hw = _run([exe, "-hide_banner", "-hwaccels"], 15).stdout
         out["cuda"] = "cuda" in hw.split()
+        out["d3d11va"] = "d3d11va" in hw.split()
         dec = _run([exe, "-hide_banner", "-decoders"], 15).stdout
         out["hevc_cuvid"] = " hevc_cuvid " in dec
         enc = _run([exe, "-hide_banner", "-encoders"], 15).stdout
         out["h264_nvenc"] = " h264_nvenc " in enc
         out["hevc_nvenc"] = " hevc_nvenc " in enc
+        for name in ("h264_amf", "hevc_amf", "h264_qsv", "hevc_qsv"):
+            out[name] = f" {name} " in enc
     except (OSError, subprocess.TimeoutExpired):
         logger.warning("[FFmpeg] hardware inventory failed", exc_info=True)
     return out

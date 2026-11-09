@@ -1,0 +1,14 @@
+{
+  "@": "Make clip: a trimmed copy of a moment saved to the clip folder (web/js/makeclip.js).",
+  "pick_first": "Pick an event or play a recording first.",
+  "already": "This clip is already being made.",
+  "making_exact": "Making the clip, frame-exact. This takes a little longer because the picture is re-encoded.",
+  "making_copy": "Making the clip. It will start on the nearest keyframe before your in point.",
+  "open_folder": "Open folder",
+  "saved": "Clip saved: {name}",
+  "saved_early": "Clip saved: {name}\nIt starts {seconds} before your in point (nearest keyframe).",
+  "@saved_early": "The seconds value is an already formatted duration, such as 1.2 sec.",
+  "check_mismatch": "The clip does not fully match the recording. Check it before you use it.",
+  "failed": "The clip could not be made: {error}",
+  "unknown_error": "unknown error"
+}

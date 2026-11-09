@@ -1,0 +1,146 @@
+{
+  "title": "Stream VODkuna",
+  "paste": "Enlaceta k'askachiy",
+  "paste_tip": "Huk VOD-ta enlacenmanta importay (ñawpaqta maskan)",
+  "close_tip": "Wichqay (Esc)",
+  "search.box_ph": "Streamerpa sutin utaq VOD / perfil enlace",
+  "search.go": "Maskay",
+  "search.go_tip": "Sutiwan maskay, utaq k'askachisqa enlacepa streamerninta kichay (Enter)",
+  "search.need_input": "streamerpa sutinta qillqay utaq VOD / perfil enlaceta k'askachiy",
+  "search.need_name": "streamerpa sutinta qillqay",
+  "search.busy": "{sites}-ta \"{name}\"-manta tapuchkan -- llapan sitiokunata kuska, huk iskay kimsa segundo",
+  "search.found": {
+    "other": "{count} streamer tarisqa"
+  },
+  "search.none": "\"{name}\" sutiyuq streamer mana kanchu {sites}-pi",
+  "sites.one_on": "aswan pisi huk sitio kichasqa kanan",
+  "link.busy": "Enlaceta ñawinchachkan -- VOD enlacepaqqa sitiota tapukun pipa VOD-nin kasqanta, yaqa 3 s",
+  "link.unsupported": "Kayqa mana yanapasqa sitiopa enlacenchu. {sites}-pa enlacenkuna llamkan (huk VOD utaq streamerpa páginan).",
+  "favs.title": "Munasqakuna",
+  "favs.check": "Musuqkunata maskay",
+  "favs.check_tip": "Llapan munasqakunata wakmanta listay, qhipa qhawaymanta rikhuriq VODkunata yupay",
+  "favs.checking": "Qhawachkan...",
+  "favs.none_yet": "manaraq munasqakuna kanchu: huk streamerta kichaspa ch'askapi clic ruway",
+  "favs.checking_note": {
+    "other": "{count} munasqakunapi musuq VODkunata qhawachkan ..."
+  },
+  "favs.result_new": {
+    "other": "munasqaykikunapi {count} musuq VOD"
+  },
+  "favs.result_nothing": "qhipa qhawaymanta mana ima musuqpas",
+  "favs.result_failed": {
+    "other": "{result} ({count} munasqakunata mana qhawayta atikunchu)"
+  },
+  "favs.removed": "{name} munasqakunamanta urqusqa",
+  "favs.added": "{name} munasqakunaman yapasqa",
+  "favs.empty_title": "Manaraq munasqakuna kanchu",
+  "favs.empty_text": "Huk streamerta kichaspa ch'askapi clic ruway kaypi charkinaykipaq.",
+  "favs.new_badge": {
+    "other": "{count} musuq"
+  },
+  "favs.new_badge_title": "Ñawpaq qhawaymanta rikhuriq VODkuna",
+  "favs.remove_title": "Munasqakunamanta urquy",
+  "favs.remove_aria": "{name}-ta munasqakunamanta urquy",
+  "favs.add_title": "Munasqakunaman yapay",
+  "favs.checked": "qhawasqa {ago}",
+  "pre.error_extra": "{error} -- listapa umanpi rikuchisqa, kunanqa mana importayta atikunchu",
+  "pre.in_library": "chay VOD-qa ñam bibliotecapi",
+  "pre.older": "chay VOD-qa musuq listamanta aswan mawk'am: umanpi rikuchisqa",
+  "import.label": "Importay",
+  "import.label_n": {
+    "other": "{count} importay"
+  },
+  "import.busy": "Importachkan...",
+  "import.queue_title": {
+    "other": "{count} uraykachiykunata siqiman churay"
+  },
+  "import.select_title": "importanapaq VODkunata akllay",
+  "import.queuing": {
+    "other": "{count} VOD siqiman churakuchkan -- sapa enlaceta ñawpaqta sitiowan qhawan ..."
+  },
+  "import.no_answer": "kay enlacepaq mana kutichiy kanchu",
+  "import.sum_queued": {
+    "other": "{count} siqipi"
+  },
+  "import.sum_already": {
+    "other": "{count} ña kachkan"
+  },
+  "import.sum_failed": {
+    "other": "{count} pantasqa (puka chip-pa hanaqninpi mouse-ta churay)"
+  },
+  "import.sum_jobs": "{summary} -- Llamkaykuna uraykachiykunata rikuchin",
+  "import.toast": "VODkuna: {summary}",
+  "row.in_library": "bibliotecapi",
+  "row.imported_before": "ñawpaqta importasqa",
+  "row.already_queued": "ñam siqipi",
+  "row.queued": "siqipi",
+  "row.failed": "pantasqa",
+  "row.job": "llamkay {id}",
+  "row.download_job": "uraykachiy llamkay {id}",
+  "row.your_link": "enlaceyki",
+  "row.your_link_title": "k'askachisqayki enlace",
+  "row.open_rec_title": "grabacionta kichay",
+  "row.live": "kunan kawsaq",
+  "row.upcoming": "hamuq",
+  "row.live_title": "stream tukukuptinmi importakuyta atinqa",
+  "row.unavailable": "mana kanchu",
+  "row.not_ready": "manaraq listochu",
+  "row.not_ready_title": "manaraq importakuyta atinchu",
+  "row.processing_title": "stream kunallan tukurqan, sitiotaq chaywan llamkachkanraq",
+  "row.new": "musuq",
+  "row.new_title": "qhipa qhawaymanta ñawpaqkaq qhawaymanta rikhurirqan",
+  "row.older": "listamanta aswan mawk'a",
+  "row.open_on": "{site}-pi kichay",
+  "ch.back_results": "Tarisqakunaman kutiy",
+  "ch.back_favs": "Munasqakunaman kutiy",
+  "ch.back_aria": "Kutiy",
+  "ch.star_wait": "listata suyay (streamerpa kikin llaventa willan)",
+  "ch.listing_title": "Listachkan...",
+  "ch.refresh_title": "Sitiomanta wakmanta listay (listaqa 5 minutokama waqaychasqa)",
+  "ch.refresh_aria": "Musuqchay",
+  "ch.page_title": "páginan: {url}",
+  "ch.page_aria": "páginan",
+  "ch.listing": "listachkan ...",
+  "ch.count_listed": {
+    "other": "{count} listasqa"
+  },
+  "ch.count_new": {
+    "other": "{count} musuq"
+  },
+  "ch.count_lib": {
+    "other": "{count} bibliotecapi"
+  },
+  "ch.select_new": "Musuqkunata akllay",
+  "ch.select_new_title": "manaraq bibliotecapi utaq siqipi kaq llapan VODkunata akllay",
+  "ch.none": "Mana mayqinpas",
+  "ch.none_title": "akllasqata pichay",
+  "ch.listing_busy": "{name}-pa VODninkunata {site}-pi listachkan ...",
+  "ch.relisting": "wakmanta listachkan ...",
+  "ch.empty_title": "Mana VODkuna listasqachu",
+  "ch.empty_text": "Streamerqa manachá ñawpaq transmisionninkunata waqaychanchu, utaq suscriptorkunallapaqmi.",
+  "ch.load_older": "Aswan mawk'akunata cargay ({count})",
+  "ch.max_listed": "Aswan musuq {count}-llam listasqa -- aswan mawk'a VOD-pa enlacenta k'askachiy importanaykipaq.",
+  "home.short": "Huk sutita qillqaspa Enter ñit'iy, utaq VOD / perfil enlaceta k'askachiy.",
+  "home.find_html": "<b>Streamerta maskay</b> -- sutinta qillqaspa Enter ñit'iy; kichasqa llapan sitiokunata kuska tapukun.",
+  "home.paste_html": "<b>Utaq enlaceta k'askachiy</b> -- streamerpa páginanqa musuq VODninkunata listan; VOD enlaceqa streamerninta chay VOD akllasqawan kichan.",
+  "home.import_html": "VODkunata akllaspa <b>Importay</b>-pi clic ruway: huk qhipa hukmanta uraykamunku (Llamkaykuna), chaymanta huk grabación hina qillqasqa, qhawasqa kanku.",
+  "res.head": "\"{query}\"-paq tarisqakuna",
+  "res.clear": "Tarisqakunata pichay",
+  "res.empty_title": "Mana ima tarikunchu",
+  "res.empty_text": "Qillqasqata qhaway, aswan sitiokunata kichay, utaq páginanpa enlacenta k'askachiy.",
+  "res.no_hits": "Kichasqa sitiokunapi mana chay sutiyuq streamer kanchu.",
+  "res.not_found": "mana tarisqa",
+  "res.fav_title": "huk munasqa",
+  "res.recent": {
+    "other": "{count} musuq"
+  },
+  "res.recent_more": "{count}+ musuq",
+  "res.no_recent": "mana musuq VODkuna listasqachu",
+  "single.title": "Huk VOD",
+  "single.clear": "Pichay",
+  "single.site": "Sitio",
+  "single.link": "Enlace",
+  "single.recheck": "Importayqa enlaceta sitiowan wakmanta qhawan.",
+  "single.no_channel": "Sitioqa mana willarqanchu pipa VOD-nin kasqanta, chayrayku mana listanapaq streamer kanchu. Kay huk VOD-taqa importakuyta atikunraqmi.",
+  "single.import": "Kay VOD-ta importay"
+}

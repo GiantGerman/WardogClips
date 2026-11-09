@@ -1,0 +1,19 @@
+{
+  "tray.open": "Louvri WardogClips",
+  "tray.update": "Gen yon mizajou...",
+  "tray.pause": "Poz pandan m ap jwe",
+  "tray.speed": "Vitès",
+  "tray.mode_full": "Vitès maksimòm",
+  "tray.mode_balanced": "Balanse",
+  "tray.mode_background": "An aryè-plan",
+  "tray.open_data": "Louvri dosye done yo",
+  "tray.open_log": "Louvri jounal la",
+  "tray.quit": "Kite",
+  "tray.balloon": "WardogClips ap mache. Fè klik dwat sou ikòn nan pou w kite l.",
+  "tray.update_notify": "WardogClips {version} disponib. Chwazi Gen yon mizajou... nan meni ikòn nan pou w wè l.",
+  "launcher.could_not_start": "WardogClips pa t ka demare:\n\n{error}",
+  "launcher.scan_running": "Yon eskan WardogClips (scan.bat / --scan) ap itilize dosye done sa a:\n\n{dir}\n\nTann li fini (oswa sispann li nan fenèt li), epi demare WardogClips ankò.",
+  "launcher.not_answering": "WardogClips deja ap mache men li pa reponn.\n\nKite l nan ikòn li (oswa tann yon minit) epi eseye ankò.\n\nJounal: {log}",
+  "launcher.damaged": "WardogClips domaje (runtime a oswa fichye aplikasyon an manke).\n\nTanpri reenstale l.\n\nNou te chèche:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips sispann touswit apre li te demare (kòd sòti {code}).\n\nJounal la ka di poukisa:\n{log}"
+}

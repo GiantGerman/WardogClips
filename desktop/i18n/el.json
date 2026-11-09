@@ -1,0 +1,19 @@
+{
+  "tray.open": "Άνοιγμα WardogClips",
+  "tray.update": "Διαθέσιμη ενημέρωση...",
+  "tray.pause": "Παύση όσο παίζω",
+  "tray.speed": "Ταχύτητα",
+  "tray.mode_full": "Πλήρης ταχύτητα",
+  "tray.mode_balanced": "Ισορροπημένη",
+  "tray.mode_background": "Παρασκήνιο",
+  "tray.open_data": "Άνοιγμα φακέλου δεδομένων",
+  "tray.open_log": "Άνοιγμα αρχείου καταγραφής",
+  "tray.quit": "Έξοδος",
+  "tray.balloon": "Το WardogClips τρέχει. Δεξί κλικ στο εικονίδιο της γραμμής εργασιών για έξοδο.",
+  "tray.update_notify": "Το WardogClips {version} είναι διαθέσιμο. Επιλέξτε Διαθέσιμη ενημέρωση... στο μενού του εικονιδίου για να το δείτε.",
+  "launcher.could_not_start": "Το WardogClips δεν μπόρεσε να ξεκινήσει:\n\n{error}",
+  "launcher.scan_running": "Μια σάρωση του WardogClips (scan.bat / --scan) χρησιμοποιεί αυτόν τον φάκελο δεδομένων:\n\n{dir}\n\nΠεριμένετε να τελειώσει (ή σταματήστε την στο παράθυρό της) και ξεκινήστε ξανά το WardogClips.",
+  "launcher.not_answering": "Το WardogClips τρέχει ήδη αλλά δεν απαντά.\n\nΚλείστε το από το εικονίδιό του (ή περιμένετε ένα λεπτό) και δοκιμάστε ξανά.\n\nΑρχείο καταγραφής: {log}",
+  "launcher.damaged": "Το WardogClips είναι κατεστραμμένο (λείπει το runtime ή τα αρχεία της εφαρμογής).\n\nΕγκαταστήστε το ξανά.\n\nΑναζητήθηκαν:\n{python}\n{main}",
+  "launcher.stopped": "Το WardogClips σταμάτησε αμέσως μετά την εκκίνηση (κωδικός εξόδου {code}).\n\nΤο αρχείο καταγραφής ίσως λέει γιατί:\n{log}"
+}

@@ -1,0 +1,19 @@
+{
+  "tray.open": "Odpri WardogClips",
+  "tray.update": "Na voljo je posodobitev ...",
+  "tray.pause": "Premor, ko igram",
+  "tray.speed": "Hitrost",
+  "tray.mode_full": "Polna hitrost",
+  "tray.mode_balanced": "Uravnoteženo",
+  "tray.mode_background": "V ozadju",
+  "tray.open_data": "Odpri podatkovno mapo",
+  "tray.open_log": "Odpri dnevnik",
+  "tray.quit": "Izhod",
+  "tray.balloon": "WardogClips teče. Za izhod z desno tipko kliknite ikono v sistemski vrstici.",
+  "tray.update_notify": "Na voljo je WardogClips {version}. Za ogled v meniju sistemske vrstice izberite Na voljo je posodobitev ...",
+  "launcher.could_not_start": "WardogClips se ni mogel zagnati:\n\n{error}",
+  "launcher.scan_running": "Pregled WardogClips (scan.bat / --scan) uporablja to podatkovno mapo:\n\n{dir}\n\nPočakajte, da se konča (ali ga ustavite v njegovem oknu), nato znova zaženite WardogClips.",
+  "launcher.not_answering": "WardogClips že teče, a se ne odziva.\n\nZaprite ga prek ikone v sistemski vrstici (ali počakajte minuto) in poskusite znova.\n\nDnevnik: {log}",
+  "launcher.damaged": "WardogClips je poškodovan (manjka izvajalno okolje ali datoteke aplikacije).\n\nZnova ga namestite.\n\nIskano:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips se je ustavil takoj po zagonu (izhodna koda {code}).\n\nVzrok je morda v dnevniku:\n{log}"
+}

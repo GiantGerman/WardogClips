@@ -48,14 +48,15 @@ from datetime import datetime
 from urllib.parse import parse_qs, quote_plus, urlparse
 
 from media import vods
+from utils.i18n import msg as _msg
 
 logger = logging.getLogger("wclips.vodbrowse")
 
 CACHE_S = 300.0
 LIST_TIMEOUT = 60.0
 SEARCH_TIMEOUT = 25.0
-TIKTOK_BROKEN = "TikTok profile listing is not available right now -- paste single video links"
-RUMBLE_429 = "Rumble is rate-limiting, try again in a minute"
+TIKTOK_BROKEN = _msg("server.vods.tiktok_broken", "TikTok profile listing is not available right now -- paste single video links")["message"]
+RUMBLE_429 = _msg("server.vods.rumble_429", "Rumble is rate-limiting, try again in a minute")["message"]
 
 LISTING_URLS = {           # tried in order; the next one only when the first is missing / empty
     "YouTube": ("https://www.youtube.com/{key}/streams", "https://www.youtube.com/{key}/videos"),
@@ -120,7 +121,8 @@ def parse_link(text: str) -> dict:
     No network. Keys as norm_key(); fragments (yt-dlp's '#__youtubedl_smuggle=') and tracking queries dropped."""
     t = (text or "").strip()
     if not t:
-        return {"kind": "unknown", "provider": None, "key": None, "url": "", "error": "type a streamer name or paste a link"}
+        return {"kind": "unknown", "provider": None, "key": None, "url": "",
+                "error": _msg("server.vods.type_name", "type a streamer name or paste a link")["message"]}
     if not _looks_like_url(t):
         return {"kind": "name", "provider": None, "key": None, "url": "", "q": t.lstrip("@").strip()}
     try:
@@ -378,13 +380,13 @@ def _list_ytdlp(provider: str, key: str, limit: int, timeout: float) -> dict:
                               "live": True, "importable": False, "thumbnail": live.get("thumbnail")})
         except vods.VodError as e:
             if "does not exist" in str(e).lower():
-                raise BrowseError(f"no Twitch channel '{key}'")
+                raise BrowseError(_msg("server.vods.no_twitch_channel", "no Twitch channel '{name}'", name=key)["message"])
     return {"name": name, "key": ckey, "vods": vods_}
 
 
 def _fetch(cfg, provider: str, key: str, limit: int, timeout: float) -> dict:
     if not vods.available():
-        raise BrowseError("yt-dlp is not installed (reinstall WardogClips)")
+        raise BrowseError(vods.NO_YTDLP)
     if provider == "Rumble":
         return _list_rumble(key, limit, timeout)
     if provider in vods.IMPERSONATE and not vods.impersonation_available():
@@ -406,7 +408,7 @@ def list_vods(cfg, provider: str, key: str, limit: int = 30, refresh: bool = Fal
         raise BrowseError(f"unknown site '{provider}'")
     key = norm_key(provider, key)
     if not key:
-        raise BrowseError("no streamer given")
+        raise BrowseError(_msg("server.vods.no_streamer", "no streamer given")["message"])
     limit = max(1, min(int(limit or 30), 100))
     ck = (provider, key, limit)
     with _cache_lock:
@@ -551,11 +553,11 @@ def search(cfg, q: str, providers=None, timeout: float = SEARCH_TIMEOUT) -> list
         ch = r.get("channel")
         if not ch or not ch.get("key"):
             return [{"provider": link["provider"], "key": None, "name": q, "url": link.get("url") or "", "ok": False,
-                     "error": r.get("error") or "no streamer behind that link", "sample": [], "n": 0}]
+                     "error": r.get("error") or _msg("server.vods.no_streamer_link", "no streamer behind that link")["message"], "sample": [], "n": 0}]
         return [_hit(list_vods(cfg, ch["provider"], ch["key"], limit=3, timeout=timeout))]
     if link["kind"] == "unknown":
         return [{"provider": link.get("provider"), "key": None, "name": q, "url": link.get("url") or "", "ok": False,
-                 "error": link.get("error") or "not a link this can use", "sample": [], "n": 0}]
+                 "error": link.get("error") or _msg("server.vods.unusable_link", "not a link this can use")["message"], "sample": [], "n": 0}]
     t0 = time.monotonic()
     with ThreadPoolExecutor(max_workers=len(provs) + 1, thread_name_prefix="vodsearch") as ex:
         futs = [(p, ex.submit(list_vods, cfg, p, name_key(p, q), 3, False, None, timeout)) for p in provs]

@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.0 (unreleased)
+
+### Languages
+- The UI can switch language instantly: a language menu in the top bar, in Settings > General and in the Ctrl+K
+  palette ("Change language..."). By default it follows the language the installer ran in, else the Windows display
+  language. 31 languages of the Americas and the EU are listed; translations other than English are marked beta.
+- Dates, times, numbers, sizes and durations follow the chosen language. English is American English: month-day-year
+  and a 12-hour clock.
+- Until a speech language is picked, the speech language follows the UI language (English when Whisper cannot
+  transcribe it).
+- The tray menu, the launcher's messages and the installer use the same language; the installer offers every listed
+  language.
+- Server errors carry a message key, so they show in the UI language.
+- American English spelling throughout.
+
 ## 0.2.0 (2026-11-07)
 
 The first public release: WardogClips is now a normal Windows program. The scanner itself (detection, transcription,

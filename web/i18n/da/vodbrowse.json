@@ -1,0 +1,161 @@
+{
+  "title": "Stream-VODs",
+  "paste": "Indsæt link",
+  "paste_tip": "Importér én VOD fra dens link (slår den op først)",
+  "close_tip": "Luk (Esc)",
+  "search.box_ph": "Streamernavn eller et VOD- / profillink",
+  "search.go": "Søg",
+  "search.go_tip": "Søg efter navn, eller åbn streameren bag et indsat link (Enter)",
+  "search.need_input": "skriv et streamernavn, eller indsæt et VOD- / profillink",
+  "search.need_name": "skriv et streamernavn",
+  "search.busy": "Spørger {sites} efter “{name}” -- alle sites på én gang, et par sekunder",
+  "search.found": {
+    "one": "{count} streamer fundet",
+    "other": "{count} streamere fundet"
+  },
+  "search.none": "ingen streamer ved navn “{name}” på {sites}",
+  "sites.one_on": "mindst ét site forbliver slået til",
+  "link.busy": "Læser linket -- for et VOD-link spørges sitet, hvis VOD det er, cirka 3 s",
+  "link.unsupported": "Dette er ikke et link fra et understøttet site. Links fra {sites} virker (en VOD eller streamerens side).",
+  "favs.title": "Favoritter",
+  "favs.check": "Tjek for nye",
+  "favs.check_tip": "Hent alle favoritter igen, og tæl de VODs, der er kommet siden sidste tjek",
+  "favs.checking": "Tjekker...",
+  "favs.none_yet": "ingen favoritter endnu: åbn en streamer, og klik på stjernen",
+  "favs.checking_note": {
+    "one": "tjekker {count} favorit for nye VODs ...",
+    "other": "tjekker {count} favoritter for nye VODs ..."
+  },
+  "favs.result_new": {
+    "one": "{count} ny VOD på tværs af dine favoritter",
+    "other": "{count} nye VODs på tværs af dine favoritter"
+  },
+  "favs.result_nothing": "intet nyt siden sidste tjek",
+  "favs.result_failed": {
+    "one": "{result} ({count} favorit kunne ikke tjekkes)",
+    "other": "{result} ({count} favoritter kunne ikke tjekkes)"
+  },
+  "favs.removed": "{name} fjernet fra favoritter",
+  "favs.added": "{name} føjet til favoritter",
+  "favs.empty_title": "Ingen favoritter endnu",
+  "favs.empty_text": "Åbn en streamer, og klik på stjernen for at gemme vedkommende her.",
+  "favs.new_badge": {
+    "one": "{count} ny",
+    "other": "{count} nye"
+  },
+  "favs.new_badge_title": "VODs, der er kommet siden tjekket før",
+  "favs.remove_title": "Fjern fra favoritter",
+  "favs.remove_aria": "Fjern {name} fra favoritter",
+  "favs.add_title": "Føj til favoritter",
+  "favs.checked": "tjekket {ago}",
+  "pre.error_extra": "{error} -- vist øverst i listen, den kan ikke importeres nu",
+  "pre.in_library": "den VOD er allerede i biblioteket",
+  "pre.older": "den VOD er ældre end listen over de seneste: den vises øverst",
+  "import.label": "Importér",
+  "import.label_n": {
+    "one": "Importér {count}",
+    "other": "Importér {count}"
+  },
+  "import.busy": "Importerer...",
+  "import.queue_title": {
+    "one": "sæt {count} download i kø",
+    "other": "sæt {count} downloads i kø"
+  },
+  "import.select_title": "vælg de VODs, der skal importeres",
+  "import.queuing": {
+    "one": "sætter {count} VOD i kø -- hvert link tjekkes først med sitet ...",
+    "other": "sætter {count} VODs i kø -- hvert link tjekkes først med sitet ..."
+  },
+  "import.no_answer": "intet svar for dette link",
+  "import.sum_queued": {
+    "one": "{count} i kø",
+    "other": "{count} i kø"
+  },
+  "import.sum_already": {
+    "one": "{count} findes allerede",
+    "other": "{count} findes allerede"
+  },
+  "import.sum_failed": {
+    "one": "{count} mislykkedes (hold musen over den røde chip)",
+    "other": "{count} mislykkedes (hold musen over den røde chip)"
+  },
+  "import.sum_jobs": "{summary} -- Jobs viser downloadsene",
+  "import.toast": "VODs: {summary}",
+  "row.in_library": "i biblioteket",
+  "row.imported_before": "importeret før",
+  "row.already_queued": "allerede i kø",
+  "row.queued": "i kø",
+  "row.failed": "mislykkedes",
+  "row.job": "job {id}",
+  "row.download_job": "downloadjob {id}",
+  "row.your_link": "dit link",
+  "row.your_link_title": "linket, du indsatte",
+  "row.open_rec_title": "åbn optagelsen",
+  "row.live": "live nu",
+  "row.upcoming": "kommende",
+  "row.live_title": "kan importeres, når streamet er slut",
+  "row.unavailable": "utilgængelig",
+  "row.not_ready": "ikke klar",
+  "row.not_ready_title": "kan ikke importeres endnu",
+  "row.processing_title": "streamet er lige slut, og sitet behandler det stadig",
+  "row.new": "ny",
+  "row.new_title": "kommet siden tjekket før det seneste",
+  "row.older": "ældre end listen",
+  "row.open_on": "åbn på {site}",
+  "ch.back_results": "Tilbage til resultaterne",
+  "ch.back_favs": "Tilbage til favoritter",
+  "ch.back_aria": "Tilbage",
+  "ch.star_wait": "vent på listen (den fortæller streamerens egen nøgle)",
+  "ch.listing_title": "Henter liste...",
+  "ch.refresh_title": "Hent listen igen fra sitet (listen gemmes i 5 minutter)",
+  "ch.refresh_aria": "Opdatér",
+  "ch.page_title": "deres side: {url}",
+  "ch.page_aria": "deres side",
+  "ch.listing": "henter liste ...",
+  "ch.count_listed": {
+    "one": "{count} på listen",
+    "other": "{count} på listen"
+  },
+  "ch.count_new": {
+    "one": "{count} ny",
+    "other": "{count} nye"
+  },
+  "ch.count_lib": {
+    "one": "{count} i biblioteket",
+    "other": "{count} i biblioteket"
+  },
+  "ch.select_new": "Vælg nye",
+  "ch.select_new_title": "vælg alle VODs, der endnu ikke er i biblioteket eller i kø",
+  "ch.none": "Ingen",
+  "ch.none_title": "ryd markeringen",
+  "ch.listing_busy": "Henter VODs fra {name} på {site} ...",
+  "ch.relisting": "henter listen igen ...",
+  "ch.empty_title": "Ingen VODs på listen",
+  "ch.empty_text": "Streameren gemmer måske ingen tidligere udsendelser, eller de er kun for abonnenter.",
+  "ch.load_older": "Indlæs ældre ({count})",
+  "ch.max_listed": "Kun de nyeste {count} vises -- indsæt linket til en ældre VOD for at importere den.",
+  "home.short": "Skriv et navn, og tryk Enter, eller indsæt et VOD- / profillink.",
+  "home.find_html": "<b>Find en streamer</b> -- skriv navnet, og tryk Enter; alle sites, der er slået til, spørges på én gang.",
+  "home.paste_html": "<b>Eller indsæt et link</b> -- en streamers side viser de seneste VODs; et VOD-link åbner streameren med den VOD valgt.",
+  "home.import_html": "Vælg VODs, og klik på <b>Importér</b>: de hentes én ad gangen (Jobs) og bliver derefter transskriberet og scannet som en optagelse.",
+  "res.head": "Resultater for “{query}”",
+  "res.clear": "Ryd resultaterne",
+  "res.empty_title": "Intet fundet",
+  "res.empty_text": "Tjek stavningen, slå flere sites til, eller indsæt linket til vedkommendes side.",
+  "res.no_hits": "Ingen streamer med det navn på de sites, der er slået til.",
+  "res.not_found": "ikke fundet",
+  "res.fav_title": "en favorit",
+  "res.recent": {
+    "one": "{count} nylig",
+    "other": "{count} nylige"
+  },
+  "res.recent_more": "{count}+ nylige",
+  "res.no_recent": "ingen nylige VODs på listen",
+  "single.title": "Én VOD",
+  "single.clear": "Ryd",
+  "single.site": "Site",
+  "single.link": "Link",
+  "single.recheck": "Import tjekker linket med sitet igen.",
+  "single.no_channel": "Sitet oplyste ikke, hvis VOD dette er, så der er ingen streamer at vise. Denne ene VOD kan stadig importeres.",
+  "single.import": "Importér denne VOD"
+}

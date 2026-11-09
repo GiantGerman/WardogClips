@@ -1,0 +1,19 @@
+{
+  "tray.open": "Iftaħ WardogClips",
+  "tray.update": "Aġġornament disponibbli...",
+  "tray.pause": "Pawża waqt li nilgħab",
+  "tray.speed": "Veloċità",
+  "tray.mode_full": "Veloċità sħiħa",
+  "tray.mode_balanced": "Bilanċjat",
+  "tray.mode_background": "Fl-isfond",
+  "tray.open_data": "Iftaħ il-folder tad-data",
+  "tray.open_log": "Iftaħ il-log",
+  "tray.quit": "Oħroġ",
+  "tray.balloon": "WardogClips qed jaħdem. Ikklikkja bil-lemin fuq l-ikona tat-tray biex toħroġ.",
+  "tray.update_notify": "WardogClips {version} hu disponibbli. Agħżel Aġġornament disponibbli... fil-menu tat-tray biex tarah.",
+  "launcher.could_not_start": "WardogClips ma setax jibda:\n\n{error}",
+  "launcher.scan_running": "Skennjar ta' WardogClips (scan.bat / --scan) qed juża dan il-folder tad-data:\n\n{dir}\n\nStenna sakemm jispiċċa (jew waqqfu fit-tieqa tiegħu), imbagħad erġa' ibda WardogClips.",
+  "launcher.not_answering": "WardogClips diġà qed jaħdem iżda mhux qed iwieġeb.\n\nOħroġ minnu mill-ikona tat-tray (jew stenna minuta) u erġa' pprova.\n\nLog: {log}",
+  "launcher.damaged": "WardogClips hu bil-ħsara (ir-runtime jew il-fajls tal-app huma nieqsa).\n\nJekk jogħġbok erġa' installah.\n\nFittixt għal:\n{python}\n{main}",
+  "launcher.stopped": "WardogClips waqaf eżatt wara li beda (exit code {code}).\n\nIl-log jista' jgħid għaliex:\n{log}"
+}
