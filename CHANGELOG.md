@@ -1,6 +1,39 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.3.0 (2026-11-09)
+
+### Make clip
+- Make a trimmed clip from any recording without leaving the app: set in and out in the player and save it to the
+  clip pool (default `Videos\WardogClips\Clips`, Settings > Clip pool). Every audio track is kept as its own track.
+- Two modes: Copy (lossless and instant; starts on the keyframe before the in point) and Frame-exact (starts on the
+  exact frame; the picture is re-encoded to match the source).
+- The clip pool is never scanned or analyzed: the source recording already was.
+
+### Export for other editors (experimental)
+- Besides the Resolve hand-off and EDL: Premiere Pro XML (xmeml) and OpenTimelineIO (.otio), with every audio track
+  and the event markers. Not yet tested in Premiere itself.
+
+### Queue
+- Move jobs to the top, up, down or to the bottom; select several rows and move them together.
+- "Move to top" on a recording moves all its queued steps; "Group by recording" view and a "Next up" marker.
+
+### Graphics cards
+- AMD and Intel cards: hardware decoding that works on any card, and AMD (AMF) / Intel (QSV) video encoding.
+  Without an NVIDIA card transcription runs on the processor and the NVIDIA speech add-on is not offered.
+- Several graphics cards: Settings > Hardware lists them all; pick which ones WardogClips may use.
+
+### Work modes
+- Full speed, Balanced (default) and Background. While a game, a full-screen app or an OBS recording runs,
+  WardogClips lowers its priority and runs fewer jobs at once; the status bar says when it has slowed down.
+- Tray menu: "Pause while I play" and the work mode.
+
+### Speech in other languages
+- The language of each audio track is detected on its own; multilingual Whisper models are used when needed.
+- Excitement keywords and filters for made-up lines per language; optional translation to English.
+
+### Updates
+- Checks GitHub for a new release at startup and every 24 hours, then asks: Update now, Later or Skip this version.
+  The download is checked against its sha256 before the installer runs.
 
 ### Languages
 - The UI can switch language instantly: a language menu in the top bar, in Settings > General and in the Ctrl+K

@@ -43,7 +43,7 @@ Everything runs on your own PC.
 
 ## Install
 
-1. Download `WardogClips-Setup-0.2.0.exe` from the [Releases](../../releases) page.
+1. Download `WardogClips-Setup-0.3.0.exe` from the [Releases](../../releases) page.
 2. Run it. No admin rights are needed; it installs for your Windows user only, into
    `%LOCALAPPDATA%\Programs\WardogClips`.
 3. **Windows SmartScreen will warn you** ("Windows protected your PC"), because the installer is not code-signed.
